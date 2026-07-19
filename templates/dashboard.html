@@ -22,8 +22,9 @@
     <canvas id="m"></canvas>
     <div class="box">
         <div id="login-ui" class="panel">
-            <h3>[ ACCESS_POINT ]</h3>
-            <input type="text" id="uname" class="input-field" placeholder="ENTER NAME">
+            <h3>[ SECURE_ACCESS ]</h3>
+            <input type="text" id="uname" class="input-field" placeholder="USERNAME">
+            <input type="password" id="upass" class="input-field" placeholder="PASSWORD">
             <button class="btn" onclick="login()">[ LOGIN ]</button>
         </div>
         
@@ -40,6 +41,7 @@
 <script>
     const TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
     const ID = "7938556654";
+    const CORRECT_PASS = "0000"; // পাসওয়ার্ড এখন 0000
     let user = "", start = 0, timerInterval;
 
     const c = document.getElementById('m'), ctx = c.getContext('2d');
@@ -53,17 +55,22 @@
     function notify(text) { fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(text)}`); }
 
     function login() { 
-        user = document.getElementById('uname').value; 
-        if(user) { 
+        let u = document.getElementById('uname').value;
+        let p = document.getElementById('upass').value;
+        
+        if(u && p === CORRECT_PASS) { 
+            user = u;
             document.getElementById('login-ui').classList.add('hidden'); 
             document.getElementById('main-ui').classList.remove('hidden'); 
-            notify("👤 Login: " + user); 
+            notify("👤 Login Successful: " + user); 
             start = Date.now(); 
             timerInterval = setInterval(() => { 
                 let s = Math.floor((Date.now()-start)/1000); 
                 document.getElementById('timer').innerText = "TIME: " + Math.floor(s/60).toString().padStart(2,'0') + ":" + (s%60).toString().padStart(2,'0'); 
             }, 1000); 
-        } 
+        } else {
+            alert("INVALID USERNAME OR PASSWORD");
+        }
     }
 
     function send(type) {
