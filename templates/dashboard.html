@@ -2,113 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SECURE_CORE_TERMINAL</title>
     <style>
-        body, html { margin: 0; padding: 0; min-height: 100%; font-family: 'Courier New', monospace; color: #00ff41; background: #000; overflow-y: auto; }
-        #terminal-bg { position: fixed; inset: 0; background: radial-gradient(circle, #051a05 0%, #000 100%); z-index: -1; }
-        canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        .container { position: relative; z-index: 10; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .panel { width: 100%; max-width: 400px; padding: 30px; border: 1px solid #00ff41; background: rgba(0, 10, 0, 0.95); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); margin-bottom: 20px; }
-        .btn { padding: 12px; border: 1px solid #00ff41; background: transparent; color: #00ff41; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; }
+        .panel { width: 350px; margin: 50px auto; padding: 20px; border: 1px solid #00ff41; background: #050505; text-align: center; }
+        .btn { border: 1px solid #00ff41; background: none; color: #00ff41; padding: 10px; width: 100%; cursor: pointer; margin-top: 10px; }
         .btn:hover { background: #00ff41; color: #000; }
         input, textarea { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        .hidden { display: none !important; }
-        #timer-display { font-size: 20px; color: #fff; margin-bottom: 20px; text-shadow: 0 0 10px #00ff41; }
-        .dev-footer { text-align: center; padding: 20px; font-size: 13px; border-top: 1px solid #00ff41; margin-top: auto; color: #008f11; width: 100%; }
-        a { color: #00ff41; text-decoration: none; }
+        .hidden { display: none; }
+        #timer { font-size: 18px; margin-bottom: 10px; color: #fff; }
     </style>
 </head>
 <body>
-    <div id="terminal-bg"></div>
-    <canvas id="matrix"></canvas>
-
-    <div class="container">
-        <div id="timer-display" class="hidden">TIME: 00:00</div>
-
-        <div id="name-ui" class="panel">
-            <h3>[ OPERATOR_ID ]</h3>
-            <input type="text" id="username" placeholder="NAME">
-            <button class="btn" onclick="saveName()">[ ACCESS ]</button>
-        </div>
-
-        <div id="pin-ui" class="panel hidden">
-            <h3>[ PIN_AUTH ]</h3>
-            <input type="password" id="pin-input" maxlength="4" placeholder="PIN">
-            <button class="btn" onclick="checkPin()">[ CONFIRM ]</button>
-        </div>
-
-        <div id="main-ui" class="panel hidden">
-            <h3>[ CORE_ENCRYPTION ]</h3>
-            <textarea id="msg" placeholder="TYPE_MESSAGE..."></textarea>
-            <button class="btn" onclick="proc('encode')">[ ENCODE ]</button>
-            <button class="btn" onclick="proc('decode')">[ DECODE ]</button>
-            <div id="out" style="border:1px dashed #00ff41; padding:10px; margin:10px 0; word-break: break-all;">OUTPUT</div>
-            <button class="btn" onclick="copyOut()">[ COPY_BUFFER ]</button>
-        </div>
-
-        <div class="dev-footer">
-            <p>DEVELOPER: NILOY GHOSH (@CipherSentinel_BD)</p>
-            <p>Email: <a href="mailto:n7753522@gmail.com">n7753522@gmail.com</a></p>
-            <p>Advertise: <a href="https://t.me/DeIIIeted">@DeIIIeted</a></p>
-        </div>
+    <div id="name-ui" class="panel">
+        <h3>[ OPERATOR_ID ]</h3>
+        <input type="text" id="username" placeholder="NAME">
+        <button class="btn" onclick="startSession()">[ ACCESS ]</button>
     </div>
 
-<script>
-    let username = "", startTime, timerInterval;
+    <div id="main-ui" class="panel hidden">
+        <div id="timer">TIME: 00:00</div>
+        <h3>[ CORE_ENCRYPTION ]</h3>
+        <textarea id="msg" placeholder="MESSAGE..."></textarea>
+        <button class="btn" onclick="proc('encrypt')">[ ENCRYPT ]</button>
+        <button class="btn" onclick="proc('decrypt')">[ DECRYPT ]</button>
+        <div id="out" style="border:1px dashed #00ff41; padding:10px; margin-top:10px;">OUTPUT</div>
+    </div>
 
-    // ম্যাট্রিক্স এফেক্ট
-    const c = document.getElementById('matrix'), ctx = c.getContext('2d');
-    c.width = window.innerWidth; c.height = window.innerHeight;
-    const chars = "0101010101ABCDEF";
-    let drops = Array(Math.floor(c.width/20)).fill(1);
-    function draw() { ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = '#00ff41'; ctx.font = '15px monospace'; drops.forEach((y, i) => { ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*20, y*20); if(y*20 > c.height) drops[i] = 0; drops[i]++; }); } setInterval(draw, 60);
+    <script>
+        let username, startTime, timerInterval;
 
-    function saveName() { 
-        username = document.getElementById('username').value; 
-        if(username) { 
-            document.getElementById('name-ui').classList.add('hidden'); 
-            document.getElementById('pin-ui').classList.remove('hidden'); 
-        } 
-    }
-    
-    function checkPin() { 
-        if(document.getElementById('pin-input').value === "0000") { 
-            document.getElementById('pin-ui').classList.add('hidden'); 
-            document.getElementById('main-ui').classList.remove('hidden'); 
-            document.getElementById('timer-display').classList.remove('hidden');
+        function startSession() {
+            username = document.getElementById('username').value;
+            if(!username) return;
+            fetch('/login_notify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username}) });
+            document.getElementById('name-ui').classList.add('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
             startTime = Date.now();
             timerInterval = setInterval(() => {
-                let elapsed = Math.floor((Date.now() - startTime) / 1000);
-                let m = Math.floor(elapsed / 60), s = elapsed % 60;
-                document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                let s = Math.floor((Date.now()-startTime)/1000);
+                document.getElementById('timer').innerText = `TIME: ${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
             }, 1000);
-        } else { alert("WRONG PIN"); document.getElementById('pin-input').value = ""; } 
-    }
-
-    // সার্ভারে ডেটা পাঠানোর জন্য নতুন পদ্ধতি
-    window.onbeforeunload = function() {
-        if(startTime && username) {
-            let elapsed = Math.floor((Date.now() - startTime) / 1000);
-            let m = Math.floor(elapsed / 60), s = elapsed % 60;
-            
-            // ব্যাকএন্ডে সেশন ডাটা পাঠানো
-            navigator.sendBeacon('/log-session', JSON.stringify({
-                username: username,
-                duration: `${m}m ${s}s`
-            }));
         }
-    };
 
-    function proc(mode) {
-        let val = document.getElementById('msg').value;
-        try { 
-            let res = (mode === 'encode') ? btoa(val) : atob(val); 
-            document.getElementById('out').innerText = res; 
-        } catch(e) { alert("DATA CORRUPTION"); }
-    }
-    
-    function copyOut() { navigator.clipboard.writeText(document.getElementById('out').innerText); alert("COPIED!"); }
-</script>
+        async function proc(action) {
+            let res = await fetch('/process', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: document.getElementById('msg').value, action, username}) });
+            let data = await res.json();
+            document.getElementById('out').innerText = data.result;
+        }
+
+        window.onbeforeunload = () => {
+            let dur = document.getElementById('timer').innerText;
+            navigator.sendBeacon('/session_end', JSON.stringify({username, duration: dur}));
+        };
+    </script>
 </body>
 </html>
