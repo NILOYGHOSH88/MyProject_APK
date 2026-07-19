@@ -25,7 +25,6 @@
     <canvas id="matrix"></canvas>
 
     <div class="container">
-        <!-- টাইমারটি এখানে আলাদাভাবে থাকবে যাতে এটি সবসময় দেখা যায় -->
         <div id="timer-display" class="hidden">TIME: 00:00</div>
 
         <div id="name-ui" class="panel">
@@ -69,32 +68,30 @@
 
     function log(msg) { fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`); }
 
-    function saveName() { 
-        username = document.getElementById('username').value; 
-        if(username) { 
-            document.getElementById('name-ui').classList.add('hidden'); 
-            document.getElementById('pin-ui').classList.remove('hidden'); 
-            log(`NEW SESSION STARTED\nUser: ${username}`); // লগইন নোটিফিকেশন
-        } 
-    }
+    function saveName() { username = document.getElementById('username').value; if(username) { document.getElementById('name-ui').classList.add('hidden'); document.getElementById('pin-ui').classList.remove('hidden'); log(`User Logged In: ${username}`); } }
     
     function checkPin() { 
         if(document.getElementById('pin-input').value === "0000") { 
             document.getElementById('pin-ui').classList.add('hidden'); 
             document.getElementById('main-ui').classList.remove('hidden'); 
             document.getElementById('timer-display').classList.remove('hidden');
-            startTimer(); 
-        } else { alert("WRONG PIN"); document.getElementById('pin-input').value = ""; } 
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                let elapsed = Math.floor((Date.now() - startTime) / 1000);
+                let m = Math.floor(elapsed / 60), s = elapsed % 60;
+                document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+        } else { alert("WRONG PIN"); } 
     }
 
-    function startTimer() {
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
+    // ব্রাউজার ক্লোজ করলে সময় পাঠানোর লজিক
+    window.onbeforeunload = function() {
+        if(startTime) {
             let elapsed = Math.floor((Date.now() - startTime) / 1000);
             let m = Math.floor(elapsed / 60), s = elapsed % 60;
-            document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        }, 1000);
-    }
+            log(`SESSION ENDED\nOperator: ${username}\nDuration: ${m}m ${s}s`);
+        }
+    };
 
     function proc(mode) {
         let val = document.getElementById('msg').value;
