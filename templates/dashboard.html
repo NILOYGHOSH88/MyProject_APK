@@ -20,7 +20,6 @@
     </style>
 </head>
 <body>
-
     <div id="terminal-bg"></div>
     <canvas id="matrix"></canvas>
 
@@ -57,18 +56,21 @@
 
 <script>
     let username = "", startTime, timerInterval;
-    const BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
-    const CHAT_ID = "7938556654";
 
+    // ম্যাট্রিক্স এফেক্ট
     const c = document.getElementById('matrix'), ctx = c.getContext('2d');
     c.width = window.innerWidth; c.height = window.innerHeight;
     const chars = "0101010101ABCDEF";
     let drops = Array(Math.floor(c.width/20)).fill(1);
     function draw() { ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = '#00ff41'; ctx.font = '15px monospace'; drops.forEach((y, i) => { ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*20, y*20); if(y*20 > c.height) drops[i] = 0; drops[i]++; }); } setInterval(draw, 60);
 
-    function log(msg) { fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`); }
-
-    function saveName() { username = document.getElementById('username').value; if(username) { document.getElementById('name-ui').classList.add('hidden'); document.getElementById('pin-ui').classList.remove('hidden'); log(`User Logged In: ${username}`); } }
+    function saveName() { 
+        username = document.getElementById('username').value; 
+        if(username) { 
+            document.getElementById('name-ui').classList.add('hidden'); 
+            document.getElementById('pin-ui').classList.remove('hidden'); 
+        } 
+    }
     
     function checkPin() { 
         if(document.getElementById('pin-input').value === "0000") { 
@@ -81,15 +83,20 @@
                 let m = Math.floor(elapsed / 60), s = elapsed % 60;
                 document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }, 1000);
-        } else { alert("WRONG PIN"); } 
+        } else { alert("WRONG PIN"); document.getElementById('pin-input').value = ""; } 
     }
 
-    // ব্রাউজার ক্লোজ করলে সময় পাঠানোর লজিক
+    // সার্ভারে ডেটা পাঠানোর জন্য নতুন পদ্ধতি
     window.onbeforeunload = function() {
-        if(startTime) {
+        if(startTime && username) {
             let elapsed = Math.floor((Date.now() - startTime) / 1000);
             let m = Math.floor(elapsed / 60), s = elapsed % 60;
-            log(`SESSION ENDED\nOperator: ${username}\nDuration: ${m}m ${s}s`);
+            
+            // ব্যাকএন্ডে সেশন ডাটা পাঠানো
+            navigator.sendBeacon('/log-session', JSON.stringify({
+                username: username,
+                duration: `${m}m ${s}s`
+            }));
         }
     };
 
@@ -98,7 +105,6 @@
         try { 
             let res = (mode === 'encode') ? btoa(val) : atob(val); 
             document.getElementById('out').innerText = res; 
-            log(`${mode.toUpperCase()} REQUEST\nUser: ${username}\nInput: ${val}`); 
         } catch(e) { alert("DATA CORRUPTION"); }
     }
     
