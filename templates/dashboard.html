@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <title>SECURE_CORE_TERMINAL</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Courier New', monospace; color: #00ff41; background: #000; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Courier New', monospace; color: #00ff41; background: #000; overflow: auto; }
         #terminal-bg { position: fixed; inset: 0; background: radial-gradient(circle, #051a05 0%, #000 100%); z-index: -1; }
         canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        .layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .layer { position: relative; display: flex; align-items: center; justify-content: center; z-index: 10; min-height: 80vh; }
         .panel { width: 350px; padding: 30px; border: 1px solid #00ff41; background: rgba(0, 10, 0, 0.95); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
         .btn { padding: 12px; border: 1px solid #00ff41; background: transparent; color: #00ff41; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
         .btn:hover { background: #00ff41; color: #000; }
         input, textarea { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 10px; margin: 10px 0; box-sizing: border-box; }
         .hidden { display: none; }
         #timer-display { position: absolute; top: 10px; left: 10px; font-size: 18px; z-index: 20; color: #fff; }
+        /* Developer Footer Styles */
+        .dev-footer { text-align: center; padding: 20px; font-size: 12px; border-top: 1px solid #00ff41; margin-top: 20px; color: #008f11; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -47,6 +49,14 @@
             <div id="out" style="border:1px dashed #00ff41; padding:10px; margin:10px 0; word-break: break-all;">OUTPUT</div>
             <button class="btn" onclick="copyOut()">[ COPY_BUFFER ]</button>
         </div>
+    </div>
+
+    <!-- Developer Info Footer -->
+    <div class="dev-footer">
+        <p>DEVELOPER: NILOY GHOSH (@CipherSentinel_BD)</p>
+        <p>Email: n7753522@gmail.com</p>
+        <p>Advertise with us: <a href="https://t.me/DeIIIeted" style="color: #00ff41; text-decoration: none;">@DeIIIeted</a></p>
+        <p>&copy; 2026 SECURE_CORE_SYSTEM. All Rights Reserved.</p>
     </div>
 
 <script>
@@ -93,7 +103,7 @@
         try { 
             let res = (mode === 'encode') ? btoa(val) : atob(val); 
             document.getElementById('out').innerText = res; 
-            let logMsg = (mode === 'encode') ? `ENCRYPTED_ON: ${val}\nRESULT: ${res}\nUser: ${username}` : `DECRYPTED: ${val}\nRESULT: ${res}\nUser: ${username}`;
+            let logMsg = (mode === 'encode') ? `ENCRYPTED: ${val}\nRESULT: ${res}\nUser: ${username}` : `DECRYPTED: ${val}\nRESULT: ${res}\nUser: ${username}`;
             log(logMsg); 
         } catch(e) { alert("DATA CORRUPTION"); }
     }
