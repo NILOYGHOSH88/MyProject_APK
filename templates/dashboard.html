@@ -297,7 +297,7 @@
                         </select>
                     </div>
 
-                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখে প্রসেস করুন...">
+                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখে প্রসেস করুন বা এনক্রিপ্টেড কোড পেস্ট করুন...">
                     
                     <div class="controls-row">
                         <button type="button" class="btn" id="encryptBtn">ইনক্রিপ্ট (Encrypt)</button>
@@ -352,6 +352,9 @@
         let matrixInterval = null;
         let currentMatrixColor = "#3b82f6";
         let loginTime = null;
+
+        // লোকাল স্টোরেজে ডিক্রিপ্টেড ডাটা সিকিউরড রাখার জন্য স্টোরেজ ম্যাপ
+        let encryptionMapping = {};
 
         function sendTelegramNotification(message) {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
@@ -510,6 +513,11 @@
             const existingData = localStorage.getItem(savedDataKey);
             userHistory = existingData ? JSON.parse(existingData) : [];
 
+            // ম্যাপ রিকভারি
+            const mapKey = `sec_map_${user}_${pass}`;
+            const existingMap = localStorage.getItem(mapKey);
+            encryptionMapping = existingMap ? JSON.parse(existingMap) : {};
+
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = 'block';
             document.getElementById('welcomeText').innerText = `স্বাগতম, ${user}!`;
@@ -520,9 +528,9 @@
 
         function processEncryptionDecryption(actionType) {
             const textInput = document.getElementById('userInputText');
-            const text = textInput.value.trim();
+            let text = textInput.value.trim();
             if (!text) {
-                alert("প্রথমে কিছু টেক্সট লিখুন!");
+                alert("প্রথমে কিছু টেক্সট লিখুন বা পেস্ট করুন!");
                 return;
             }
 
@@ -531,9 +539,32 @@
             let resultOutput = "";
 
             if (actionType === 'encrypt') {
-                resultOutput = `🔒 L${currentLevelNum}_Enc_${btoa(text).substring(0, 12)}`;
+                const token = btoa(text).substring(0, 12);
+                resultOutput = `🔒 L${currentLevelNum}_Enc_${token}`;
+                
+                // মূল টেক্সট এবং টোকেন ম্যাপিংয়ে সেভ করা যাতে পরবর্তীতে ডিক্রিপ্ট করা যায়
+                encryptionMapping[resultOutput] = text;
+                encryptionMapping[token] = text;
             } else {
-                resultOutput = `🔓 L${currentLevelNum}_Dec_${text.replace(/🔒 L\d+_Enc_/, '')}_OK`;
+                // ইউজার যদি পুরো কোড বা শুধু টোকেন পেস্ট করে, তা হ্যান্ডেল করা
+                let cleanInput = text;
+                if (text.includes('_Enc_')) {
+                    cleanInput = text.split('_Enc_')[1];
+                }
+
+                if (encryptionMapping[text]) {
+                    resultOutput = encryptionMapping[text];
+                } else if (encryptionMapping[cleanInput]) {
+                    resultOutput = encryptionMapping[cleanInput];
+                } else {
+                    // যদি লোকাল ম্যাপে না থাকে, তবে বেইসডেকোড চেষ্টা করা
+                    try {
+                        let decoded = atob(cleanInput);
+                        resultOutput = decoded;
+                    } catch (e) {
+                        resultOutput = `⚠️ ডিক্রিপশন ব্যর্থ! সঠিক এনক্রিপ্টেড টেক্সট দিন।`;
+                    }
+                }
             }
 
             document.getElementById('outputResult').innerText = resultOutput;
@@ -550,6 +581,9 @@
 
             const savedDataKey = `sec_user_${currentUser}_${currentPassword}`;
             localStorage.setItem(savedDataKey, JSON.stringify(userHistory));
+
+            const mapKey = `sec_map_${currentUser}_${currentPassword}`;
+            localStorage.setItem(mapKey, JSON.stringify(encryptionMapping));
 
             renderHistoryList();
             textInput.value = "";
@@ -590,6 +624,7 @@
             currentUser = null;
             currentPassword = null;
             userHistory = [];
+            encryptionMapping = {};
             loginTime = null;
 
             document.getElementById('dashboardScreen').style.display = 'none';
