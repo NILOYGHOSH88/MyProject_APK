@@ -3,31 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate 900-Line Global Master Dashboard</title>
+    <title>Dynamic Color Shifting Security Dashboard</title>
     <style>
-        /* ==========================================
-           1. CORE CSS VARIABLES & RESET (Lines 1-50)
-           ================================---------- */
         :root {
-            --bg-color: #020617;
+            --bg-color: #030712;
             --panel-bg: #0f172a;
             --text-color: #f8fafc;
             --accent-color: #3b82f6;
             --border-color: #1e293b;
-            --glow-color: rgba(59, 130, 246, 0.6);
-            --transition-speed: 0.5s;
+            --glow-color: rgba(59, 130, 246, 0.5);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
         }
 
-        /* ==========================================
-           2. LAYOUT & BODY STYLING (Lines 51-120)
-           ================-------------------------- */
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -35,297 +28,238 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow-x: hidden;
-            transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+            padding: 20px;
+            transition: background 0.8s ease, color 0.8s ease;
         }
 
-        .dashboard-container {
-            width: 95%;
-            max-width: 1100px;
-            background-color: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 28px;
-            padding: 40px;
-            box-shadow: 0 0 70px var(--glow-color);
-            position: relative;
-            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .dashboard-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
+        .dashboard-card {
             width: 100%;
-            height: 5px;
-            background: var(--accent-color);
-            transition: background var(--transition-speed) ease;
+            max-width: 1000px;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 0 50px var(--glow-color);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* ==========================================
-           3. HEADER & BADGE STYLING (Lines 121-200)
-           ================-------------------------- */
-        .dashboard-header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 25px;
-            margin-bottom: 30px;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            transition: border-color 0.8s ease;
         }
 
-        .title-group h1 {
-            font-size: 26px;
-            font-weight: 800;
+        .title-area h1 {
+            font-size: 24px;
+            font-weight: bold;
             margin-bottom: 5px;
-            letter-spacing: 0.5px;
+            color: var(--accent-color);
+            transition: color 0.8s ease;
         }
 
-        .country-flag-badge {
+        .badge {
             background: var(--accent-color);
             color: #fff;
-            padding: 10px 22px;
+            padding: 8px 18px;
             border-radius: 25px;
             font-weight: bold;
-            font-size: 15px;
-            box-shadow: 0 4px 20px var(--glow-color);
-            transition: all var(--transition-speed) ease;
+            font-size: 14px;
+            box-shadow: 0 0 20px var(--glow-color);
+            transition: all 0.8s ease;
         }
 
-        /* ==========================================
-           4. STATS GRID & CARDS (Lines 201-350)
-           ================-------------------------- */
-        .stats-grid {
+        .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
+            gap: 20px;
+            margin-bottom: 25px;
         }
 
-        .card {
+        .sub-box {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
-            padding: 25px;
-            border-radius: 16px;
-            text-align: center;
-            transition: all var(--transition-speed) ease;
-            position: relative;
-            overflow: hidden;
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.8s ease;
         }
 
-        .card:hover {
-            border-color: var(--accent-color);
-            transform: translateY(-3px);
-        }
-
-        .card h4 {
-            font-size: 14px;
-            opacity: 0.75;
+        .sub-box h3 {
+            font-size: 15px;
+            color: var(--accent-color);
             margin-bottom: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: color 0.8s ease;
         }
 
-        .card p {
-            font-size: 30px;
-            font-weight: 900;
-            color: var(--accent-color);
-            transition: color var(--transition-speed) ease;
+        .log-console {
+            background: #000;
+            color: #38bdf8;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            height: 130px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            white-space: pre-wrap;
         }
 
-        /* ==========================================
-           5. CONTROL PANEL & FOOTER (Lines 351-450)
-           ================-------------------------- */
-        .control-panel {
+        .footer-panel {
             background: var(--bg-color);
-            padding: 22px;
-            border-radius: 16px;
+            padding: 15px 20px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
-            transition: background var(--transition-speed) ease;
+            gap: 15px;
+            transition: all 0.8s ease;
         }
 
-        .btn {
+        .action-btn {
             background-color: var(--accent-color);
-            color: white;
+            color: #fff;
             border: none;
-            padding: 12px 28px;
-            border-radius: 12px;
+            padding: 10px 22px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 15px;
-            box-shadow: 0 4px 20px var(--glow-color);
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
-        }
-
-        .instruction {
             font-size: 14px;
-            opacity: 0.85;
-            line-height: 1.5;
+            box-shadow: 0 0 15px var(--glow-color);
+            transition: all 0.5s ease;
         }
 
-        .timer-highlight {
-            font-weight: 800;
-            color: var(--accent-color);
+        .action-btn:hover {
+            opacity: 0.85;
+            transform: scale(1.03);
+        }
+
+        .info-desc {
+            font-size: 13px;
+            opacity: 0.85;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <div class="title-group">
-                <h1 id="countryTitle">গ্লোবাল ডেটা হাব</h1>
-                <p id="countryDesc" class="instruction">সার্বজনীন ডিজিটাল ইনোভেশন জোন</p>
+    <div class="dashboard-card">
+        <div class="header">
+            <div class="title-area">
+                <h1 id="sysTitle">ফুল কালার শিফটিং সিকিউরিটি সিস্টেম</h1>
+                <p id="sysMeta" class="info-desc">মাস: জানুয়ারি | ভ্যালু: ১০০% | লেভেল: ৩</p>
             </div>
-            <div id="countryBadge" class="country-flag-badge">থিম ১ / ২০০</div>
+            <div id="colorBadge" class="badge">থিম ১ / ১০০</div>
         </div>
 
-        <div class="stats-grid">
-            <div class="card">
-                <h4>সক্রিয় গ্লোবাল নোড</h4>
-                <p id="statNodes">১০,০০০</p>
+        <div class="grid-container">
+            <!-- এনক্রিপশন ও ডিক্রিপশন লেভেল ৩ মডিউল -->
+            <div class="sub-box">
+                <h3 id="cardHeader">Encryption & Decryption (Level 3)</h3>
+                <p><strong>ইনপুট ডেটা:</strong> <span id="plainText">Data_Node_01</span></p>
+                <p><strong>সাইফার টেক্সট:</strong> <span id="cipherText" style="color: #f43f5e;">🔒 c2VjdXJlX2VuY19hMQ==</span></p>
+                <p><strong>ডিক্রিপ্টেড আউটপুট:</strong> <span id="decryptedText" style="color: #10b981;">🔓 verified_ok_lvl3</span></p>
+                <p><strong>সিকিউরিটি স্ট্যাটাস:</strong> <span id="secStatus" style="color: #f59e0b;">Maximum Protection Active</span></p>
             </div>
-            <div class="card">
-                <h4>সার্ভার আপটাইম রেট</h4>
-                <p id="statRate">৯৯.৯৯%</p>
-            </div>
-            <div class="card">
-                <h4>নেটওয়ার্ক ব্যান্ডউইথ</h4>
-                <p id="statBandwidth">১০.০ জিবিপিএস</p>
+
+            <!-- কনসোল লগ ও মেসেজ -->
+            <div class="sub-box">
+                <h3>System Logs & Timing</h3>
+                <div class="log-console" id="logConsole">
+                    [System] Initializing full color shift engine...
+                    [Security] Level 3 encryption engaged.
+                </div>
             </div>
         </div>
 
-        <div class="control-panel">
-            <button class="btn" onclick="toggleAutoTheme()">অটো-থিম (চালু/বন্ধ)</button>
-            <div class="instruction">
-                ⚡ প্রতি <span class="timer-highlight">২ সেকেন্ড পর পর</span> ২০০টি দেশের থিম বদলাচ্ছে!<br>
-                ⌨️ কিবোর্ডে যেকোনো দেশের নাম টাইপ করে সরাসরি সার্চ করতে পারেন।
+        <div class="footer-panel">
+            <button class="action-btn" onclick="toggleColorShift()">অটো-কালার শিফট (চালু/বন্ধ)</button>
+            <div class="info-desc">
+                ⚡ প্রতি ২ সেকেন্ড পর পর পুরো ড্যাশবোর্ডের রঙ ও ডেটা সম্পূর্ণ বদলে যাচ্ছে!
             </div>
         </div>
     </div>
 
     <script>
-        /* ==========================================================================
-           6. MASTER JAVASCRIPT & 200 COUNTRIES DATABASE (Lines 451-900)
-           ========================================================================== */
+        // ১০০টি দেশের নাম ও ডেটাবেজ অ্যারে
+        const countriesList = [];
+        const baseNames = ["বাংলাদেশ", "যুক্তরাষ্ট্র", "জাপান", "সৌদি আরব", "যুক্তরাজ্য", "ফ্রান্স", "জার্মানি", "কানাডা", "অস্ট্রেলিয়া", "ব্রাজিল", "ভারত", "দক্ষিণ কোরিয়া", "সংযুক্ত আরব আমিরাত", "সুইডেন", "সুইজারল্যান্ড", "ইতালি", "স্পেন", "নেদারল্যান্ডস", "সিঙ্গাপুর", "মালয়েশিয়া"];
         
-        // বিশ্বের ২০০টি স্বতন্ত্র দেশের ডেটাসেট ইনিশিয়ালাইজেশন
-        const rawCountries = [
-            { name: "বাংলাদেশ", capital: "ঢাকা", desc: "দক্ষিণ এশীয় ডিজিটাল ইনোভেশন হাব", hue: 140 },
-            { name: "যুক্তরাষ্ট্র", capital: "ওয়াশিংটন", desc: "উত্তর আমেরিকান সুপার কম্পিউটিং জোন", hue: 210 },
-            { name: "জাপান", capital: "টোকিও", desc: "এআই ও রোবোটিক্স টেকনোলজি হাব", hue: 350 },
-            { name: "সৌদি আরব", capital: "রিয়াদ", desc: "স্মার্ট এনার্জি অ্যান্ড গ্রিড নেটওয়ার্ক", hue: 45 },
-            { name: "যুক্তরাজ্য", capital: "লন্ডন", desc: "ইউরোপীয় ফিনটেক ও সিকিউরিটি হাব", hue: 240 },
-            { name: "ফ্রান্স", capital: "প্যারিস", desc: "ক্রিয়েটিভ ডিজাইন ও কোয়ান্টাম জোন", hue: 320 },
-            { name: "জার্মানি", capital: "বার্লিন", desc: "অটোমোটিভ ক্লাউড ডেটা সেন্টার", hue: 20 },
-            { name: "কানাডা", capital: "অটোয়া", desc: "বায়োটেক অ্যান্ড স্পেস রিসার্চ নেটওয়ার্ক", hue: 0 },
-            { name: "অস্ট্রেলিয়া", capital: "ক্যানবেরা", desc: "ওশেনিয়া গ্রিন এনার্জি হাব", hue: 180 },
-            { name: "ব্রাজিল", capital: "ব্রাসিলিয়া", desc: "সাউথ আমেরিকান ক্লাউড ইনফ্রাস্ট্রাকচার", hue: 90 },
-            { name: "ভারত", capital: "নয়াদিল্লি", desc: "সাউথ এশিয়ান সফটওয়্যার ইঞ্জিনিয়ারিং হাব", hue: 30 },
-            { name: "দক্ষিণ কোরিয়া", capital: "সিউল", desc: "আল্ট্রা-ফাস্ট ফাইভজি ও সেমিকন্ডাক্টর জোন", hue: 220 },
-            { name: "সংযুক্ত আরব আমিরাত", capital: "দুবাই", desc: "গ্লোবাল ফিউচার স্মার্ট সিটি হাব", hue: 50 },
-            { name: "সুইডেন", capital: "স্টকহোম", desc: "নর্ডিক ইকোলজি টেক্সটাইল ও ক্লাউড জোন", hue: 200 },
-            { name: "সুইজারল্যান্ড", capital: "বেরান", desc: "সেন্ট্রাল ইউরোপীয় সিকিউর ফিন্যান্স হাব", hue: 340 },
-            { name: "ইতালি", capital: "রোম", desc: "মডুলার আর্কিটেকচার অ্যান্ড ডেটা সেন্টার", hue: 120 },
-            { name: "স্পেন", capital: "মাদ্রিদ", desc: "সাউথ ইউরোপিয়ান আইসিটি নেটওয়ার্ক", hue: 15 },
-            { name: "নেদারল্যান্ডস", capital: "আমস্টারডাম", desc: "ইউরোপিয়ান ইন্টারনেট এক্সচেঞ্জ হাব", hue: 215 },
-            { name: "সিঙ্গাপুর", capital: "সিঙ্গাপুর", desc: "সাউথইস্ট এশিয়ান ফিনটেক সেন্টার", hue: 360 },
-            { name: "মলেশশিয়া", capital: "কুয়ালালামপুর", desc: "ডিজিটাল ইকোনমি ও এআই হাব", hue: 160 }
-        ];
-
-        // লজিক্যালি এক্সপ্যান্ড করে নিখুঁত ২০০টি দেশের ডাটা তৈরি করা হলো
-        const masterCountries = [];
-        for (let i = 0; i < 200; i++) {
-            const base = rawCountries[i % rawCountries.length];
-            masterCountries.push({
-                name: i < rawCountries.length ? base.name : `সার্বভৌম জোন #${i + 1}`,
-                capital: i < rawCountries.length ? base.capital : `স্টেশন কোড ${i + 1}`,
-                desc: i < rawCountries.length ? base.desc : `আন্তর্জাতিক উন্নত গবেষণা ও ক্লাউড নোড নেটওয়ার্ক জোন #${i + 1}`,
-                hue: (i * 19.5) % 360 // প্রতিটি দেশের জন্য সম্পূর্ণ আলাদা এবং আকর্ষণীয় রঙের শেড
+        for (let i = 0; i < 100; i++) {
+            const name = i < baseNames.length ? baseNames[i] : `গ্লোবাল জোন-${i + 1}`;
+            countriesList.push({
+                name: name,
+                code: `NODE-${100 + i}`,
+                hue: (i * 3.6) % 360 // সম্পূর্ণ কালার হুই (0 থেকে ৩৬০ ডিগ্রি) থেকে ভিন্ন রঙ জেনারেট করবে
             });
         }
 
+        const monthsList = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+        
         let currentIndex = 0;
-        let isAutoRunning = true;
+        let isShiftingActive = true;
 
-        // থিম এবং কালার রেন্ডার করার মাস্টার ইঞ্জিন ফাংশন
-        function renderDashboardTheme(index) {
-            currentIndex = index % masterCountries.length;
-            const country = masterCountries[currentIndex];
+        // পুরো ড্যাশবোর্ডের রঙ এবং ডেটা পরিবর্তন করার মাস্টার ইঞ্জিন
+        function shiftDashboardColorAndData() {
+            currentIndex = (currentIndex + 1) % countriesList.length;
+            const country = countriesList[currentIndex];
+            const currentMonth = monthsList[currentIndex % monthsList.length];
+            const levelNum = (currentIndex % 3) + 1; // লেভেল ১, ২ এবং ৩ রোটেট করবে
 
-            // ডায়নামিক কালার জেনারেশন (HSL কালার স্পেস)
-            const accentColor = `hsl(${country.hue}, 85%, 60%)`;
-            const bgColor = `hsl(${country.hue}, 45%, 5%)`;
-            const panelBg = `hsl(${country.hue}, 35%, 10%)`;
-            const borderColor = `hsl(${country.hue}, 55%, 18%)`;
-            const glowColor = `hsla(${country.hue}, 85%, 60%, 0.45)`;
+            // সম্পূর্ণ ডায়নামিক কালার স্পেস (HSL) জেনারেশন
+            const accentColor = `hsl(${country.hue}, 905, 58%)`;
+            const bgColor = `hsl(${country.hue}, 45%, 4%)`;
+            const panelBg = `hsl(${country.hue}, 35%, 8%)`;
+            const borderColor = `hsl(${country.hue}, 60%, 20%)`;
+            const glowColor = `hsla(${country.hue}, 90%, 58%, 0.45)`;
 
-            // ডকুমেন্ট রুট প্রপার্টিতে মানগুলো ইনজেক্ট করা হচ্ছে
+            // রুট সিএসএস ভেরিয়েবলগুলোতে সরাসরি নতুন রঙ ইনজেক্ট করা হচ্ছে (যাতে পুরো কালার বদলে যায়)
             const rootStyle = document.documentElement.style;
             rootStyle.setProperty('--bg-color', bgColor);
             rootStyle.setProperty('--panel-bg', panelBg);
-            rootStyle.setProperty('--accent-color', accentColor);
+            rootStyle.setProperty('--accent-color', `hsl(${country.hue}, 85%, 55%)`);
             rootStyle.setProperty('--border-color', borderColor);
             rootStyle.setProperty('--glow-color', glowColor);
 
-            // টেক্সট কনটেন্ট আপডেট
-            document.getElementById('countryTitle').innerText = `${country.name} (${country.capital}) হাব`;
-            document.getElementById('countryDesc').innerText = country.desc;
-            document.getElementById('countryBadge').innerText = `থিম ${currentIndex + 1} / ২০০: ${country.name}`;
+            // রেন্ডম ভ্যালু ও মেট্রিড ডেটা তৈরি
+            const coreValue = (95 + (currentIndex % 5) + 0.3).toFixed(1) + '%';
+            const timeString = new Date().toTimeString().split(' ')[0];
 
-            // স্ট্যাটিস্টিক্যাল ডেটা ডাইনামিক্যালি আপডেট
-            document.getElementById('statNodes').innerText = (5000 + (currentIndex * 43) % 5000).toLocaleString();
-            document.getElementById('statRate').innerText = (98 + ((currentIndex * 7) % 199) / 100).toFixed(2) + '%';
-            document.getElementById('statBandwidth').innerText = (4 + (currentIndex % 6) + 0.5).toFixed(1) + ' জিবিপিএস';
+            // ড্যাশবোর্ডের টেক্সট কনটেন্ট আপডেট
+            document.getElementById('sysTitle').innerText = `${country.name} (${country.code}) - লেভেল ${levelNum} সিকিউরিটি`;
+            document.getElementById('sysMeta').innerText = `মাস: ${currentMonth} | ভ্যালু: ${coreValue} | টাইমিং: ${timeString}`;
+            document.getElementById('colorBadge').innerText = `থিম ${currentIndex + 1} / ১০০: ${country.name}`;
+            document.getElementById('cardHeader').innerText = `Encryption & Decryption (Level ${levelNum})`;
+            document.getElementById('secStatus').innerText = `Level-${levelNum} (${levelNum === 3 ? 'Maximum Protection' : 'Standard Secure'})`;
+
+            // ইনক্রিপশন / ডিক্রিপশন সাইফার পরিবর্তন
+            const rawPayload = `Payload_${country.name}_${currentIndex}`;
+            document.getElementById('plainText').innerText = rawPayload;
+            document.getElementById('cipherText').innerText = `🔒 enc_lvl${levelNum}_${btoa(rawPayload).substring(0, 10)}`;
+            document.getElementById('decryptedText').innerText = `🔓 verified_${country.code.toLowerCase()}`;
+
+            // কনসোল লগে নতুন মেসেজ যোগ করা
+            const logBox = document.getElementById('logConsole');
+            logBox.innerText += `[${timeString}] [${country.name}] Theme shifted (Hue: ${Math.round(country.hue)}°) | Lvl-${levelNum} Sync OK.\n`;
+            logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // ঠিক প্রতি ২ সেকেন্ড পর পর (২০০০ মিলি সেকেন্ড) অটোমেটিক আপডেট টাইমার
-        let globalTimer = setInterval(() => {
-            if (isAutoRunning) {
-                currentIndex++;
-                renderDashboardTheme(currentIndex);
+        // ঠিক প্রতি ২ সেকেন্ড পর পর (২০০০ মিলি সেকেন্ড) অটোমেটিক কালার ও ডেটা শিফটিং টাইমার
+        let shiftTimer = setInterval(() => {
+            if (isShiftingActive) {
+                shiftDashboardColorAndData();
             }
         }, 2000);
 
-        // অটো-থিম কন্ট্রোল বাটন টগল ফাংশন
-        function toggleAutoTheme() {
-            isAutoRunning = !isAutoRunning;
-            const btnElement = document.querySelector('.btn');
-            btnElement.innerText = isAutoRunning ? "অটো-থিম (চালু)" : "অটো-থিম (বন্ধ)";
+        // অটো-কালার শিফট অন/অফ টগল বাটন ফাংশন
+        function toggleColorShift() {
+            isShiftingActive = !isShiftingActive;
+            const btn = document.querySelector('.action-btn');
+            btn.innerText = isShiftingActive ? "অটো-কালার শিফট (চালু)" : "অটো-কালার শিফট (বন্ধ)";
         }
-
-        // কিবোর্ড ইনপুট ট্র্যাকিং সিস্টেম (দেশের নাম টাইপ করলেই সেই থিম ইনস্ট্যান্ট রান করবে)
-        let keyboardBuffer = "";
-        window.addEventListener('keydown', (e) => {
-            if (e.key.length === 1) {
-                keyboardBuffer += e.key.toLowerCase();
-                clearTimeout(window.bufferTimeout);
-                window.bufferTimeout = setTimeout(() => { keyboardBuffer = ""; }, 2500);
-
-                const matchedIndex = masterCountries.findIndex(c => c.name.toLowerCase().includes(keyboardBuffer));
-                if (matchedIndex !== -1 && keyboardBuffer.length > 1) {
-                    currentIndex = matchedIndex;
-                    renderDashboardTheme(currentIndex);
-                }
-            }
-        });
-
-        // প্রোগ্রাম লোড হওয়ার সাথে সাথে প্রথম থিম রেন্ডার করা
-        renderDashboardTheme(0);
-
-        /* ==========================================================================
-           END OF SCRIPT (Line ~900)
-           ========================================================================== */
     </script>
 </body>
 </html>
