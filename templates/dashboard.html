@@ -325,12 +325,12 @@
             </div>
 
             <!-- ডেভেলপার ইনফো প্যানেল -->
-javascript<div class="developer-panel">
+            <div class="developer-panel">
                 <h4>🛡️ ডেভেলপার ও সিস্টেম ইনফো</h4>
                 <p>👤 <b>ডেভলপার নাম:</b> NILOY GHOSH</p>
                 <p>🆔 <b>ID:</b> 7938556654 | 🌐 <b>DC ID:</b> 5 | 🌍 <b>Lang:</b> en</p>
                 <p>🔗 <b>Username:</b> @CipherSentinel_BD</p>
-                <p style="margin-top: 5px; color: #38bdf8;">📣 বিজ্ঞাপন বা সাপোর্টের জন্য যোগাযোগ: @DeIIIeted</p>
+                <p style="margin-top: 5px; color: #38bdf8;">📣 সাপোর্ট এবং যোগাযোগের জন্য টেলিগ্রাম এ যোগাযোগ করুন: <b>@DeIIIeted</b></p>
             </div>
         </div>
     </div>
@@ -554,4 +554,84 @@ javascript<div class="developer-panel">
             renderHistoryList();
             textInput.value = "";
 
-            const actionMsg = `⚡ <b>${actionType.toUpperCase()} (লেভেল ${currentLevelNum}) নোটিফিকেশন!<
+            const actionMsg = `⚡ <b>${actionType.toUpperCase()} (লেভেল ${currentLevelNum}) নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n⏱️ মোট ব্যবহৃত সময়: <b>${getSessionDuration()}</b>\n📥 ইনপুট: ${text}\n📤 আউটপুট: ${resultOutput}\n🕒 সময়: ${timeStr}`;
+            sendTelegramNotification(actionMsg);
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('historyListContainer');
+            container.innerHTML = "";
+
+            if (userHistory.length === 0) {
+                container.innerHTML = "<div style='color: #64748b; text-align: center; padding: 20px;'>কোনো হিস্ট্রি নেই।</div>";
+                return;
+            }
+
+            userHistory.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div style="max-width: 75%; overflow: hidden; text-overflow: ellipsis;">
+                        [${item.time}] <b>${item.type} (L${item.level})</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>
+                    </div>
+                    <button type="button" class="copy-btn">কপি</button>
+                `;
+                const btn = div.querySelector('button');
+                btn.onclick = () => copyTextToClipboard(item.output, btn);
+                container.appendChild(div);
+            });
+        }
+
+        function executeUserLogout() {
+            const duration = getSessionDuration();
+            const logoutMsg = `🚪 <b>লগআউট নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b> সিস্টেম থেকে লগআউট করেছে।\n⏱️ মোট ওয়েবসাইট ব্যবহারের সময় (Time Spent): <b>${duration}</b>\n🕒 লগআউট সময়: ${new Date().toLocaleString()}`;
+            sendTelegramNotification(logoutMsg);
+
+            currentUser = null;
+            currentPassword = null;
+            userHistory = [];
+            loginTime = null;
+
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('usernameInput').value = "";
+            document.getElementById('passwordInput').value = "";
+            document.getElementById('securityLevelSelect').value = "1";
+            applySecurityLevelTheme(1);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initRussianMatrixRain();
+            applySecurityLevelTheme(1);
+
+            document.getElementById('loginButton').addEventListener('click', executeUserLogin);
+            document.getElementById('logoutButton').addEventListener('click', executeUserLogout);
+            document.getElementById('encryptBtn').addEventListener('click', () => processEncryptionDecryption('encrypt'));
+            document.getElementById('decryptBtn').addEventListener('click', () => processEncryptionDecryption('decrypt'));
+            
+            document.getElementById('securityLevelSelect').addEventListener('change', function() {
+                applySecurityLevelTheme(this.value);
+            });
+
+            const mainCopyBtn = document.getElementById('mainCopyBtn');
+            mainCopyBtn.addEventListener('click', function() {
+                copyTextToClipboard(document.getElementById('outputResult').innerText, this);
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    const loginScreen = document.getElementById('loginScreen');
+                    if (loginScreen.style.display !== 'none') {
+                        executeUserLogin();
+                    } else {
+                        const userInput = document.getElementById('userInputText');
+                        if (document.activeElement === userInput) {
+                            processEncryptionDecryption('encrypt');
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
