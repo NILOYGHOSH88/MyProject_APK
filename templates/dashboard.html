@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Color Shifting Security Dashboard</title>
+    <title>Enterprise SecOps & Telegram Alert Dashboard</title>
     <style>
         :root {
             --bg-color: #030712;
@@ -12,6 +12,7 @@
             --accent-color: #3b82f6;
             --border-color: #1e293b;
             --glow-color: rgba(59, 130, 246, 0.5);
+            --telegram-color: #229ED9;
         }
 
         * {
@@ -34,11 +35,11 @@
 
         .dashboard-card {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             background-color: var(--panel-bg);
             border: 2px solid var(--accent-color);
             border-radius: 20px;
-            padding: 35px;
+            padding: 30px;
             box-shadow: 0 0 50px var(--glow-color);
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -49,12 +50,12 @@
             align-items: center;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             transition: border-color 0.8s ease;
         }
 
         .title-area h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             margin-bottom: 5px;
             color: var(--accent-color);
@@ -64,19 +65,19 @@
         .badge {
             background: var(--accent-color);
             color: #fff;
-            padding: 8px 18px;
-            border-radius: 25px;
+            padding: 8px 16px;
+            border-radius: 20px;
             font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 0 20px var(--glow-color);
+            font-size: 13px;
+            box-shadow: 0 0 15px var(--glow-color);
             transition: all 0.8s ease;
         }
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .sub-box {
@@ -88,7 +89,7 @@
         }
 
         .sub-box h3 {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--accent-color);
             margin-bottom: 12px;
             text-transform: uppercase;
@@ -98,18 +99,28 @@
         .log-console {
             background: #000;
             color: #38bdf8;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            font-size: 13px;
-            height: 130px;
+            font-size: 12px;
+            height: 120px;
             overflow-y: auto;
             border: 1px solid var(--border-color);
             white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        .telegram-alert-box {
+            background: rgba(34, 158, 217, 0.1);
+            border: 1px solid var(--telegram-color);
+            color: #e0f2fe;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
         }
 
         .footer-panel {
             background: var(--bg-color);
-            padding: 15px 20px;
+            padding: 15px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             display: flex;
@@ -124,22 +135,21 @@
             background-color: var(--accent-color);
             color: #fff;
             border: none;
-            padding: 10px 22px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             box-shadow: 0 0 15px var(--glow-color);
             transition: all 0.5s ease;
         }
 
         .action-btn:hover {
             opacity: 0.85;
-            transform: scale(1.03);
         }
 
         .info-desc {
-            font-size: 13px;
+            font-size: 12px;
             opacity: 0.85;
         }
     </style>
@@ -149,42 +159,45 @@
     <div class="dashboard-card">
         <div class="header">
             <div class="title-area">
-                <h1 id="sysTitle">ফুল কালার শিফটিং সিকিউরিটি সিস্টেম</h1>
-                <p id="sysMeta" class="info-desc">মাস: জানুয়ারি | ভ্যালু: ১০০% | লেভেল: ৩</p>
+                <h1 id="sysTitle">এন্টারপ্রাইজ সিকিউরিটি অ্যান্ড টেলিগ্রাম নোটিফিকেশন হাব</h1>
+                <p id="sysMeta" class="info-desc">মাস: জানুয়ারি | ভ্যালু: ১০০% | ইউজার টাইমিং: 00:00:00</p>
             </div>
             <div id="colorBadge" class="badge">থিম ১ / ১০০</div>
         </div>
 
         <div class="grid-container">
-            <!-- এনক্রিপশন ও ডিক্রিপশন লেভেল ৩ মডিউল -->
+            <!-- ইনক্রিপশন, ডিক্রিপশন ও লেভেল ৩ সিকিউরিটি মডিউল -->
             <div class="sub-box">
-                <h3 id="cardHeader">Encryption & Decryption (Level 3)</h3>
-                <p><strong>ইনপুট ডেটা:</strong> <span id="plainText">Data_Node_01</span></p>
-                <p><strong>সাইফার টেক্সট:</strong> <span id="cipherText" style="color: #f43f5e;">🔒 c2VjdXJlX2VuY19hMQ==</span></p>
+                <h3 id="cardHeader">Encryption / Decryption (Inclusion Level 3)</h3>
+                <p><strong>ইনপুট ডেটা:</strong> <span id="plainText">Secure_Node_01</span></p>
+                <p><strong>ইনক্রিপ্টেড (Cipher):</strong> <span id="cipherText" style="color: #f43f5e;">🔒 c2VjdXJlX2VuY19hMQ==</span></p>
                 <p><strong>ডিক্রিপ্টেড আউটপুট:</strong> <span id="decryptedText" style="color: #10b981;">🔓 verified_ok_lvl3</span></p>
-                <p><strong>সিকিউরিটি স্ট্যাটাস:</strong> <span id="secStatus" style="color: #f59e0b;">Maximum Protection Active</span></p>
+                <p><strong>সিকিউরিটি স্ট্যাটাস:</strong> <span id="secStatus" style="color: #f59e0b;">Level-3 (Max Protection)</span></p>
             </div>
 
-            <!-- কনসোল লগ ও মেসেজ -->
+            <!-- লগইন, সিস্টেম লগ ও টেলিগ্রাম নোটিফিকেশন মডিউল -->
             <div class="sub-box">
-                <h3>System Logs & Timing</h3>
+                <h3>Login Logs & Telegram Alert</h3>
                 <div class="log-console" id="logConsole">
-                    [System] Initializing full color shift engine...
-                    [Security] Level 3 encryption engaged.
+                    [Login_Auth] User session verified successfully.
+                    [System] 100 countries color engine active.
+                </div>
+                <div class="telegram-alert-box" id="tgAlertBox">
+                    ✈️ <b>Telegram Bot:</b> Level 3 encryption sync verified for current geo-node.
                 </div>
             </div>
         </div>
 
         <div class="footer-panel">
-            <button class="action-btn" onclick="toggleColorShift()">অটো-কালার শিফট (চালু/বন্ধ)</button>
+            <button class="action-btn" onclick="toggleSystemState()">অটো-সাইকেল (চালু/বন্ধ)</button>
             <div class="info-desc">
-                ⚡ প্রতি ২ সেকেন্ড পর পর পুরো ড্যাশবোর্ডের রঙ ও ডেটা সম্পূর্ণ বদলে যাচ্ছে!
+                ⚡ প্রতি ২ সেকেন্ডে কালার শিফট, লেভেল ৩ ইনক্রিপশন/ডিক্রিপশন এবং টেলিগ্রাম নোটিফিকেশন আপডেট হচ্ছে!
             </div>
         </div>
     </div>
 
     <script>
-        // ১০০টি দেশের নাম ও ডেটাবেজ অ্যারে
+        // ১০০টি দেশের ডেটাবেজ জেনারেটর
         const countriesList = [];
         const baseNames = ["বাংলাদেশ", "যুক্তরাষ্ট্র", "জাপান", "সৌদি আরব", "যুক্তরাজ্য", "ফ্রান্স", "জার্মানি", "কানাডা", "অস্ট্রেলিয়া", "ব্রাজিল", "ভারত", "দক্ষিণ কোরিয়া", "সংযুক্ত আরব আমিরাত", "সুইডেন", "সুইজারল্যান্ড", "ইতালি", "স্পেন", "নেদারল্যান্ডস", "সিঙ্গাপুর", "মালয়েশিয়া"];
         
@@ -193,72 +206,76 @@
             countriesList.push({
                 name: name,
                 code: `NODE-${100 + i}`,
-                hue: (i * 3.6) % 360 // সম্পূর্ণ কালার হুই (0 থেকে ৩৬০ ডিগ্রি) থেকে ভিন্ন রঙ জেনারেট করবে
+                hue: (i * 3.6) % 360 // সম্পূর্ণ কালার হুই (0 থেকে ৩৬০ ডিগ্রি)
             });
         }
 
         const monthsList = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
         
         let currentIndex = 0;
-        let isShiftingActive = true;
+        let isSystemActive = true;
 
-        // পুরো ড্যাশবোর্ডের রঙ এবং ডেটা পরিবর্তন করার মাস্টার ইঞ্জিন
-        function shiftDashboardColorAndData() {
+        // মূল সিকিউরিটি ও কালার শিফটিং প্রসেসিং ইঞ্জিন
+        function runSystemEngine() {
             currentIndex = (currentIndex + 1) % countriesList.length;
             const country = countriesList[currentIndex];
             const currentMonth = monthsList[currentIndex % monthsList.length];
-            const levelNum = (currentIndex % 3) + 1; // লেভেল ১, ২ এবং ৩ রোটেট করবে
+            const levelNum = 3; // আপনার চাহিদা অনুযায়ী স্থায়ীভাবে লেভেল ৩ ইনক্লুশন/সিকিউরিটি
 
-            // সম্পূর্ণ ডায়নামিক কালার স্পেস (HSL) জেনারেশন
-            const accentColor = `hsl(${country.hue}, 905, 58%)`;
+            // ডায়নামিক কালার শিফট (HSL)
+            const accentColor = `hsl(${country.hue}, 90%, 58%)`;
             const bgColor = `hsl(${country.hue}, 45%, 4%)`;
             const panelBg = `hsl(${country.hue}, 35%, 8%)`;
             const borderColor = `hsl(${country.hue}, 60%, 20%)`;
             const glowColor = `hsla(${country.hue}, 90%, 58%, 0.45)`;
 
-            // রুট সিএসএস ভেরিয়েবলগুলোতে সরাসরি নতুন রঙ ইনজেক্ট করা হচ্ছে (যাতে পুরো কালার বদলে যায়)
+            // রুট সিএসএস ভেরিয়েবল আপডেট (পুরা কালার বদলে যাওয়ার জন্য)
             const rootStyle = document.documentElement.style;
             rootStyle.setProperty('--bg-color', bgColor);
             rootStyle.setProperty('--panel-bg', panelBg);
-            rootStyle.setProperty('--accent-color', `hsl(${country.hue}, 85%, 55%)`);
+            rootStyle.setProperty('--accent-color', accentColor);
             rootStyle.setProperty('--border-color', borderColor);
             rootStyle.setProperty('--glow-color', glowColor);
 
-            // রেন্ডম ভ্যালু ও মেট্রিড ডেটা তৈরি
-            const coreValue = (95 + (currentIndex % 5) + 0.3).toFixed(1) + '%';
+            // ইউজার টাইমিং এবং মান (Value) ট্র্যাকিং
+            const coreValue = (98 + (currentIndex % 3) + 0.1).toFixed(1) + '%';
             const timeString = new Date().toTimeString().split(' ')[0];
 
-            // ড্যাশবোর্ডের টেক্সট কনটেন্ট আপডেট
-            document.getElementById('sysTitle').innerText = `${country.name} (${country.code}) - লেভেল ${levelNum} সিকিউরিটি`;
-            document.getElementById('sysMeta').innerText = `মাস: ${currentMonth} | ভ্যালু: ${coreValue} | টাইমিং: ${timeString}`;
+            // টেক্সট কনটেন্ট আপডেট
+            document.getElementById('sysTitle').innerText = `${country.name} (${country.code}) - সিকিউরিটি হাব`;
+            document.getElementById('sysMeta').innerText = `মাস: ${currentMonth} | ভ্যালু: ${coreValue} | ইউজার টাইমিং: ${timeString}`;
             document.getElementById('colorBadge').innerText = `থিম ${currentIndex + 1} / ১০০: ${country.name}`;
-            document.getElementById('cardHeader').innerText = `Encryption & Decryption (Level ${levelNum})`;
-            document.getElementById('secStatus').innerText = `Level-${levelNum} (${levelNum === 3 ? 'Maximum Protection' : 'Standard Secure'})`;
+            document.getElementById('cardHeader').innerText = `Encryption / Decryption (Inclusion Level ${levelNum})`;
+            document.getElementById('secStatus').innerText = `Level-${levelNum} (Max Security Clearance)`;
 
-            // ইনক্রিপশন / ডিক্রিপশন সাইফার পরিবর্তন
-            const rawPayload = `Payload_${country.name}_${currentIndex}`;
+            // ইনক্রিপশন / ডিক্রিপশন সাইফার জেনারেশন
+            const rawPayload = `UserSession_${country.name}_${currentIndex}`;
             document.getElementById('plainText').innerText = rawPayload;
-            document.getElementById('cipherText').innerText = `🔒 enc_lvl${levelNum}_${btoa(rawPayload).substring(0, 10)}`;
-            document.getElementById('decryptedText').innerText = `🔓 verified_${country.code.toLowerCase()}`;
+            document.getElementById('cipherText').innerText = `🔒 enc_lvl${levelNum}_${btoa(rawPayload).substring(0, 12)}`;
+            document.getElementById('decryptedText').innerText = `🔓 decrypted_verified_${country.code.toLowerCase()}`;
 
-            // কনসোল লগে নতুন মেসেজ যোগ করা
+            // লগইন লগ কনসোল আপডেট
             const logBox = document.getElementById('logConsole');
-            logBox.innerText += `[${timeString}] [${country.name}] Theme shifted (Hue: ${Math.round(country.hue)}°) | Lvl-${levelNum} Sync OK.\n`;
+            logBox.innerText += `[${timeString}] [Login] User authenticated on ${country.name}.\n`;
             logBox.scrollTop = logBox.scrollHeight;
+
+            // টেলিগ্রাম নোটিফিকেশন অ্যালার্ট আপডেট
+            const tgBox = document.getElementById('tgAlertBox');
+            tgBox.innerHTML = `✈️ <b>Telegram Bot Alert:</b> [${timeString}] Node <b>${country.name}</b> passed Inclusion Level 3 security audit. Value: ${coreValue}`;
         }
 
-        // ঠিক প্রতি ২ সেকেন্ড পর পর (২০০০ মিলি সেকেন্ড) অটোমেটিক কালার ও ডেটা শিফটিং টাইমার
-        let shiftTimer = setInterval(() => {
-            if (isShiftingActive) {
-                shiftDashboardColorAndData();
+        // ঠিক প্রতি ২ সেকেন্ড পর পর (২০০০ মিলি সেকেন্ড) অটোমেটিক এক্সিকিউশন
+        let systemTimer = setInterval(() => {
+            if (isSystemActive) {
+                runSystemEngine();
             }
         }, 2000);
 
-        // অটো-কালার শিফট অন/অফ টগল বাটন ফাংশন
-        function toggleColorShift() {
-            isShiftingActive = !isShiftingActive;
+        // অটো-সাইকেল অন/অফ টগল বাটন
+        function toggleSystemState() {
+            isSystemActive = !isSystemActive;
             const btn = document.querySelector('.action-btn');
-            btn.innerText = isShiftingActive ? "অটো-কালার শিফট (চালু)" : "অটো-কালার শিফট (বন্ধ)";
+            btn.innerText = isSystemActive ? "অটো-সাইকেল (চালু)" : "অটো-সাইকেল (বন্ধ)";
         }
     </script>
 </body>
