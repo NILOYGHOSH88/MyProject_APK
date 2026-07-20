@@ -36,26 +36,19 @@
             transition: background 0.8s ease, color 0.8s ease;
         }
 
-        /* হ্যাকার স্টাইল ব্যাকগ্রাউন্ড গ্লিচ ইফেক্ট */
-        body::before {
-            content: "";
-            position: absolute;
+        /* পাইথন অ্যাসকি আর্ট লজিক ভিত্তিক ডাইনামিক ব্যাকগ্রাউন্ড ক্যানভাস (শুধু লগইন স্ক্রিনের জন্য) */
+        #asciiCanvas {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
             pointer-events: none;
             z-index: 0;
+            opacity: 0.35;
         }
 
-        /* সার্বক্ষণিক রাশিয়ান ম্যাট্রিক্স রেইন ক্যানভাস */
+        /* সার্বক্ষণিক ম্যাট্রিক্স রেইন ক্যানভাস (ড্যাশবোর্ডের জন্য) */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -64,6 +57,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
+            display: none;
         }
 
         .container {
@@ -108,7 +102,6 @@
             position: relative;
         }
 
-        /* টাইপিং ইফেক্টের জন্য কার্সার */
         #loginScreen h2::after {
             content: "|";
             animation: blink 1s infinite;
@@ -155,7 +148,6 @@
             color: rgba(0, 255, 65, 0.5);
         }
 
-        /* পাসওয়ার্ড দেখার চোখের আইকন */
         .toggle-password {
             position: absolute;
             top: 50%;
@@ -317,7 +309,6 @@
         }
         .copy-btn:hover { background: #059669; }
 
-        /* মোবাইল মোড টগল বাটন স্টাইল */
         .mobile-toggle-btn {
             background: transparent;
             border: 2px solid #8b5cf6;
@@ -371,10 +362,13 @@
 </head>
 <body>
 
+    <!-- পাইথন কোড লজিক ভিত্তিক অ্যাসকি আর্ট ব্যাকগ্রাউন্ড க্যানভাস -->
+    <canvas id="asciiCanvas"></canvas>
+    <!-- ড্যাশবোর্ডের জন্য ম্যাট্রিক্স রেইন ক্যানভাস -->
     <canvas id="matrixCanvas"></canvas>
 
     <div class="container" id="mainContainer">
-        <!-- ১. হ্যাকার স্টাইল লগইন স্ক্রিন -->
+        <!-- ১. লগইন স্ক্রিন -->
         <div id="loginScreen">
             <h2>CYPHER PROTOCOL</h2>
             
@@ -440,9 +434,7 @@
                 <!-- পার্মানেন্ট হিস্ট্রি চ্যাট বক্স -->
                 <div class="card">
                     <h3>পার্মানেন্ট হিস্ট্রি চ্যাট বক্স</h3>
-                    <div class="history-list" id="historyListContainer">
-                        <!-- আগের সব হিস্ট্রি এখানে লোড হবে -->
-                    </div>
+                    <div class="history-list" id="historyListContainer"></div>
                 </div>
             </div>
 
@@ -462,15 +454,16 @@
         const TELEGRAM_CHAT_ID = "7938556654";
 
         const levelConfigs = {
-            1: { name: "লেভেল ১ (সাধারণ)", hue: 120, matrixColor: "#00ff41" },
-            2: { name: "লেভেল ২ (কঠিন)", hue: 140, matrixColor: "#10b981" },
-            3: { name: "লেভেল ৩ (এক্সট্রিম কঠিন)", hue: 35, matrixColor: "#f59e0b" },
-            4: { name: "লেভেল ৪ (১০০% শতভাগ নিরাপত্তা)", hue: 0, matrixColor: "#ef4444" }
+            1: { name: "লেভেল ১ (সাধারণ)", matrixColor: "#00ff41" },
+            2: { name: "লেভেল ২ (কঠিন)", matrixColor: "#10b981" },
+            3: { name: "লেভেল ৩ (এক্সট্রিম কঠিন)", matrixColor: "#f59e0b" },
+            4: { name: "লেভেল ৪ (১০০% শতভাগ নিরাপত্তা)", matrixColor: "#ef4444" }
         };
 
         let currentUser = null;
         let currentPassword = null;
         let userHistory = [];
+        let asciiInterval = null;
         let matrixInterval = null;
         let currentMatrixColor = "#00ff41";
         let loginTime = null;
@@ -478,12 +471,7 @@
 
         function sendTelegramNotification(message) {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const data = {
-                chat_id: TELEGRAM_CHAT_ID,
-                text: message,
-                parse_mode: "HTML"
-            };
-
+            const data = { chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: "HTML" };
             fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -498,6 +486,84 @@
             const mins = Math.floor(diffSec / 60);
             const secs = diffSec % 60;
             return mins > 0 ? `${mins} মিনিট ${secs} সেকেন্ড` : `${secs} সেকেন্ড`;
+        }
+
+        // পাইথন কোডের অ্যাসকি ক্যারেক্টার লজিক দিয়ে লগইন স্ক্রিনের অ্যাসকি ব্যাকগ্রাউন্ড রেন্ডার করা
+        function initPythonAsciiRain() {
+            const canvas = document.getElementById('asciiCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // পাইথন কোডের সেই নির্দিষ্ট অ্যাসকি শেড ক্যারেক্টারগুলো
+            const asciiChars = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."];
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = [];
+
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+
+            if (asciiInterval) clearInterval(asciiInterval);
+
+            asciiInterval = setInterval(() => {
+                ctx.fillStyle = 'rgba(3, 7, 18, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = asciiChars[Math.floor(Math.random() * asciiChars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }, 40);
+        }
+
+        // ড্যাশবোর্ডের জন্য ম্যাট্রিক্স রেইন
+        function initMatrixRain() {
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789@#?*+';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+
+            if (matrixInterval) clearInterval(matrixInterval);
+
+            matrixInterval = setInterval(() => {
+                ctx.fillStyle = 'rgba(3, 7, 18, 0.15)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = currentMatrixColor;
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }, 33);
         }
 
         function applySecurityLevelTheme(levelNum) {
@@ -525,52 +591,10 @@
             }
 
             const badgeEl = document.getElementById('themeBadge');
-            if (badgeEl) badgeEl.innerText = config.name;
+            if (badgeEl) badgeEl.innerText = levelConfigs[levelNum].name;
 
             const cardHeaderEl = document.getElementById('cardHeader');
-            if (cardHeaderEl) cardHeaderEl.innerText = `ক্রিপ্টোগ্রাফি ইঞ্জিন [${config.name}]`;
-        }
-
-        function initRussianMatrixRain() {
-            const canvas = document.getElementById('matrixCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-            const russianAlphabet = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя0123456789';
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = [];
-
-            for (let i = 0; i < columns; i++) {
-                drops[i] = 1;
-            }
-
-            if (matrixInterval) clearInterval(matrixInterval);
-
-            matrixInterval = setInterval(() => {
-                ctx.fillStyle = 'rgba(3, 7, 18, 0.15)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = currentMatrixColor;
-                ctx.font = fontSize + 'px monospace';
-
-                for (let i = 0; i < drops.length; i++) {
-                    const text = russianAlphabet.charAt(Math.floor(Math.random() * russianAlphabet.length));
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
-            }, 33);
+            if (cardHeaderEl) cardHeaderEl.innerText = `ক্রিপ্টোগ্রাফি ইঞ্জিন [${levelConfigs[levelNum].name}]`;
         }
 
         function copyTextToClipboard(text, btnElement) {
@@ -578,39 +602,11 @@
                 alert("কপি করার মতো কিছু নেই!");
                 return;
             }
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const originalText = btnElement.innerText;
-                    btnElement.innerText = "কপি হয়েছে!";
-                    btnElement.style.background = "#00ff41";
-                    btnElement.style.color = "#000";
-                    setTimeout(() => {
-                        btnElement.innerText = originalText;
-                        btnElement.style.background = "#10b981";
-                        btnElement.style.color = "#fff";
-                    }, 1500);
-                }).catch(() => fallbackCopyText(text, btnElement));
-            } else {
-                fallbackCopyText(text, btnElement);
-            }
-        }
-
-        function fallbackCopyText(text, btnElement) {
-            const textarea = document.createElement("textarea");
-            textarea.value = text;
-            textarea.style.position = "fixed";
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            try {
-                document.execCommand('copy');
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btnElement.innerText;
                 btnElement.innerText = "কপি হয়েছে!";
-                setTimeout(() => { btnElement.innerText = "কপি"; }, 1500);
-            } catch (err) {
-                alert("কপি করতে ব্যর্থ হয়েছে!");
-            }
-            document.body.removeChild(textarea);
+                setTimeout(() => { btnElement.innerText = originalText; }, 1500);
+            });
         }
 
         function executeUserLogin() {
@@ -630,12 +626,15 @@
             sendTelegramNotification(loginMsg);
 
             const savedDataKey = `sec_user_${user}_${pass}`;
-            const existingData = localStorage.getItem(savedDataKey);
-            userHistory = existingData ? JSON.parse(existingData) : [];
+            userHistory = localStorage.getItem(savedDataKey) ? JSON.parse(localStorage.getItem(savedDataKey)) : [];
 
             const mapKey = `sec_map_${user}_${pass}`;
-            const existingMap = localStorage.getItem(mapKey);
-            encryptionMapping = existingMap ? JSON.parse(existingMap) : {};
+            encryptionMapping = localStorage.getItem(mapKey) ? JSON.parse(localStorage.getItem(mapKey)) : {};
+
+            // লগইন স্ক্রিনের অ্যাসকি ক্যানভাস বন্ধ করে ড্যাশবোর্ডের ম্যাট্রিক্স ক্যানভাস চালু করা
+            document.getElementById('asciiCanvas').style.display = 'none';
+            document.getElementById('matrixCanvas').style.display = 'block';
+            initMatrixRain();
 
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').style.display = 'block';
@@ -660,23 +659,17 @@
             if (actionType === 'encrypt') {
                 const token = btoa(text).substring(0, 12);
                 resultOutput = `🔒 L${currentLevelNum}_Enc_${token}`;
-                
                 encryptionMapping[resultOutput] = text;
                 encryptionMapping[token] = text;
             } else {
-                let cleanInput = text;
-                if (text.includes('_Enc_')) {
-                    cleanInput = text.split('_Enc_')[1];
-                }
-
+                let cleanInput = text.includes('_Enc_') ? text.split('_Enc_')[1] : text;
                 if (encryptionMapping[text]) {
                     resultOutput = encryptionMapping[text];
                 } else if (encryptionMapping[cleanInput]) {
                     resultOutput = encryptionMapping[cleanInput];
                 } else {
                     try {
-                        let decoded = atob(cleanInput);
-                        resultOutput = decoded;
+                        resultOutput = atob(cleanInput);
                     } catch (e) {
                         resultOutput = `⚠️ ডিক্রিপশন ব্যর্থ! সঠিক এনক্রিপ্টেড টেক্সট দিন।`;
                     }
@@ -684,39 +677,25 @@
             }
 
             document.getElementById('outputResult').innerText = resultOutput;
+            userHistory.unshift({ type: actionType.toUpperCase(), level: currentLevelNum, input: text, output: resultOutput, time: timeStr });
 
-            const recordItem = {
-                type: actionType.toUpperCase(),
-                level: currentLevelNum,
-                input: text,
-                output: resultOutput,
-                time: timeStr
-            };
-
-            userHistory.unshift(recordItem);
-
-            const savedDataKey = `sec_user_${currentUser}_${currentPassword}`;
-            localStorage.setItem(savedDataKey, JSON.stringify(userHistory));
-
-            const mapKey = `sec_map_${currentUser}_${currentPassword}`;
-            localStorage.setItem(mapKey, JSON.stringify(encryptionMapping));
+            localStorage.setItem(`sec_user_${currentUser}_${currentPassword}`, JSON.stringify(userHistory));
+            localStorage.setItem(`sec_map_${currentUser}_${currentPassword}`, JSON.stringify(encryptionMapping));
 
             renderHistoryList();
             textInput.value = "";
 
-            const actionMsg = `⚡ <b>${actionType.toUpperCase()} (লেভেল ${currentLevelNum}) নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n⏱️ মোট ব্যবহৃত সময়: <b>${getSessionDuration()}</b>\n📥 ইনপুট: ${text}\n📤 আউটপুট: ${resultOutput}\n🕒 সময়: ${timeStr}`;
+            const actionMsg = `⚡ <b>${actionType.toUpperCase()} (লেভেল ${currentLevelNum}) নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n⏱️ সময়: <b>${getSessionDuration()}</b>\n📥 ইনপুট: ${text}\n📤 আউটপুট: ${resultOutput}`;
             sendTelegramNotification(actionMsg);
         }
 
         function renderHistoryList() {
             const container = document.getElementById('historyListContainer');
             container.innerHTML = "";
-
             if (userHistory.length === 0) {
                 container.innerHTML = "<div style='color: #64748b; text-align: center; padding: 20px;'>কোনো হিস্ট্রি নেই।</div>";
                 return;
             }
-
             userHistory.forEach((item) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
@@ -726,22 +705,25 @@
                     </div>
                     <button type="button" class="copy-btn">কপি</button>
                 `;
-                const btn = div.querySelector('button');
-                btn.onclick = () => copyTextToClipboard(item.output, btn);
+                div.querySelector('button').onclick = (e) => copyTextToClipboard(item.output, e.target);
                 container.appendChild(div);
             });
         }
 
         function executeUserLogout() {
             const duration = getSessionDuration();
-            const logoutMsg = `🚪 <b>লগআউট নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b> সিস্টেম থেকে লগআউট করেছে।\n⏱️ মোট ওয়েবসাইট ব্যবহারের সময় (Time Spent): <b>${duration}</b>\n🕒 লগআউট সময়: ${new Date().toLocaleString()}`;
-            sendTelegramNotification(logoutMsg);
+            sendTelegramNotification(`🚪 <b>লগআউট নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n⏱️ মোট সময়: <b>${duration}</b>`);
 
             currentUser = null;
             currentPassword = null;
             userHistory = [];
             encryptionMapping = {};
             loginTime = null;
+
+            // আবার লগইন স্ক্রিনের অ্যাসকি ক্যানভাস চালু করা
+            document.getElementById('matrixCanvas').style.display = 'none';
+            document.getElementById('asciiCanvas').style.display = 'block';
+            initPythonAsciiRain();
 
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
@@ -752,13 +734,11 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            initRussianMatrixRain();
+            initPythonAsciiRain(); // শুধু লগইন স্ক্রিনের জন্য অ্যাসকি আর্ট ব্যাকগ্রাউন্ড চালু করা হলো
             applySecurityLevelTheme(1);
 
-            // পাসওয়ার্ড শো/হাইড করার জাভাস্ক্রিপ্ট
             const togglePassword = document.querySelector('#togglePassword');
             const passwordInput = document.querySelector('#passwordInput');
-
             togglePassword.addEventListener('click', function () {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
@@ -775,33 +755,21 @@
                 applySecurityLevelTheme(this.value);
             });
 
-            const mainCopyBtn = document.getElementById('mainCopyBtn');
-            mainCopyBtn.addEventListener('click', function() {
+            document.getElementById('mainCopyBtn').addEventListener('click', function() {
                 copyTextToClipboard(document.getElementById('outputResult').innerText, this);
             });
 
-            // মোবাইল ভিউ টগল করার বাটন ফাংশনালিটি
             const mobileToggleBtn = document.getElementById('mobileToggleBtn');
             const mainContainer = document.getElementById('mainContainer');
             mobileToggleBtn.addEventListener('click', () => {
                 mainContainer.classList.toggle('mobile-mode');
-                if (mainContainer.classList.contains('mobile-mode')) {
-                    mobileToggleBtn.innerText = "💻 ডেস্কটপ ভিউ";
-                } else {
-                    mobileToggleBtn.innerText = "📱 মোবাইল ভিউ";
-                }
+                mobileToggleBtn.innerText = mainContainer.classList.contains('mobile-mode') ? "💻 ডেস্কটপ ভিউ" : "📱 মোবাইল ভিউ";
             });
 
-            document.addEventListener('keydown', function(event) {
+            document.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
-                    const loginScreen = document.getElementById('loginScreen');
-                    if (loginScreen.style.display !== 'none') {
+                    if (document.getElementById('loginScreen').style.display !== 'none') {
                         executeUserLogin();
-                    } else {
-                        const userInput = document.getElementById('userInputText');
-                        if (document.activeElement === userInput) {
-                            processEncryptionDecryption('encrypt');
-                        }
                     }
                 }
             });
