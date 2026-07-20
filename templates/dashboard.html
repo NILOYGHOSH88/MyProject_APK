@@ -12,7 +12,6 @@
             --accent-color: #3b82f6;
             --border-color: #1e293b;
             --glow-color: rgba(59, 130, 246, 0.4);
-            --telegram-color: #229ED9;
         }
 
         * {
@@ -194,7 +193,7 @@
 
         .telegram-badge {
             background: rgba(34, 158, 217, 0.1);
-            border: 1px solid var(--telegram-color);
+            border: 1px solid #229ED9;
             color: #38bdf8;
             padding: 10px;
             border-radius: 6px;
@@ -240,7 +239,7 @@
         <!-- ১. লগইন স্ক্রিন -->
         <div id="loginScreen">
             <h2 id="loginTitle">সিকিউরড লগইন পোর্টাল (৪-লেভেল ক্রিপ্টোগ্রাফি)</h2>
-            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 20px;">আপনার নাম ও পাসওয়ার্ড দিন। ফিজিক্যাল কিবোর্ড দিয়ে Enter চাপলেও লগইন হবে।</p>
+            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 20px;">আপনার নাম ও পাসওয়ার্ড দিয়ে লগইন করুন।</p>
             <div class="form-group">
                 <label>ব্যবহারকারীর নাম (Username):</label>
                 <input type="text" id="usernameInput" placeholder="আপনার নাম লিখুন...">
@@ -249,7 +248,7 @@
                 <label>সিক্রেট পাসওয়ার্ড (Password):</label>
                 <input type="password" id="passwordInput" placeholder="পাসওয়ার্ড দিন...">
             </div>
-            <button class="btn" onclick="executeUserLogin()">লগইন ও টেলিগ্রাম সিঙ্ক</button>
+            <button type="button" class="btn" id="loginButton" onclick="executeUserLogin()">লগইন ও টেলিগ্রাম সিঙ্ক</button>
         </div>
 
         <!-- ২. ড্যাশবোর্ড স্ক্রিন -->
@@ -261,7 +260,7 @@
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <div id="themeBadge" class="badge">লেভেল ১ (Level 1)</div>
-                    <button class="btn logout-btn" onclick="executeUserLogout()">লগআউট</button>
+                    <button type="button" class="btn logout-btn" onclick="executeUserLogout()">লগআউট</button>
                 </div>
             </div>
 
@@ -269,18 +268,18 @@
                 <!-- ৪ লেভেল ক্রিপ্টোগ্রাফি প্যানেল -->
                 <div class="card">
                     <h3 id="cardHeader">৪-লেভেল ইনক্রিপশন ও ডিক্রিপশন ইঞ্জিন</h3>
-                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখে Enter চাপুন...">
+                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখে প্রসেস করুন...">
                     
                     <div class="controls-row">
-                        <button class="btn" onclick="processEncryptionDecryption('encrypt')">ইনক্রিপ্ট (Encrypt)</button>
-                        <button class="btn" style="background-color: #10b981;" onclick="processEncryptionDecryption('decrypt')">ডিক্রিপ্ট (Decrypt)</button>
-                        <button class="btn" style="background-color: #8b5cf6;" onclick="toggleAutoThemeMode()">অটো থিম (২ সেঃ)</button>
+                        <button type="button" class="btn" onclick="processEncryptionDecryption('encrypt')">ইনক্রিপ্ট (Encrypt)</button>
+                        <button type="button" class="btn" style="background-color: #10b981;" onclick="processEncryptionDecryption('decrypt')">ডিক্রিপ্ট (Decrypt)</button>
+                        <button type="button" class="btn" style="background-color: #8b5cf6;" id="autoThemeBtn" onclick="toggleAutoThemeMode()">অটো থিম (২ সেঃ)</button>
                     </div>
 
                     <p style="font-size: 13px; margin-top: 10px;">
                         <strong>সর্বশেষ আউটপুট:</strong> 
                         <span id="outputResult" style="color: #38bdf8; word-break: break-all;">--</span>
-                        <button class="copy-btn" id="mainCopyBtn" style="margin-left: 8px;" onclick="copyTextToClipboard(document.getElementById('outputResult').innerText, this)">কপি</button>
+                        <button type="button" class="copy-btn" id="mainCopyBtn" style="margin-left: 8px;" onclick="copyTextToClipboard(document.getElementById('outputResult').innerText, this)">কপি</button>
                     </p>
                     
                     <div class="telegram-badge">
@@ -353,7 +352,7 @@
         // অটো থিম বা লেভেল পরিবর্তন মোড (প্রতি ২ সেকেন্ড পর পর)
         function toggleAutoThemeMode() {
             isAutoThemeActive = !isAutoThemeActive;
-            const btn = event.target;
+            const btn = document.getElementById('autoThemeBtn');
             if (isAutoThemeActive) {
                 btn.style.background = "#ef4444";
                 btn.innerText = "অটো থিম (বন্ধ করুন)";
@@ -371,7 +370,7 @@
         // প্রথম লোডে ডিফল্ট লেভেল ১ সেট করা
         applySecurityLevelTheme(encryptionLevels[0]);
 
-        // টেলিগ্রাম বটে নোটিফিকেশন পাঠানোর ফাংশন[span_1](start_span)[span_1](end_span)
+        // টেলিগ্রাম বটে নোটিফিকেশন পাঠানোর ফাংশন
         function sendTelegramNotification(message) {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
             const data = {
@@ -527,7 +526,7 @@
                     <div style="max-width: 75%; overflow: hidden; text-overflow: ellipsis;">
                         [${item.time}] <b>${item.type} (L${item.level})</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>
                     </div>
-                    <button class="copy-btn" onclick="copyTextToClipboard('${item.output}', this)">কপি</button>
+                    <button type="button" class="copy-btn" onclick="copyTextToClipboard('${item.output}', this)">কপি</button>
                 `;
                 container.appendChild(div);
             });
@@ -547,4 +546,24 @@
 
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('usern
+            document.getElementById('usernameInput').value = "";
+            document.getElementById('passwordInput').value = "";
+        }
+
+        // ফিজিক্যাল কিবোর্ড সাপোর্ট (Enter Key)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const loginScreen = document.getElementById('loginScreen');
+                if (loginScreen.style.display !== 'none') {
+                    executeUserLogin();
+                } else {
+                    const userInput = document.getElementById('userInputText');
+                    if (document.activeElement === userInput) {
+                        processEncryptionDecryption('encrypt');
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
