@@ -3,89 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SECURE_CORE_SYSTEM</title>
+    <title>SECURE_CORE // MULTI-LEVEL SECURITY</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: #00ff41; font-family: 'Courier New', monospace; overflow: hidden; }
-        canvas { position: fixed; top: 0; left: 0; z-index: 0; }
-        .box { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 10px; }
-        .panel { width: 100%; max-width: 350px; padding: 20px; border: 1px solid #00ff41; background: rgba(0, 20, 0, 0.95); text-align: center; box-sizing: border-box; }
-        .input-field { width: 100%; background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 12px; margin: 10px 0; box-sizing: border-box; }
-        .btn { border: 1px solid #00ff41; background: #000; color: #00ff41; padding: 12px; width: 100%; cursor: pointer; margin-top: 5px; font-weight: bold; }
-        .btn:hover { background: #00ff41; color: #000; }
-        #out { border: 1px dashed #00ff41; padding: 10px; margin: 10px 0; min-height: 20px; word-break: break-all; }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        :root {
+            --bg-color: #030a05;
+            --main-color: #00ff66;
+            --panel-bg: rgba(2, 15, 5, 0.9);
+            --border-color: #00ff66;
+            --output-color: #66ff99;
+            --glow-color: rgba(0, 255, 102, 0.4);
+        }
+
+        body.cyber-red {
+            --bg-color: #0a0303;
+            --main-color: #ff3333;
+            --panel-bg: rgba(15, 2, 2, 0.9);
+            --border-color: #ff3333;
+            --output-color: #ff9999;
+            --glow-color: rgba(255, 51, 51, 0.4);
+        }
+
+        body.neon-blue {
+            --bg-color: #03060a;
+            --main-color: #00f0ff;
+            --panel-bg: rgba(2, 10, 15, 0.9);
+            --border-color: #00f0ff;
+            --output-color: #99f9ff;
+            --glow-color: rgba(0, 240, 255, 0.4);
+        }
+
+        body.matrix-amber {
+            --bg-color: #0a0703;
+            --main-color: #ffb700;
+            --panel-bg: rgba(15, 10, 2, 0.9);
+            --border-color: #ffb700;
+            --output-color: #ffe180;
+            --glow-color: rgba(255, 183, 0, 0.4);
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            background: var(--bg-color); color: var(--main-color); 
+            font-family: 'Share Tech Mono', monospace; 
+            overflow: hidden; 
+            transition: background 0.5s, color 0.5s;
+        }
+        canvas { position: fixed; top: 0; left: 0; z-index: 0; opacity: 0.8; }
+        
+        .box { 
+            position: relative; z-index: 1; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            height: 100vh; padding: 15px; 
+        }
+        
+        .panel { 
+            width: 100%; max-width: 400px; padding: 25px; 
+            border: 1px solid var(--border-color); 
+            background: var(--panel-bg); 
+            box-shadow: 0 0 20px var(--glow-color);
+            text-align: center; box-sizing: border-box; 
+            backdrop-filter: blur(5px);
+            border-radius: 4px;
+            animation: fadeIn 0.5s ease-in-out;
+            transition: all 0.5s;
+        }
+
+        h3 { letter-spacing: 2px; text-shadow: 0 0 10px var(--glow-color); margin-top: 0; }
+        
+        .input-field { 
+            width: 100%; background: var(--bg-color); color: var(--main-color); 
+            border: 1px solid var(--border-color); padding: 10px; margin: 8px 0; 
+            box-sizing: border-box; font-family: 'Share Tech Mono', monospace;
+            font-size: 14px; outline: none; transition: 0.3s;
+            border-radius: 2px;
+        }
+        .input-field:focus { 
+            box-shadow: 0 0 10px var(--glow-color); 
+        }
+
+        /* লেভেল সিলেকশন ডিজাইন */
+        .level-group {
+            display: flex; justify-content: space-between; margin: 10px 0; gap: 5px;
+        }
+        .level-btn {
+            flex: 1; padding: 8px 4px; font-size: 11px; cursor: pointer;
+            background: var(--bg-color); border: 1px solid var(--border-color);
+            color: var(--main-color); font-family: 'Share Tech Mono', monospace;
+            transition: 0.3s; border-radius: 2px;
+        }
+        .level-btn.active {
+            background: var(--main-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px var(--main-color);
+            font-weight: bold;
+        }
+
+        /* প্রিমিয়াম বাটন অ্যানিমেশন */
+        .btn { 
+            border: 1px solid var(--border-color); background: var(--bg-color); 
+            color: var(--main-color); padding: 12px; width: 100%; 
+            cursor: pointer; margin-top: 8px; font-weight: bold; 
+            font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 2px;
+            position: relative; overflow: hidden;
+        }
+        .btn::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: rgba(255, 255, 255, 0.2); border-radius: 50%;
+            transform: translate(-50%, -50%); transition: width 0.4s, height 0.4s;
+        }
+        .btn:active::after { width: 300px; height: 300px; }
+        .btn:hover { 
+            background: var(--main-color); color: var(--bg-color); 
+            box-shadow: 0 0 15px var(--main-color); 
+            transform: translateY(-2px);
+        }
+        .btn:active { transform: translateY(1px); }
+
+        #out { 
+            border: 1px dashed var(--border-color); padding: 10px; margin: 10px 0; 
+            min-height: 25px; word-break: break-all; background: rgba(0,0,0,0.5);
+            text-align: left; font-size: 13px; color: var(--output-color);
+        }
+
         .hidden { display: none !important; }
-        #timer { font-size: 20px; margin-bottom: 15px; color: #fff; }
+        
+        #timer { 
+            font-size: 20px; margin-bottom: 10px; color: #fff; 
+            text-shadow: 0 0 8px #fff; letter-spacing: 2px;
+        }
+
+        .dev-info { 
+            margin-top: 15px; font-size: 11px; color: var(--main-color); 
+            opacity: 0.8; border-top: 1px dashed var(--border-color); padding-top: 8px; 
+            letter-spacing: 1px;
+        }
+
+        .theme-selector {
+            display: flex; justify-content: space-between; margin-bottom: 12px; gap: 5px;
+        }
+        .theme-btn {
+            flex: 1; padding: 6px; font-size: 10px; cursor: pointer;
+            background: transparent; border: 1px solid var(--border-color);
+            color: var(--main-color); font-family: 'Share Tech Mono', monospace;
+            transition: 0.2s;
+        }
+        .theme-btn:hover { background: var(--main-color); color: var(--bg-color); }
+
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--main-color); color: var(--bg-color); padding: 10px 20px;
+            font-weight: bold; border-radius: 4px; transition: transform 0.3s ease;
+            box-shadow: 0 0 15px var(--glow-color); z-index: 999;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
     <canvas id="m"></canvas>
+    
     <div class="box">
+        <!-- লগইন প্যানেল -->
         <div id="login-ui" class="panel">
+            <div class="theme-selector">
+                <button class="theme-btn" onclick="setTheme('green')">GREEN</button>
+                <button class="theme-btn" onclick="setTheme('red')">RED</button>
+                <button class="theme-btn" onclick="setTheme('blue')">BLUE</button>
+                <button class="theme-btn" onclick="setTheme('amber')">AMBER</button>
+            </div>
             <h3>[ SECURE_ACCESS ]</h3>
-            <input type="text" id="uname" class="input-field" placeholder="USERNAME">
-            <input type="password" id="upass" class="input-field" placeholder="PASSWORD">
-            <button class="btn" onclick="login()">[ LOGIN ]</button>
+            <input type="text" id="uname" class="input-field" placeholder="ENTER USERNAME" autocomplete="off">
+            <input type="password" id="upass" class="input-field" placeholder="ENTER PASSWORD (0000)" onkeypress="checkEnter(event, 'login')">
+            <button class="btn" onclick="login()">[ INITIALIZE LOGIN ]</button>
+            <div class="dev-info">SYSTEM DESIGNED BY: <b>NILOY</b></div>
         </div>
         
+        <!-- মূল প্যানেল -->
         <div id="main-ui" class="panel hidden">
-            <div id="timer">TIME: 00:00</div>
-            <textarea id="msg" class="input-field" placeholder="MESSAGE"></textarea>
-            <button class="btn" onclick="send('encrypt')">[ ENCRYPT ]</button>
-            <button class="btn" onclick="send('decrypt')">[ DECRYPT ]</button>
-            <div id="out">OUTPUT</div>
-            <button class="btn" onclick="copy()">[ COPY_BUFFER ]</button>
+            <div class="theme-selector">
+                <button class="theme-btn" onclick="setTheme('green')">GREEN</button>
+                <button class="theme-btn" onclick="setTheme('red')">RED</button>
+                <button class="theme-btn" onclick="setTheme('blue')">BLUE</button>
+                <button class="theme-btn" onclick="setTheme('amber')">AMBER</button>
+            </div>
+            <div id="timer">00:00:00</div>
+            
+            <!-- সিকিউরিটি লেভেল সিলেকশন বাটন -->
+            <div style="font-size: 12px; margin-bottom: 2px; text-align: left;">SELECT SECURITY LEVEL:</div>
+            <div class="level-group">
+                <button class="level-btn active" id="lvl1" onclick="setSecurityLevel(1)">LEVEL 1</button>
+                <button class="level-btn" id="lvl2" onclick="setSecurityLevel(2)">LEVEL 2</button>
+                <button class="level-btn" id="lvl3" onclick="setSecurityLevel(3)">LEVEL 3</button>
+            </div>
+
+            <textarea id="msg" class="input-field" placeholder="বাংলা বা যেকোনো লেখা এখানে লিখুন..." rows="2" onkeypress="checkEnter(event, 'encrypt')"></textarea>
+            
+            <button class="btn" onclick="send('encrypt')">[ ENCRYPT DATA ]</button>
+            <button class="btn" onclick="send('decrypt')">[ DECRYPT DATA ]</button>
+            <div id="out">OUTPUT_BUFFER...</div>
+            <button class="btn" onclick="copy()">[ COPY TO CLIPBOARD ]</button>
+            <div class="dev-info">CORE: ACTIVE | DEV: NILOY</div>
         </div>
     </div>
+
+    <div id="toast">NOTIFICATION</div>
 
 <script>
     const TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
     const ID = "7938556654";
-    const CORRECT_PASS = "0000"; // পাসওয়ার্ড এখন 0000
+    const CORRECT_PASS = "0000"; 
     let user = "", start = 0, timerInterval;
+    let currentSecurityLevel = 1; // ডিফল্ট লেভেল ১
+
+    function setTheme(theme) {
+        document.body.className = "";
+        if (theme === 'red') document.body.classList.add('cyber-red');
+        else if (theme === 'blue') document.body.classList.add('neon-blue');
+        else if (theme === 'amber') document.body.classList.add('matrix-amber');
+        showToast("THEME CHANGED: " + theme.toUpperCase());
+    }
+
+    // সিকিউরিটি লেভেল সেট করার ফাংশন
+    function setSecurityLevel(level) {
+        currentSecurityLevel = level;
+        document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('lvl' + level).classList.add('active');
+        showToast("SECURITY LEVEL " + level + " ACTIVATED");
+    }
 
     const c = document.getElementById('m'), ctx = c.getContext('2d');
     c.width = window.innerWidth; c.height = window.innerHeight;
-    const matrix = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ".split("");
-    let drops = Array(Math.floor(c.width/20)).fill(1);
+    const matrix = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789@#$%&";
+    let drops = Array(Math.floor(c.width/22)).fill(1);
     
-    function draw() { ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle = "#00ff41"; ctx.font = "15px monospace"; drops.forEach((y, i) => { const t = matrix[Math.floor(Math.random()*matrix.length)]; ctx.fillText(t, i*20, y*20); if(y*20 > c.height) drops[i] = 0; drops[i]++; }); } 
-    setInterval(draw, 50);
+    function draw() { 
+        ctx.fillStyle = "rgba(0, 0, 0, 0.08)"; 
+        ctx.fillRect(0, 0, c.width, c.height); 
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--main-color'); 
+        ctx.font = "14px 'Share Tech Mono'"; 
+        drops.forEach((y, i) => { 
+            const t = matrix[Math.floor(Math.random() * matrix.length)]; 
+            ctx.fillText(t, i * 22, y * 22); 
+            if(y * 22 > c.height && Math.random() > 0.975) drops[i] = 0; 
+            drops[i]++; 
+        }); 
+    } 
+    setInterval(draw, 45);
 
-    function notify(text) { fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(text)}`); }
+    function showToast(text) {
+        let toast = document.getElementById('toast');
+        toast.innerText = text;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+
+    function notify(text) { 
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(text)}`); 
+    }
 
     function login() { 
-        let u = document.getElementById('uname').value;
+        let u = document.getElementById('uname').value.trim();
         let p = document.getElementById('upass').value;
         
         if(u && p === CORRECT_PASS) { 
             user = u;
             document.getElementById('login-ui').classList.add('hidden'); 
             document.getElementById('main-ui').classList.remove('hidden'); 
-            notify("👤 Login Successful: " + user); 
+            notify(`🟢 LOGIN SUCCESS\nUser: ${user}\nDeveloper: NILOY`); 
+            showToast("ACCESS GRANTED");
+            
             start = Date.now(); 
             timerInterval = setInterval(() => { 
-                let s = Math.floor((Date.now()-start)/1000); 
-                document.getElementById('timer').innerText = "TIME: " + Math.floor(s/60).toString().padStart(2,'0') + ":" + (s%60).toString().padStart(2,'0'); 
+                let s = Math.floor((Date.now() - start) / 1000); 
+                let hrs = Math.floor(s / 3600).toString().padStart(2, '0');
+                let mins = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+                let secs = (s % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${hrs}:${mins}:${secs}`; 
             }, 1000); 
         } else {
-            alert("INVALID USERNAME OR PASSWORD");
+            showToast("ACCESS DENIED: WRONG CREDENTIALS");
+        }
+    }
+
+    // ইউনিকোড এনকোডার ও ডিকোডার (বাংলা সহ যেকোনো ভাষার জন্য)
+    function unicodeToBase64(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+    }
+
+    function base64ToUnicode(str) {
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
+
+    // মাল্টি-লেভেল এনক্রিপশন সিস্টেম
+    function multiLevelEncrypt(text, level) {
+        let encoded = unicodeToBase64(text);
+        if (level === 2) {
+            // লেভেল ২: ডাবল এনকোডিং + রিভার্স
+            encoded = unicodeToBase64(encoded.split('').reverse().join(''));
+        } else if (level === 3) {
+            // লেভেল ৩: ট্রিপল এনকোডিং + কাস্টম প্রিফিক্স এবং সাফিক্স
+            let rev = encoded.split('').reverse().join('');
+            encoded = "SECURE_L3_" + unicodeToBase64(rev) + "_L3";
+        }
+        return encoded;
+    }
+
+    function multiLevelDecrypt(cipher, level) {
+        if (level === 3) {
+            if (!cipher.startsWith("SECURE_L3_") || !cipher.endsWith("_L3")) {
+                throw new Error("Invalid Level 3 Format");
+            }
+            let core = cipher.replace("SECURE_L3_", "").replace("_L3", "");
+            let decodedOnce = base64ToUnicode(core);
+            let unreversed = decodedOnce.split('').reverse().join('');
+            return base64ToUnicode(unreversed);
+        } else if (level === 2) {
+            let decodedOnce = base64ToUnicode(cipher);
+            let unreversed = decodedOnce.split('').reverse().join('');
+            return base64ToUnicode(unreversed);
+        } else {
+            return base64ToUnicode(cipher);
         }
     }
 
     function send(type) {
         let msg = document.getElementById('msg').value;
+        if(!msg) { showToast("ERROR: EMPTY PAYLOAD"); return; }
         try {
-            let res = (type == 'encrypt') ? btoa(msg) : atob(msg);
+            let res = "";
+            if (type === 'encrypt') {
+                res = multiLevelEncrypt(msg, currentSecurityLevel);
+            } else {
+                res = multiLevelDecrypt(msg, currentSecurityLevel);
+            }
             document.getElementById('out').innerText = res;
-            notify(type.toUpperCase() + "\nUser: " + user + "\nInput: " + msg + "\nOutput: " + res);
-        } catch(e) { alert("ERROR: INVALID DATA"); }
+            notify(`⚡ ${type.toUpperCase()} (Lvl ${currentSecurityLevel})\nUser: ${user}\nInput: ${msg}\nOutput: ${res}`);
+            showToast(type.toUpperCase() + " SUCCESSFUL (L-" + currentSecurityLevel + ")");
+        } catch(e) { 
+            showToast("ERROR: DECRYPTION FAILED OR WRONG LEVEL"); 
+        }
     }
 
-    function copy() { navigator.clipboard.writeText(document.getElementById('out').innerText); alert("COPIED!"); }
+    function copy() { 
+        let textToCopy = document.getElementById('out').innerText;
+        navigator.clipboard.writeText(textToCopy); 
+        showToast("BUFFER COPIED TO CLIPBOARD"); 
+    }
+
+    function checkEnter(event, action) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            if (action === 'login') login();
+            else if (action === 'encrypt') send('encrypt');
+        }
+    }
 
     window.onbeforeunload = () => { 
-        if(user) notify("🛑 Session Ended: " + user + "\nDuration: " + document.getElementById('timer').innerText); 
+        if(user) notify(`🔴 SESSION TERMINATED\nUser: ${user}\nDuration: ${document.getElementById('timer').innerText}`); 
     };
 </script>
 </body>
