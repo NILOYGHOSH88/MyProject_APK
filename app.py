@@ -5,48 +5,57 @@ from telegram_service import start_telegram_bots_background, send_admin_alert, s
 
 app = Flask(__name__)
 
-# অ্যাপ চালুর সাথেই টেলিগ্রাম বট ব্যাকগ্রাউন্ডে রান করিয়ে দেওয়া
+# ব্যাকগ্রাউন্ডে টেলিগ্রাম বট চালু করা
 start_telegram_bots_background()
 
-# সাময়িকভাবে ওটিপি কোড সেভ রাখার ডিকশনারি
-temp_otp_storage = {}
+# সাময়িকভাবে ইউজার ডাটা এবং ওটিপি সংরক্ষণের ডিকশনারি
+temp_storage = {}
 
 @app.route('/')
 def home():
     return render_template('dashboard.html')
 
-# ওটিপি রিকোয়েস্ট পাঠানোর রাউট
-@app.route('/send-otp', methods=['POST'])
-def send_otp():
+# ধাপ ১: ইউজারনেম ও পাসওয়ার্ড চেক এবং ওটিপি পাঠানো
+@app.route('/login-step1', methods=['POST'])
+def login_step1():
     data = request.json
-    username = data.get('username')
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
     
-    if not username:
-        return jsonify({"success": False, "message": "ইউজারনেম দিন!"})
+    if not username or not password:
+        return jsonify({"success": False, "message": "ইউজারনেম এবং পাসওয়ার্ড উভয়ই দিতে হবে!"})
     
-    # ৪ ডিজিটের র‍্যান্ডম ওটিপি জেনারেট করা
+    # এখানে আপনার পছন্দমতো পাসওয়ার্ড ভ্যালিডেশন দিতে পারেন (বর্তমানে ডেমো হিসেবে যেকোনো পাসওয়ার্ড গ্রহণ করবে)
+    clean_username = username.replace('@', '').lower()
+    
+    # ৪ ডিজিটের ওটিপি জেনারেট
     otp_code = str(random.randint(1000, 9999))
-    temp_otp_storage[username.replace('@', '').lower()] = otp_code
+    temp_storage[clean_username] = {
+        "otp": otp_code,
+        "password": password
+    }
     
-    # টেলিগ্রাম বটের মাধ্যমে ওটিপি পাঠানো
+    # টেলিগ্রামে ওটিপি পাঠানো
     sent = send_otp_to_user(username, otp_code)
     
     if sent:
-        send_admin_alert(f"⚠️ ইউজারের কাছে ওটিপি পাঠানো হয়েছে: <b>{username}</b>")
-        return jsonify({"success": True, "message": "টেলিগ্রামে ওটিপি পাঠানো হয়েছে!"})
+        send_admin_alert(f"🔐 লগইন প্রচেষ্টা (ধাপ ১): <b>{username}</b>")
+        return jsonify({"success": True, "message": "পাসওয়ার্ড সঠিক! টেলিগ্রামে ওটিপি পাঠানো হয়েছে।"})
     else:
-        return jsonify({"success": False, "message": "ইউজারকে খুঁজে পাওয়া যায়নি! প্রথমে বটে গিয়ে /start দিন।"})
+        return jsonify({"success": False, "message": "টেলিগ্রাম ইউজার পাওয়া যায়নি! প্রথমে বটে গিয়ে /start দিন।"})
 
-# ওটিপি ভেরিফাই করার রাউট
+# ধাপ ২: ওটিপি ভেরিফিকেশন
 @app.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
     username = data.get('username', '').replace('@', '').lower()
-    user_entered_otp = data.get('otp')
+    user_entered_otp = data.get('otp', '').strip()
     
-    if temp_otp_storage.get(username) == user_entered_otp:
-        send_admin_alert(f"✅ সফলভাবে লগইন করেছে: <b>{username}</b>")
-        return jsonify({"success": True, "message": "লগইন সফল!"})
+    user_data = temp_storage.get(username)
+    
+    if user_data and user_data["otp"] == user_entered_otp:
+        send_admin_alert(f"✅ সফলভাবে লগইন ও ভেরিফাই করেছে: <b>{username}</b>")
+        return jsonify({"success": True, "message": "ওটিপি ভেরিফিকেশন সফল! ড্যাশবোর্ডে প্রবেশ করছেন..."})
     else:
         return jsonify({"success": False, "message": "ভুল ওটিপি কোড!"})
 
