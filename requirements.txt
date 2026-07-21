@@ -1,4 +1,4 @@
-Flask
-pyTelegramBotAPI
-requests
-gunicorn
+Flask>=3.1.0
+pyTelegramBotAPI>=4.36.0
+requests>=2.34.0
+gunicorn>=26.0.0
