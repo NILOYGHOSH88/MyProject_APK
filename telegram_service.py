@@ -1,4 +1,5 @@
 import threading
+import time
 from telebot import TeleBot
 
 # ১. অ্যাডমিন বট (নোটিফিকেশনের জন্য)
@@ -45,13 +46,15 @@ def send_otp_to_user(username, otp_code):
             print(f"OTP Bot Send Error: {e}")
     return False
 
-# ব্যাকগ্রাউন্ডে ওটিপি বট পোলিং চালু রাখার থ্রেড
+# ব্যাকগ্রাউন্ডে ওটিপি বট সেফ পোলিং লজিক
 def run_otp_bot():
-    try:
-        print("🤖 ওটিপি বট ব্যাকগ্রাউন্ডে চালু হচ্ছে...")
-        otp_bot.infinity_polling(none_stop=True)
-    except Exception as e:
-        print(f"OTP Bot Polling Error: {e}")
+    while True:
+        try:
+            print("🤖 ওটিপি বট ব্যাকগ্রাউন্ডে চালু হচ্ছে...")
+            otp_bot.infinity_polling(none_stop=True, interval=1, timeout=30)
+        except Exception as e:
+            print(f"Polling error: {e}")
+            time.sleep(5)
 
 def start_telegram_bots_background():
     bot_thread = threading.Thread(target=run_otp_bot, daemon=True)
