@@ -1,3 +1,4 @@
+import os
 import random
 from flask import Flask, render_template, request, jsonify
 from telegram_service import start_telegram_bots_background, send_admin_alert, send_otp_to_user
@@ -14,7 +15,7 @@ temp_otp_storage = {}
 def home():
     return render_template('dashboard.html')
 
-# ওটিপি রিকোয়েস্ট পাঠানোর রাউট (ওয়েবসাইট থেকে কল হবে)
+# ওটিপি রিকোয়েস্ট পাঠানোর রাউট
 @app.route('/send-otp', methods=['POST'])
 def send_otp():
     data = request.json
@@ -50,4 +51,5 @@ def verify_otp():
         return jsonify({"success": False, "message": "ভুল ওটিপি কোড!"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
