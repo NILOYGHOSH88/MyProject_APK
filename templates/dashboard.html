@@ -116,6 +116,17 @@
             box-shadow: 0 0 10px var(--border-color);
         }
 
+        .alt-btn {
+            background: transparent;
+            color: #00ffff;
+            border: 1px dashed #00ffff;
+            margin-top: 10px;
+        }
+        .alt-btn:hover {
+            background: #00ffff;
+            color: #000;
+        }
+
         .message { margin-top: 10px; font-weight: bold; font-size: 12px; }
         .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; }
         .bot-link:hover { text-decoration: underline; }
@@ -140,25 +151,42 @@
     <div class="card" id="main-card">
         <h2 id="card-title" style="font-size: 20px;">💀 ROOT_ACCESS // LOGIN</h2>
         
-        <!-- ধাপ ১: ইউজারনেম ও পাসওয়ার্ড -->
-        <div id="step-login">
-            <p>> এন্টার টেলিগ্রাম ক্রডেনশিয়াল:</p>
+        <!-- ধাপ ১: টেলিগ্রাম ইউজারনেম ও পাসওয়ার্ড লগইন -->
+        <div id="step-telegram-login">
+            <p>> টেলিগ্রাম ক্রডেনশিয়াল:</p>
             <input type="text" id="username" placeholder="Telegram Username (@username)">
             <input type="password" id="password" placeholder="Password">
-            <button class="action-btn" onclick="loginStep1()">বট ওটিপি রিকোয়েস্ট</button>
-            <div style="margin-top: 10px; font-size: 12px;">
+            <button class="action-btn" onclick="loginStep1()">টেলিগ্রাম ওটিপি রিকোয়েস্ট</button>
+            
+            <div style="margin-top: 8px; font-size: 12px;">
                 > বট কানেক্ট না থাকলে: <a href="https://t.me/CryptoGuard_OTP_bot" target="_blank" class="bot-link">এখানে ক্লিক করে /start দিন</a>
             </div>
+
+            <!-- অল্টারনেটিভ লগইন সুইচ বাটন -->
+            <button class="action-btn alt-btn" onclick="switchForm('alt')">🔄 অল্টারনেটিভ লগইন (ফোন/নাম)</button>
         </div>
 
-        <!-- ধাপ ২: ওটিপি ভেরিফিকেশন -->
+        <!-- অল্টারনেটিভ লগইন ফর্ম (টেলিগ্রাম না থাকলে) -->
+        <div id="step-alt-login" class="hidden">
+            <p>> অল্টারনেটিভ এক্সেস (ফোন ও নাম):</p>
+            <input type="text" id="alt-phone" placeholder="Phone Number (যেমন: 017xxxxxxxx)">
+            <input type="text" id="alt-name" placeholder="Full Name">
+            <input type="password" id="alt-password" placeholder="Password">
+            <input type="email" id="alt-email" placeholder="Email Address (ঐচ্ছিক / Optional)">
+            <button class="action-btn" onclick="alternativeLoginSubmit()" style="background: #002244; color: #00ffff; border-color: #00ffff;">লগইন / রেজিস্টার</button>
+
+            <!-- টেলিগ্রাম লগইনে ফিরে যাওয়ার বাটন -->
+            <button class="action-btn alt-btn" onclick="switchForm('telegram')">🔙 টেলিগ্রাম লগইনে ফিরে যান</button>
+        </div>
+
+        <!-- ধাপ ২: ওটিপি ভেরিফিকেশন (শুধুমাত্র টেলিগ্রাম ইউজারদের জন্য) -->
         <div id="step-otp" class="hidden">
             <p>> টেলিগ্রাম ওটিপি কোড ইনপুট করুন:</p>
             <input type="text" id="otp-code" placeholder="4-digit OTP" maxlength="4">
             <button class="action-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
         </div>
 
-        <!-- ধাপ ৩: ৩ লেভেলের এনক্রিপশন, ডিক্রিপশন ও থিম ড্যাশবোর্ড -->
+        <!-- ধাপ ৩: ৩ লেভেলের এনক্রিপশন ও ডিক্রিপশন ড্যাশবোর্ড -->
         <div id="step-dashboard" class="hidden">
             <h3 id="dash-heading" style="font-size: 16px;">> সিস্টেম ড্যাশবোর্ড আনলকড</h3>
             
@@ -167,7 +195,6 @@
                 <p><b>এনক্রিপশন প্রোটোকল:</b> <span id="enc-mode">AES-128 Active</span></p>
             </div>
 
-            <!-- গোপন টেক্সট এনক্রিপশন ও ডিক্রিপশন টুল -->
             <div style="margin-top: 10px; text-align: left; font-size: 12px;">
                 <label>> সিক্রেট টেক্সট এনক্রিপ্ট করুন:</label>
                 <textarea id="plain-text" placeholder="নরমাল টেক্সট লিখুন..." rows="2" oninput="syncAndSaveData()"></textarea>
@@ -225,9 +252,22 @@
             }
         }
 
-        let currentUsername = "";
+        // ফর্ম সুইচিং (টেলিগ্রাম থেকে অল্টারনেটিভ)
+        function switchForm(type) {
+            document.getElementById('response-msg').innerText = "";
+            if (type === 'alt') {
+                document.getElementById('step-telegram-login').style.display = 'none';
+                document.getElementById('step-alt-login').style.display = 'block';
+            } else {
+                document.getElementById('step-alt-login').style.display = 'none';
+                document.getElementById('step-telegram-login').style.display = 'block';
+            }
+        }
+
+        let currentIdentifier = "";
         let securityLevel = 1;
 
+        // টেলিগ্রাম লগইন ধাপ ১
         function loginStep1() {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
@@ -235,25 +275,25 @@
 
             if (!usernameInput || !passwordInput) {
                 msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[ত্রুটি]: সব ফিল্ড পূরণ করুন!";
+                msgDiv.innerText = "[ত্রুটি]: ইউজারনেম এবং পাসওয়ার্ড দিন!";
                 return;
             }
 
-            currentUsername = usernameInput;
+            currentIdentifier = usernameInput.replace('@', '').toLowerCase();
             msgDiv.style.color = "#00ffff";
             msgDiv.innerText = "[প্রসেসিং]: ওটিপি পাঠানো হচ্ছে...";
 
             fetch('/login-step1', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUsername, password: passwordInput })
+                body: JSON.stringify({ username: usernameInput, password: passwordInput })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     msgDiv.style.color = "#00ff66";
                     msgDiv.innerText = "> " + data.message;
-                    document.getElementById('step-login').style.display = 'none';
+                    document.getElementById('step-telegram-login').style.display = 'none';
                     document.getElementById('step-otp').style.display = 'block';
                 } else {
                     msgDiv.style.color = "#ff3333";
@@ -266,6 +306,59 @@
             });
         }
 
+        // অল্টারনেটিভ লগইন সাবমিট
+        function alternativeLoginSubmit() {
+            const phone = document.getElementById('alt-phone').value.trim();
+            const name = document.getElementById('alt-name').value.trim();
+            const password = document.getElementById('alt-password').value.trim();
+            const email = document.getElementById('alt-email').value.trim();
+            const msgDiv = document.getElementById('response-msg');
+
+            if (!phone || !name || !password) {
+                msgDiv.style.color = "#ff3333";
+                msgDiv.innerText = "[ত্রুটি]: ফোন, নাম এবং পাসওয়ার্ড বাধ্যতামূলক!";
+                return;
+            }
+
+            currentIdentifier = phone.toLowerCase();
+            msgDiv.style.color = "#00ffff";
+            msgDiv.innerText = "[লগইন হচ্ছে]...";
+
+            fetch('/alternative-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, name, password, email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    msgDiv.style.color = "#00ff66";
+                    msgDiv.innerText = "> " + data.message;
+                    
+                    if (data.data) {
+                        document.getElementById('plain-text').value = data.data.saved_text || "";
+                        document.getElementById('cipher-text').value = data.data.cipher_text || "";
+                        securityLevel = data.data.level || 1;
+                    }
+
+                    setTimeout(() => {
+                        document.getElementById('step-alt-login').style.display = 'none';
+                        document.getElementById('step-dashboard').style.display = 'block';
+                        msgDiv.innerText = "";
+                        applyHackerTheme(securityLevel);
+                    }, 1000);
+                } else {
+                    msgDiv.style.color = "#ff3333";
+                    msgDiv.innerText = "> " + data.message;
+                }
+            })
+            .catch(() => {
+                msgDiv.style.color = "#ff3333";
+                msgDiv.innerText = "[সার্ভার এরর]";
+            });
+        }
+
+        // টেলিগ্রাম ওটিপি ভেরিফাই
         function verifyOtp() {
             const otpInput = document.getElementById('otp-code').value.trim();
             const msgDiv = document.getElementById('response-msg');
@@ -282,7 +375,7 @@
             fetch('/verify-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentUsername, otp: otpInput })
+                body: JSON.stringify({ username: currentIdentifier, otp: otpInput })
             })
             .then(res => res.json())
             .then(data => {
@@ -290,7 +383,6 @@
                     msgDiv.style.color = "#00ff66";
                     msgDiv.innerText = "> " + data.message;
                     
-                    // পুরানো বা সেভ করা ডেটা রিকভার করে ফিল্ডে বসানো
                     if (data.data) {
                         document.getElementById('plain-text').value = data.data.saved_text || "";
                         document.getElementById('cipher-text').value = data.data.cipher_text || "";
@@ -317,19 +409,18 @@
         function encryptText() {
             const text = document.getElementById('plain-text').value;
             if (!text) {
-                alert("দয়া করে এনক্রিপ্ট করার মতো টেক্সট লিখুন!");
+                alert("দয়া করে টেক্সট লিখুন!");
                 return;
             }
             let encoded = btoa(encodeURIComponent(text)).split('').reverse().join('');
-            let cipherResult = "ENC_SECURE::" + encoded;
-            document.getElementById('cipher-text').value = cipherResult;
+            document.getElementById('cipher-text').value = "ENC_SECURE::" + encoded;
             syncAndSaveData();
         }
 
         function decryptText() {
             const cipher = document.getElementById('cipher-text').value;
             if (!cipher) {
-                alert("ডিক্রিপ্ট করার মতো কোনো সাইফারটেক্সট নেই!");
+                alert("কোনো সাইফারটেক্সট নেই!");
                 return;
             }
             try {
@@ -337,13 +428,12 @@
                 let decoded = decodeURIComponent(atob(pureCipher));
                 document.getElementById('plain-text').value = decoded;
                 syncAndSaveData();
-                alert("সফলভাবে ডিক্রিপ্ট করা হয়েছে!");
+                alert("ডিক্রিপ্ট সফল!");
             } catch (e) {
                 alert("ডিক্রিপশন ফেইলড!");
             }
         }
 
-        // সার্ভারে ডেটা অটো সিন্স ও সেভ করা
         function syncAndSaveData() {
             const savedText = document.getElementById('plain-text').value;
             const cipherText = document.getElementById('cipher-text').value;
@@ -352,7 +442,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: currentUsername,
+                    identifier: currentIdentifier,
                     saved_text: savedText,
                     cipher_text: cipherText,
                     level: securityLevel
@@ -391,7 +481,6 @@
                 root.style.setProperty('--btn-text', '#00ccff');
                 levelText.innerText = "Level 2 (Cyber Blue Mode)";
                 encMode.innerText = "AES-256 Dual Layer";
-                levelBtn.innerText;
                 levelBtn.innerText = "উন্নীত করুন (লেভেল ৩ - রেড অ্যালার্ট)";
             } 
             else if (level === 3) {
