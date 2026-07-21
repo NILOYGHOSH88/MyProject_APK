@@ -1,52 +1,53 @@
+import random
 from flask import Flask, render_template, request, jsonify
-import requests
-import base64
+from telegram_service import start_telegram_bots_background, send_admin_alert, send_otp_to_user
 
 app = Flask(__name__)
 
-BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs"
-CHAT_ID = "7938556654"
+# অ্যাপ চালুর সাথেই টেলিগ্রাম বট ব্যাকগ্রাউন্ডে রান করিয়ে দেওয়া
+start_telegram_bots_background()
 
-def send_to_telegram(text):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {'chat_id': CHAT_ID, 'text': text, 'parse_mode': 'HTML'}
-    requests.post(url, data=payload)
+# সাময়িকভাবে ওটিপি কোড সেভ রাখার ডিকশনারি
+temp_otp_storage = {}
 
 @app.route('/')
-def index():
+def home():
     return render_template('dashboard.html')
 
-@app.route('/login_notify', methods=['POST'])
-def login_notify():
-    username = request.json.get('username')
-    send_to_telegram(f"👤 <b>SYSTEM_ACCESS</b>\nOperator: {username}\nStatus: ONLINE")
-    return jsonify({"status": "ok"})
-
-@app.route('/session_end', methods=['POST'])
-def session_end():
+# ওটিপি রিকোয়েস্ট পাঠানোর রাউট (ওয়েবসাইট থেকে কল হবে)
+@app.route('/send-otp', methods=['POST'])
+def send_otp():
     data = request.json
-    send_to_telegram(f"🛑 <b>SESSION_ENDED</b>\nOperator: {data['username']}\nDuration: {data['duration']}")
-    return jsonify({"status": "ok"})
-
-@app.route('/process', methods=['POST'])
-def process():
-    data = request.json
-    message = data.get('message', '')
-    action = data.get('action')
     username = data.get('username')
-    result = ""
-
-    if action == 'encrypt':
-        result = base64.b64encode(message.encode('utf-8')).decode('utf-8')
-        send_to_telegram(f"🛡️ <b>ENCRYPT</b>\nUser: {username}\nInput: {message}\nOutput: {result}")
-    elif action == 'decrypt':
-        try:
-            result = base64.b64decode(message.encode('utf-8')).decode('utf-8')
-            send_to_telegram(f"🔓 <b>DECRYPT</b>\nUser: {username}\nInput: {message}\nOutput: {result}")
-        except:
-            result = "ERROR: INVALID_FORMAT"
     
-    return jsonify({"result": result})
+    if not username:
+        return jsonify({"success": False, "message": "ইউজারনেম দিন!"})
+    
+    # ৪ ডিজিটের র‍্যান্ডম ওটিপি জেনারেট করা
+    otp_code = str(random.randint(1000, 9999))
+    temp_otp_storage[username.replace('@', '').lower()] = otp_code
+    
+    # টেলিগ্রাম বটের মাধ্যমে ওটিপি পাঠানো
+    sent = send_otp_to_user(username, otp_code)
+    
+    if sent:
+        send_admin_alert(f"⚠️ ইউজারের কাছে ওটিপি পাঠানো হয়েছে: <b>{username}</b>")
+        return jsonify({"success": True, "message": "টেলিগ্রামে ওটিপি পাঠানো হয়েছে!"})
+    else:
+        return jsonify({"success": False, "message": "ইউজারকে খুঁজে পাওয়া যায়নি! প্রথমে বটে গিয়ে /start দিন।"})
+
+# ওটিপি ভেরিফাই করার রাউট
+@app.route('/verify-otp', methods=['POST'])
+def verify_otp():
+    data = request.json
+    username = data.get('username', '').replace('@', '').lower()
+    user_entered_otp = data.get('otp')
+    
+    if temp_otp_storage.get(username) == user_entered_otp:
+        send_admin_alert(f"✅ সফলভাবে লগইন করেছে: <b>{username}</b>")
+        return jsonify({"success": True, "message": "লগইন সফল!"})
+    else:
+        return jsonify({"success": False, "message": "ভুল ওটিপি কোড!"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True, port=5000)
