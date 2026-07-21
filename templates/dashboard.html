@@ -15,10 +15,6 @@
             --glow-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
         }
 
-        * {
-            box-sizing: border-box;
-        }
-
         body { 
             font-family: 'Courier New', Courier, monospace; 
             background-color: var(--bg-color); 
@@ -26,10 +22,9 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            min-height: 100vh; 
+            height: 100vh; 
             margin: 0; 
-            position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
             transition: background 0.6s ease, color 0.6s ease;
         }
 
@@ -43,7 +38,7 @@
             opacity: 0.22;
         }
 
-        /* লেভেল পরিবর্তনের গ্লিচ ওভারলে */
+        /* লেভেল পরিবর্তনের ভয়ঙ্কর স্ক্রিন গ্লিচ ওভারলে */
         #glitch-overlay {
             position: fixed;
             top: 0;
@@ -73,7 +68,7 @@
             right: 20px;
             display: flex;
             gap: 10px;
-            z-index: 100;
+            z-index: 999;
         }
 
         .top-btn {
@@ -105,12 +100,11 @@
             border: 2px solid var(--border-color);
             box-shadow: var(--glow-shadow); 
             width: 440px; 
-            text-align: left; 
+            text-align: center; 
             z-index: 10;
             max-height: 90vh;
             overflow-y: auto;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            margin: 20px;
         }
 
         .card.desktop-view { width: 460px; }
@@ -125,6 +119,7 @@
             border: 1px solid var(--border-color); 
             color: var(--text-color);
             border-radius: 6px; 
+            box-sizing: border-box; 
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
             transition: all 0.3s ease;
@@ -148,6 +143,8 @@
             margin-top: 6px;
             box-shadow: var(--glow-shadow);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         button.action-btn:hover { 
             background-color: var(--border-color); 
@@ -156,16 +153,11 @@
             box-shadow: 0 0 22px var(--border-color);
         }
 
-        .tool-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
         .tool-btn-group {
             display: flex;
             gap: 8px;
+            float: right;
+            margin-bottom: 4px;
         }
 
         .mini-btn {
@@ -182,6 +174,7 @@
         .mini-btn:hover {
             background: var(--border-color);
             color: #000;
+            transform: scale(1.05);
         }
 
         .alt-btn {
@@ -191,7 +184,7 @@
             margin-top: 10px;
         }
 
-        .message { margin-top: 10px; font-weight: bold; font-size: 12px; text-align: center; }
+        .message { margin-top: 10px; font-weight: bold; font-size: 12px; clear: both; }
         .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; }
         
         .level-box { 
@@ -199,11 +192,12 @@
             padding: 10px; 
             border-radius: 6px; 
             border: 1px dashed var(--border-color); 
+            text-align: left; 
             background: rgba(0, 255, 102, 0.03);
             font-size: 12px;
         }
 
-        /* মোডাল উইন্ডো ফিক্সড */
+        /* প্রিমিয়াম অ্যানিমেটেড মোডাল */
         .modal {
             display: none;
             position: fixed;
@@ -214,10 +208,11 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .modal.show {
             display: flex;
@@ -227,35 +222,37 @@
             background: #0d0d0d;
             border: 2px solid var(--border-color);
             padding: 30px;
-            width: 320px;
+            width: 360px;
             border-radius: 16px;
             text-align: center;
             color: var(--text-color);
             box-shadow: 0 0 40px rgba(0,0,0,0.9), var(--glow-shadow);
-            transform: scale(0.7);
+            transform: scale(0.6) translateY(40px);
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .modal.show .modal-content {
-            transform: scale(1);
+            transform: scale(1) translateY(0);
         }
 
         .device-option-btn {
             background: #111;
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 12px;
             width: 100%;
             border-radius: 8px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            font-size: 13px;
-            margin: 6px 0;
-            transition: all 0.3s ease;
+            font-size: 14px;
+            margin: 8px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .device-option-btn:hover { 
             background: var(--border-color); 
             color: #000; 
+            transform: scale(1.04) translateX(4px);
+            box-shadow: 0 0 15px var(--border-color);
         }
         .close-modal { 
             background: var(--border-color); 
@@ -265,9 +262,12 @@
             font-weight: bold; 
             border-radius: 6px; 
             cursor: pointer; 
-            margin-top: 12px; 
+            margin-top: 15px; 
+            transition: 0.2s;
         }
+        .close-modal:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
+        /* প্রফেশনাল লোডিং স্পিনার অ্যানিমেশন */
         .spinner {
             display: inline-block;
             width: 14px;
@@ -275,7 +275,7 @@
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: #fff;
-            animation: spin 0.8s linear infinite;
+            animation: spin 0.8s ease-in-out infinite;
             vertical-align: middle;
             margin-right: 6px;
         }
@@ -305,11 +305,11 @@
         </div>
     </div>
 
-    <!-- ডিভাইস মোডাল -->
+    <!-- প্রিমিয়াম অ্যানিমেটেড ডিভাইস মোডাল -->
     <div id="device-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top: 0;">⚙️ ডিভাইস মোড সিলেক্ট</h3>
-            <p style="font-size: 11px; color: #aaa; margin-bottom: 12px;">স্ক্রিন লেআউট পরিবর্তন করুন:</p>
+            <h3 style="margin-top: 0; letter-spacing: 1px;">⚙️ ডিভাইস মোড সিলেক্ট</h3>
+            <p style="font-size: 11px; color: #aaa; margin-bottom: 15px;">স্ক্রিন লেআউট পরিবর্তন করুন:</p>
             <button class="device-option-btn" onclick="changeDeviceView('desktop')">💻 কম্পিউটার মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('tablet')">📋 ট্যাবলেট মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('mobile')">📱 মোবাইল মোড</button>
@@ -318,14 +318,14 @@
     </div>
 
     <div class="card desktop-view" id="main-card">
-        <h2 style="font-size: 18px; text-align: center; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
+        <h2 style="font-size: 18px; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
         
         <div id="step-telegram-login">
             <p>> টেলিগ্রাম ক্রডেনশিয়াল:</p>
             <input type="text" id="username" placeholder="Telegram Username (@username)">
             <input type="password" id="password" placeholder="Password">
             <button class="action-btn" id="tg-login-btn" onclick="loginStep1()">টেলিগ্রাম ওটিপি রিকোয়েস্ট</button>
-            <div style="margin-top: 8px; font-size: 11px; text-align: center;">
+            <div style="margin-top: 8px; font-size: 11px;">
                 > বট না থাকলে: <a href="https://t.me/CryptoGuard_OTP_bot" target="_blank" class="bot-link">/start দিন</a>
             </div>
             <button class="action-btn alt-btn" onclick="switchForm('alt')">🔄 অল্টারনেটিভ লগইন</button>
@@ -354,9 +354,9 @@
                 <p style="margin: 0;"><b>লেভেল:</b> <span id="current-level-text">Level 1</span></p>
             </div>
 
-            <div style="margin-top: 10px;">
-                <div class="tool-header">
-                    <label style="font-size: 12px;">> টেক্সট বা সাইফার কোড:</label>
+            <div style="margin-top: 10px; text-align: left; font-size: 12px;">
+                <div style="overflow: hidden;">
+                    <label>> টেক্সট বা সাইফার কোড:</label>
                     <div class="tool-btn-group">
                         <button class="mini-btn" onclick="clearText()">🗑️ মুছুন</button>
                         <button class="mini-btn" onclick="copyText()">📋 কপি</button>
@@ -402,6 +402,7 @@
         }
         setInterval(drawMatrix, 30);
 
+        // ডিভাইস ও কফি মোডাল ফাংশন
         function openDeviceModal() {
             const modal = document.getElementById('device-modal');
             modal.style.display = 'flex';
@@ -436,6 +437,7 @@
         function copyText() {
             const textarea = document.getElementById('universal-box');
             if(!textarea.value) { alert("বক্স ফাঁকা!"); return; }
+            textarea.select();
             navigator.clipboard.writeText(textarea.value).then(() => alert("ক্লিপবোর্ডে কপি করা হয়েছে! ✅"));
         }
 
@@ -458,6 +460,7 @@
         let currentIdentifier = "";
         let securityLevel = 1;
 
+        // টেলিগ্রাম লগইন ধাপ ১
         function loginStep1() {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
@@ -505,6 +508,7 @@
             });
         }
 
+        // অল্টারনেটিভ লগইন
         function alternativeLoginSubmit() {
             const phone = document.getElementById('alt-phone').value.trim();
             const name = document.getElementById('alt-name').value.trim();
@@ -553,6 +557,7 @@
             });
         }
 
+        // ওটিপি ভেরিফিকেশন
         function verifyOtp() {
             const otpInput = document.getElementById('otp-code').value.trim();
             const msgDiv = document.getElementById('response-msg');
@@ -600,6 +605,7 @@
 
         const MASTER_ENCRYPTION_KERNEL = "MIL_SPEC_X_2026_CORE_KEY_#$99";
 
+        // এনক্রিপ্ট ও ডিক্রিপ্ট ফাংশন
         function processText(mode) {
             const box = document.getElementById('universal-box');
             const text = box.value.trim();
@@ -664,6 +670,7 @@
             });
         }
 
+        // লেভেল পরিবর্তন এবং ভয়ঙ্কর গ্লিচ ইফেক্ট
         function nextSecurityLevel() {
             const overlay = document.getElementById('glitch-overlay');
             const levelBtn = document.getElementById('level-btn');
