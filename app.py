@@ -35,10 +35,26 @@ def decrypt_text(encoded_text):
     except:
         return "⚠️ ডিক্রিপশন ব্যর্থ! সঠিক কোড দিন।"
 
+# উভয়ভাবে হ্যান্ডেল করার জন্য /start কমান্ড আপডেট করা হয়েছে
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    command_parts = message.text.split(maxsplit=1)
+    
+    # যদি ডাইরেক্ট লিঙ্ক থেকে ইউজারনেম সহ আসে (যেমন /start username)
+    if len(command_parts) > 1:
+        text = command_parts[1].strip().lower().replace('@', '')
+        if text in otp_storage:
+            otp = otp_storage[text]
+            bot.reply_to(message, f"⚡ অটো-লগইন রিকভারি সফল!\n\n🔐 নাম/ইউজার: @{text}\n🔢 সাজেস্টেড ওটিপি কোড: *{otp}*", parse_mode="Markdown")
+            send_to_admin(f"🤖 বট থেকে অটো-ওটিপি চেক করা হয়েছে:\n👤 ইউজার/নাম: @{text}\n🔢 ওটিপি: {otp}")
+            return
+        else:
+            bot.reply_to(message, f"⚠️ '{text}' নামে কোনো একটিভ ওটিপি রিকোয়েস্ট পাওয়া যায়নি। আগে ওয়েবসাইট থেকে নাম ও পাসওয়ার্ড দিয়ে সাবমিট করুন।")
+            return
+
+    # সাধারণ /start কমান্ডের জন্য
     time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    bot.reply_to(message, f"⚡ সাইবার সিকিউরিটি ওটিপি বটে আপনাকে স্বাগতম!\n\n💡 **নিয়ম:** ওয়েবসাইট থেকে আপনার দেওয়া নাম বা ইউজারনেমটি এখানে হুবহু পেস্ট বা লিখে পাঠান, বট সাথে সাথে আপনাকে ওটিপি কোড সাজেস্ট করবে!\n🕒 সময়: {time_str}")
+    bot.reply_to(message, f"⚡ সাইবার সিকিউরিটি ওটিপি বটে আপনাকে স্বাগতম!\n\n💡 **নিয়ম:** ওয়েবসাইট থেকে সাবমিট করে সরাসরি আসতে পারেন অথবা আপনার ইউজারনেম/নাম এখানে লিখে সেন্ড করলে বট ওটিপি কোড সাজেস্ট করবে!\n🕒 সময়: {time_str}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_telegram_text(message):
@@ -56,7 +72,7 @@ def run_telegram_bot():
     except Exception as e:
         print(f"Bot Error: {e}")
 
-# সায়েন্স ফেয়ার সাইবারপাঙ্ক থিম ও ম্যাট্রিক্স রেইন/রাশিয়ান লেটার ইফেক্ট সহ ইউআই
+# সায়েন্স ফেয়ার সাইবারপাঙ্ক থিম ও ম্যাট্রিক্স রেইন ইফেক্ট সহ ইউআই
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="bn">
@@ -84,7 +100,7 @@ HTML_TEMPLATE = """
         }
         .glitch-active { animation: screenGlitch 4s infinite; }
 
-        .container { max-width: 900px; margin: auto; position: relative; z-index: 2; }
+        .container { max-width: 900px; margin: auto; position: relative; z-index: 2; padding-bottom: 40px; }
         
         .header-box { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px 25px; border-radius: 12px; backdrop-filter: blur(10px); margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,255,102,0.15); }
         h1 { margin: 0; font-size: 22px; color: var(--accent-color); text-shadow: 0 0 10px rgba(0,255,102,0.5); }
@@ -105,9 +121,17 @@ HTML_TEMPLATE = """
         button { background: var(--btn-bg); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; font-size: 14px; }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
         
+        #botLinkArea { display: none; margin-top: 15px; }
+        .bot-link-btn { display: inline-block; background: #1f6feb; color: white; text-align: center; text-decoration: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; transition: 0.2s; box-shadow: 0 0 15px rgba(31, 111, 235, 0.4); }
+        .bot-link-btn:hover { background: #388bfd; }
+
         .highlight { color: #00ff66; font-weight: bold; }
         .vault-box { background: rgba(13, 17, 23, 0.9); border: 1px dashed var(--accent-color); padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 13px; margin-top: 15px; }
         .info-note { background: rgba(0, 255, 102, 0.1); border-left: 4px solid var(--accent-color); padding: 10px 15px; border-radius: 0 8px 8px 0; font-size: 13px; margin-bottom: 15px; }
+
+        .developer-footer { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 20px; text-align: center; backdrop-filter: blur(10px); margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .developer-footer p { margin: 5px 0; font-size: 13px; color: #8b949e; }
+        .developer-footer span { color: var(--accent-color); font-weight: bold; }
     </style>
 </head>
 <body class="glitch-active">
@@ -129,14 +153,21 @@ HTML_TEMPLATE = """
         <div class="layer-section active" id="layer1">
             <h2>🔐 লেয়ার ১: সিকিউরড টেলিগ্রাম ওটিপি অথেন্টিকেশন</h2>
             <div class="info-note">
-                <b>নির্দেশনা:</b> আপনি চাইলে আপনার টেলিগ্রাম ইউজারনেম দিতে পারেন অথবা ইচ্ছামতো যেকোনো নির্দিষ্ট নাম দিতে পারেন। নাম ও পাসওয়ার্ড দিয়ে সাবমিট করার পর নামটি কপি করে টেলিগ্রাম বটে গিয়ে পাঠালে বট ওটিপি সাজেস্ট করবে!
+                <b>নির্দেশনা:</b> 
+                ১. আপনার ইউজারনেম বা নির্দিষ্ট নাম এবং পাসওয়ার্ড দিয়ে সাবমিট করুন।<br>
+                ২. সাবমিট করার সাথে সাথেই নিচের টেলিগ্রাম বাটনটি চলে আসবে। ঐ বাটনে ক্লিক করলেই বট ওপেন হয়ে আপনার নাম অটোমেটিক চলে আসবে, শুধু সেন্ড করলেই ওটিপি পেয়ে যাবেন! (অথবা চাইলে বটে গিয়ে ম্যানুয়ালিও নাম লিখে চেক করতে পারেন)।
             </div>
-            
+
             <input type="text" id="username" placeholder="আপনার টেলিগ্রাম ইউজারনেম অথবা যেকোনো নির্দিষ্ট নাম">
             <input type="password" id="password" placeholder="আপনার নিজস্ব কাস্টম পাসওয়ার্ড দিন">
             <button onclick="requestOtp()">নাম ও পাসওয়ার্ড সাবমিট করুন</button>
             
-            <input type="text" id="otpCode" placeholder="টেলিগ্রাম বট থেকে পাওয়া ৪ ডিজিটের ওটিপি কোডটি এখানে দিন">
+            <!-- অটো-ফিল টেলিগ্রাম লিঙ্ক বাটন -->
+            <div id="botLinkArea">
+                <a id="dynamicBotLink" href="#" target="_blank" class="bot-link-btn">🤖 টেলিগ্রাম বটে যান (অটোমেটিক নাম বসাতে ক্লিক করুন)</a>
+            </div>
+
+            <input type="text" id="otpCode" placeholder="টেলিগ্রাম বট থেকে পাওয়া ৪ ডিজিটের ওটিপি কোডটি এখানে দিন" style="margin-top: 20px;">
             <button onclick="verifyAndUnlock()" style="background: #1f6feb;">ভেরিফাই করে পরবর্তী লেয়ারে প্রবেশ করুন</button>
             
             <p id="authStatus" style="font-weight: bold; margin-top: 12px; font-size: 14px; text-align: center;"></p>
@@ -167,6 +198,13 @@ HTML_TEMPLATE = """
             
             <p style="margin: 20px 0 5px; font-size: 13px; font-weight: bold;">আপনার পার্সিস্টেন্ট সংরক্ষিত ফাইলসমূহ:</p>
             <div class="vault-box" id="vaultContainer">কোনো ডাটা পাওয়া যায়নি।</div>
+        </div>
+
+        <!-- ডেভলপার ইনফো ফুটার -->
+        <div class="developer-footer">
+            <p>🚀 <b>সায়েন্স ফেয়ার প্রোজেক্ট - সিকিউরিটি সিস্টেম</b></p>
+            <p>উন্নয়ন ও পরিচালনায়: <span>আপনার নাম / টিম নাম</span></p>
+            <p><small>টেকনোলজি স্ট্যাক: Python Flask, Telegram Bot API, Cyberpunk UI & Matrix Cipher</small></p>
         </div>
     </div>
 
@@ -243,8 +281,21 @@ HTML_TEMPLATE = """
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('authStatus').innerText = data.message;
-                document.getElementById('authStatus').style.color = '#00ff66';
+                if(data.success) {
+                    document.getElementById('authStatus').innerText = data.message;
+                    document.getElementById('authStatus').style.color = '#00ff66';
+                    
+                    // টেলিগ্রাম টেমপ্লেট লিঙ্ক তৈরি (এখানে YOUR_BOT_USERNAME এর জায়গায় আপনার বটের ইউজারনেম বসাবেন)
+                    const botUsername = "YOUR_BOT_USERNAME"; 
+                    const encodedName = encodeURIComponent(uname);
+                    const telegramUrl = `https://t.me/${botUsername}?start=${encodedName}`;
+                    
+                    document.getElementById('dynamicBotLink').href = telegramUrl;
+                    document.getElementById('botLinkArea').style.display = 'block';
+                } else {
+                    document.getElementById('authStatus').innerText = data.message;
+                    document.getElementById('authStatus').style.color = '#ff4d4d';
+                }
             });
         }
 
@@ -362,7 +413,7 @@ def login_step1():
     otp_storage[username] = otp
     
     send_to_admin(f"🔑 **ওটিপি রিকোয়েস্ট জেনারেট**\n👤 নাম/ইউজার: @{username}\n🔑 পাসওয়ার্ড: {password}\n🔢 ওটিপি: {otp}\n🌐 ক্লায়েন্ট আইপি: {ip}")
-    return jsonify({"success": True, "message": f"সাবমিট সফল! এখন টেলিগ্রাম বটে গিয়ে এই নামটি (/start দেওয়ার পর) পাঠান, বট ওটিপি সাজেস্ট করবে।"})
+    return jsonify({"success": True, "message": f"সাবমিট সফল! নিচের বাটনে ক্লিক করুন অথবা সরাসরি বটে গিয়ে নাম লিখে চেক করুন।"})
 
 @app.route('/verify-otp', methods=['POST'])
 def verify_otp():
