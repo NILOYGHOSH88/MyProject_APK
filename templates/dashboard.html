@@ -64,10 +64,7 @@
             color: #000;
         }
 
-        .coffee-btn {
-            border-color: #ffaa00;
-            color: #ffaa00;
-        }
+        .coffee-btn { border-color: #ffaa00; color: #ffaa00; }
 
         .card { 
             background: var(--card-bg); 
@@ -91,7 +88,7 @@
         input, textarea { 
             width: 100%; 
             padding: 12px; 
-            margin: 10px 0; 
+            margin: 8px 0; 
             background: #020202;
             border: 1px solid var(--border-color); 
             color: var(--text-color);
@@ -109,14 +106,14 @@
             background-color: var(--btn-bg); 
             color: var(--btn-text); 
             border: 1px solid var(--border-color); 
-            padding: 12px; 
+            padding: 11px; 
             width: 100%; 
             border-radius: 6px; 
             cursor: pointer; 
             font-size: 14px; 
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            margin-top: 8px;
+            margin-top: 6px;
             box-shadow: var(--glow-shadow);
             transition: all 0.3s ease;
         }
@@ -125,29 +122,41 @@
             color: #000;
         }
 
-        .copy-btn {
+        .tool-btn-group {
+            display: flex;
+            gap: 8px;
+            float: right;
+            margin-bottom: 4px;
+        }
+
+        .mini-btn {
             background: #111;
-            color: #00ffff;
-            border: 1px solid #00ffff;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
             font-size: 11px;
             padding: 4px 10px;
-            width: auto;
-            float: right;
-            margin-bottom: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            transition: 0.2s;
+        }
+        .mini-btn:hover {
+            background: var(--border-color);
+            color: #000;
         }
 
         .alt-btn {
             background: transparent;
             color: #00ffff;
             border: 1px dashed #00ffff;
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
         .message { margin-top: 10px; font-weight: bold; font-size: 12px; clear: both; }
         .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; }
         
         .level-box { 
-            margin-top: 10px; 
+            margin-top: 8px; 
             padding: 10px; 
             border-radius: 6px; 
             border: 1px dashed var(--border-color); 
@@ -225,7 +234,7 @@
     </div>
 
     <div class="card desktop-view" id="main-card">
-        <h2 style="font-size: 18px;">💀 ROOT_ACCESS // LOGIN</h2>
+        <h2 style="font-size: 18px; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
         
         <div id="step-telegram-login">
             <p>> টেলিগ্রাম ক্রডেনশিয়াল:</p>
@@ -253,25 +262,29 @@
             <button class="action-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
         </div>
 
-        <!-- ড্যাশবোর্ড (মাত্র ১টি বক্স) -->
+        <!-- ড্যাশবোর্ড (সিম্পল সিঙ্গেল বক্স ও টুলবার) -->
         <div id="step-dashboard" class="hidden">
-            <h3 style="font-size: 14px;">> সিকিউরিটি ড্যাশবোর্ড</h3>
+            <h3 style="font-size: 14px; margin-bottom: 5px;">> সিকিউরিটি ড্যাশবোর্ড</h3>
             
             <div class="level-box">
-                <p><b>লেভেল:</b> <span id="current-level-text">Level 1</span></p>
+                <p style="margin: 0;"><b>লেভেল:</b> <span id="current-level-text">Level 1</span></p>
             </div>
 
             <div style="margin-top: 10px; text-align: left; font-size: 12px;">
                 <div style="overflow: hidden;">
-                    <label id="box-label">> টেক্সট বা সাইফার কোড লিখুন:</label>
-                    <button class="action-btn copy-btn" onclick="copyText()">📋 কপি</button>
+                    <label>> টেক্সট বা সাইফার কোড:</label>
+                    <div class="tool-btn-group">
+                        <button class="mini-btn" onclick="clearText()">🗑️ মুছুন</button>
+                        <button class="mini-btn" onclick="copyText()">📋 কপি</button>
+                    </div>
                 </div>
-                <!-- একমাত্র কমন বক্স -->
+                
+                <!-- একমাত্র ইউনিভার্সাল বক্স -->
                 <textarea id="universal-box" placeholder="এখানে নরমাল লেখা লিখলে এনক্রিপ্ট হবে, আর কোড বসালে ডিক্রিপ্ট হবে..." rows="4" oninput="syncAndSaveData()"></textarea>
                 
-                <!-- দুটি কাজের জন্য মাত্র দুটি পরিষ্কার বাটন -->
+                <!-- কার্যকারী বাটনসমূহ -->
                 <button class="action-btn" onclick="processText('encrypt')" style="background: #003311;">🔒 এনক্রিপ্ট করো</button>
-                <button class="action-btn" onclick="processText('decrypt')" style="background: #331100; border-color: #ffaa00; color: #ffaa00;">🔓 ডিক্রিপ্ট করো</button>
+                <button class="action-btn" onclick="processText('decrypt')" style="background: #331100; border-color: #ffaa00; color: #ffaa00;">🔓 ডিক्रিপ্ট করো</button>
             </div>
 
             <button class="action-btn" onclick="nextSecurityLevel()" id="level-btn" style="margin-top: 10px; background: #002244;">লেভেল পরিবর্তন করুন</button>
@@ -321,10 +334,19 @@
             closeDeviceModal();
         }
 
+        // বক্স কপি করার ফাংশন
         function copyText() {
             const textarea = document.getElementById('universal-box');
+            if(!textarea.value) { alert("বক্স ফাঁকা!"); return; }
             textarea.select();
-            navigator.clipboard.writeText(textarea.value).then(() => alert("কপি করা হয়েছে! ✅"));
+            navigator.clipboard.writeText(textarea.value).then(() => alert("ক্লিপবোর্ডে কপি করা হয়েছে! ✅"));
+        }
+
+        // বক্স ফাঁকা (ক্লিয়ার) করার নতুন ফাংশন
+        function clearText() {
+            const textarea = document.getElementById('universal-box');
+            textarea.value = "";
+            syncAndSaveData();
         }
 
         function switchForm(type) {
@@ -470,56 +492,4 @@
                     let parts = text.split("::");
                     if (parts.length < 2) throw new Error();
                     
-                    let unbased = atob(parts[1].split('').reverse().join(''));
-                    let unshifted = "";
-                    const xorKey = (securityLevel * 19) + 47;
-                    for (let i = 0; i < unbased.length; i++) {
-                        unshifted += String.fromCharCode(unbased.charCodeAt(i) ^ xorKey);
-                    }
-
-                    let originalText = decodeURIComponent(escape(atob(unshifted))).split("::")[0];
-                    box.value = originalText;
-                    syncAndSaveData();
-                    alert("ডিক্রিপ্ট করা হয়েছে! ✅");
-                } catch (e) {
-                    alert("ডিক্রিপশন ফেইলড! সঠিক কোড দিন বা লেভেল চেক করুন।");
-                }
-            }
-        }
-
-        function syncAndSaveData() {
-            const val = document.getElementById('universal-box').value;
-            fetch('/save-user-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identifier: currentIdentifier, cipher_text: val, level: securityLevel })
-            });
-        }
-
-        function nextSecurityLevel() {
-            securityLevel++;
-            if (securityLevel > 3) securityLevel = 1;
-            applyHackerTheme(securityLevel);
-            syncAndSaveData();
-        }
-
-        function applyHackerTheme(level) {
-            const root = document.documentElement;
-            document.getElementById('current-level-text').innerText = "Level " + level;
-            if (level === 1) {
-                root.style.setProperty('--border-color', '#00ff66');
-                root.style.setProperty('--text-color', '#00ff66');
-                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 255, 102, 0.4)');
-            } else if (level === 2) {
-                root.style.setProperty('--border-color', '#00ccff');
-                root.style.setProperty('--text-color', '#00ccff');
-                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 204, 255, 0.4)');
-            } else if (level === 3) {
-                root.style.setProperty('--border-color', '#ff3333');
-                root.style.setProperty('--text-color', '#ff3333');
-                root.style.setProperty('--glow-shadow', '0 0 20px rgba(255, 51, 51, 0.4)');
-            }
-        }
-    </script>
-</body>
-</html>
+                    let unbased = atob(parts[1].split('
