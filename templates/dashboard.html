@@ -15,6 +15,10 @@
             --glow-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body { 
             font-family: 'Courier New', Courier, monospace; 
             background-color: var(--bg-color); 
@@ -22,9 +26,10 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             margin: 0; 
-            overflow: hidden;
+            position: relative;
+            overflow-x: hidden;
             transition: background 0.6s ease, color 0.6s ease;
         }
 
@@ -38,7 +43,7 @@
             opacity: 0.22;
         }
 
-        /* লেভেল পরিবর্তনের ভয়ঙ্কর স্ক্রিন গ্লিচ ওভারলে */
+        /* লেভেল পরিবর্তনের গ্লিচ ওভারলে */
         #glitch-overlay {
             position: fixed;
             top: 0;
@@ -57,6 +62,7 @@
             60% { transform: translate(-4px, -6px); background: rgba(0, 255, 102, 0.5); }
             80% { transform: translate(8px, 4px); background: rgba(255, 0, 0, 0.4); }
             100% { transform: translate(0, 0); background: rgba(255, 0, 0, 0); }
+        }
         .glitch-active {
             animation: terrifyingGlitch 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
         }
@@ -67,7 +73,7 @@
             right: 20px;
             display: flex;
             gap: 10px;
-            z-index: 999;
+            z-index: 100;
         }
 
         .top-btn {
@@ -99,11 +105,12 @@
             border: 2px solid var(--border-color);
             box-shadow: var(--glow-shadow); 
             width: 440px; 
-            text-align: center; 
+            text-align: left; 
             z-index: 10;
             max-height: 90vh;
             overflow-y: auto;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 20px;
         }
 
         .card.desktop-view { width: 460px; }
@@ -118,7 +125,6 @@
             border: 1px solid var(--border-color); 
             color: var(--text-color);
             border-radius: 6px; 
-            box-sizing: border-box; 
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
             transition: all 0.3s ease;
@@ -142,8 +148,6 @@
             margin-top: 6px;
             box-shadow: var(--glow-shadow);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
         button.action-btn:hover { 
             background-color: var(--border-color); 
@@ -152,11 +156,16 @@
             box-shadow: 0 0 22px var(--border-color);
         }
 
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
         .tool-btn-group {
             display: flex;
             gap: 8px;
-            float: right;
-            margin-bottom: 4px;
         }
 
         .mini-btn {
@@ -173,7 +182,6 @@
         .mini-btn:hover {
             background: var(--border-color);
             color: #000;
-            transform: scale(1.05);
         }
 
         .alt-btn {
@@ -183,7 +191,7 @@
             margin-top: 10px;
         }
 
-        .message { margin-top: 10px; font-weight: bold; font-size: 12px; clear: both; }
+        .message { margin-top: 10px; font-weight: bold; font-size: 12px; text-align: center; }
         .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; }
         
         .level-box { 
@@ -191,12 +199,11 @@
             padding: 10px; 
             border-radius: 6px; 
             border: 1px dashed var(--border-color); 
-            text-align: left; 
             background: rgba(0, 255, 102, 0.03);
             font-size: 12px;
         }
 
-        /* প্রিমিয়াম ডিভাইস মোডাল ও অ্যানিমেশন */
+        /* মোডাল উইন্ডো ফিক্সড */
         .modal {
             display: none;
             position: fixed;
@@ -207,11 +214,10 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.4s ease;
         }
         .modal.show {
             display: flex;
@@ -221,37 +227,35 @@
             background: #0d0d0d;
             border: 2px solid var(--border-color);
             padding: 30px;
-            width: 360px;
+            width: 320px;
             border-radius: 16px;
             text-align: center;
             color: var(--text-color);
             box-shadow: 0 0 40px rgba(0,0,0,0.9), var(--glow-shadow);
-            transform: scale(0.6) translateY(40px);
+            transform: scale(0.7);
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .modal.show .modal-content {
-            transform: scale(1) translateY(0);
+            transform: scale(1);
         }
 
         .device-option-btn {
             background: #111;
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 12px;
+            padding: 10px;
             width: 100%;
             border-radius: 8px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            font-size: 14px;
-            margin: 8px 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 13px;
+            margin: 6px 0;
+            transition: all 0.3s ease;
         }
         .device-option-btn:hover { 
             background: var(--border-color); 
             color: #000; 
-            transform: scale(1.04) translateX(4px);
-            box-shadow: 0 0 15px var(--border-color);
         }
         .close-modal { 
             background: var(--border-color); 
@@ -261,12 +265,9 @@
             font-weight: bold; 
             border-radius: 6px; 
             cursor: pointer; 
-            margin-top: 15px; 
-            transition: 0.2s;
+            margin-top: 12px; 
         }
-        .close-modal:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* প্রফেশনাল লোডিং স্পিনার অ্যানিমেশন */
         .spinner {
             display: inline-block;
             width: 14px;
@@ -274,7 +275,7 @@
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: #fff;
-            animation: spin 0.8s ease-in-out infinite;
+            animation: spin 0.8s linear infinite;
             vertical-align: middle;
             margin-right: 6px;
         }
@@ -304,11 +305,11 @@
         </div>
     </div>
 
-    <!-- প্রিমিয়াম অ্যানিমেটেড ডিভাইস মোডাল -->
+    <!-- ডিভাইস মোডাল -->
     <div id="device-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top: 0; letter-spacing: 1px;">⚙️ ডিভাইস মোড সিলেক্ট</h3>
-            <p style="font-size: 11px; color: #aaa; margin-bottom: 15px;">স্ক্রিন লেআউট পরিবর্তন করুন:</p>
+            <h3 style="margin-top: 0;">⚙️ ডিভাইস মোড সিলেক্ট</h3>
+            <p style="font-size: 11px; color: #aaa; margin-bottom: 12px;">স্ক্রিন লেআউট পরিবর্তন করুন:</p>
             <button class="device-option-btn" onclick="changeDeviceView('desktop')">💻 কম্পিউটার মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('tablet')">📋 ট্যাবলেট মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('mobile')">📱 মোবাইল মোড</button>
@@ -317,14 +318,14 @@
     </div>
 
     <div class="card desktop-view" id="main-card">
-        <h2 style="font-size: 18px; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
+        <h2 style="font-size: 18px; text-align: center; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
         
         <div id="step-telegram-login">
             <p>> টেলিগ্রাম ক্রডেনশিয়াল:</p>
             <input type="text" id="username" placeholder="Telegram Username (@username)">
             <input type="password" id="password" placeholder="Password">
-            <button class="action-btn" onclick="loginStep1()">টেলিগ্রাম ওটিপি রিকোয়েস্ট</button>
-            <div style="margin-top: 8px; font-size: 11px;">
+            <button class="action-btn" id="tg-login-btn" onclick="loginStep1()">টেলিগ্রাম ওটিপি রিকোয়েস্ট</button>
+            <div style="margin-top: 8px; font-size: 11px; text-align: center;">
                 > বট না থাকলে: <a href="https://t.me/CryptoGuard_OTP_bot" target="_blank" class="bot-link">/start দিন</a>
             </div>
             <button class="action-btn alt-btn" onclick="switchForm('alt')">🔄 অল্টারনেটিভ লগইন</button>
@@ -335,14 +336,14 @@
             <input type="text" id="alt-phone" placeholder="Phone Number">
             <input type="text" id="alt-name" placeholder="Full Name">
             <input type="password" id="alt-password" placeholder="Password">
-            <button class="action-btn" onclick="alternativeLoginSubmit()">লগইন / রেজিস্টার</button>
+            <button class="action-btn" id="alt-login-btn" onclick="alternativeLoginSubmit()">লগইন / রেজিস্টার</button>
             <button class="action-btn alt-btn" onclick="switchForm('telegram')">🔙 ফিরে যান</button>
         </div>
 
         <div id="step-otp" class="hidden">
             <p>> ৪-ডিজিটের ওটিপি দিন:</p>
             <input type="text" id="otp-code" placeholder="OTP" maxlength="4">
-            <button class="action-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
+            <button class="action-btn" id="otp-verify-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
         </div>
 
         <!-- ড্যাশবোর্ড -->
@@ -353,9 +354,9 @@
                 <p style="margin: 0;"><b>লেভেল:</b> <span id="current-level-text">Level 1</span></p>
             </div>
 
-            <div style="margin-top: 10px; text-align: left; font-size: 12px;">
-                <div style="overflow: hidden;">
-                    <label>> টেক্সট বা সাইফার কোড:</label>
+            <div style="margin-top: 10px;">
+                <div class="tool-header">
+                    <label style="font-size: 12px;">> টেক্সট বা সাইফার কোড:</label>
                     <div class="tool-btn-group">
                         <button class="mini-btn" onclick="clearText()">🗑️ মুছুন</button>
                         <button class="mini-btn" onclick="copyText()">📋 কপি</button>
@@ -401,7 +402,6 @@
         }
         setInterval(drawMatrix, 30);
 
-        // ডিভাইস মোডাল অ্যানিমেশন কন্ট্রোল
         function openDeviceModal() {
             const modal = document.getElementById('device-modal');
             modal.style.display = 'flex';
@@ -436,7 +436,6 @@
         function copyText() {
             const textarea = document.getElementById('universal-box');
             if(!textarea.value) { alert("বক্স ফাঁকা!"); return; }
-            textarea.select();
             navigator.clipboard.writeText(textarea.value).then(() => alert("ক্লিপবোর্ডে কপি করা হয়েছে! ✅"));
         }
 
@@ -463,6 +462,7 @@
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
             const msgDiv = document.getElementById('response-msg');
+            const btn = document.getElementById('tg-login-btn');
 
             if (!usernameInput || !passwordInput) {
                 msgDiv.style.color = "#ff3333";
@@ -473,6 +473,10 @@
             currentIdentifier = usernameInput.replace('@', '').toLowerCase();
             msgDiv.style.color = "#00ffff";
             msgDiv.innerText = "[প্রসেসিং]: ওটিপি পাঠানো হচ্ছে...";
+            
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> ওটিপি রিকোয়েস্ট হচ্ছে...`;
+            btn.disabled = true;
 
             fetch('/login-step1', {
                 method: 'POST',
@@ -481,6 +485,8 @@
             })
             .then(res => res.json())
             .then(data => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
                 if (data.success) {
                     msgDiv.style.color = "#00ff66";
                     msgDiv.innerText = "> " + data.message;
@@ -491,7 +497,12 @@
                     msgDiv.innerText = "> " + data.message;
                 }
             })
-            .catch(() => { msgDiv.style.color = "#ff3333"; msgDiv.innerText = "[কানেকশন ফেইলড]"; });
+            .catch(() => { 
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                msgDiv.style.color = "#ff3333"; 
+                msgDiv.innerText = "[কানেকশন ফেইলড]"; 
+            });
         }
 
         function alternativeLoginSubmit() {
@@ -499,6 +510,7 @@
             const name = document.getElementById('alt-name').value.trim();
             const password = document.getElementById('alt-password').value.trim();
             const msgDiv = document.getElementById('response-msg');
+            const btn = document.getElementById('alt-login-btn');
 
             if (!phone || !name || !password) {
                 msgDiv.style.color = "#ff3333";
@@ -507,6 +519,188 @@
             }
 
             currentIdentifier = phone.toLowerCase();
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> এক্সেস হচ্ছে...`;
+            btn.disabled = true;
+
             fetch('/alternative-login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, name, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                if (data.success) {
+                    if (data.data) {
+                        document.getElementById('universal-box').value = data.data.cipher_text || data.data.saved_text || "";
+                        securityLevel = data.data.level || 1;
+                    }
+                    document.getElementById('step-alt-login').style.display = 'none';
+                    document.getElementById('step-dashboard').style.display = 'block';
+                    applyHackerTheme(securityLevel);
+                } else {
+                    msgDiv.style.color = "#ff3333";
+                    msgDiv.innerText = "> " + data.message;
+                }
+            })
+            .catch(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                msgDiv.style.color = "#ff3333";
+                msgDiv.innerText = "[কানেকশন ফেইলড]";
+            });
+        }
+
+        function verifyOtp() {
+            const otpInput = document.getElementById('otp-code').value.trim();
+            const msgDiv = document.getElementById('response-msg');
+            const btn = document.getElementById('otp-verify-btn');
+
+            if (!otpInput) {
+                msgDiv.style.color = "#ff3333";
+                msgDiv.innerText = "[ত্রুটি]: ওটিপি কোড দিন!";
+                return;
+            }
+
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> ভেরিফাই হচ্ছে...`;
+            btn.disabled = true;
+
+            fetch('/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentIdentifier, otp: otpInput })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                if (data.success) {
+                    if (data.data) {
+                        document.getElementById('universal-box').value = data.data.cipher_text || data.data.saved_text || "";
+                        securityLevel = data.data.level || 1;
+                    }
+                    document.getElementById('step-otp').style.display = 'none';
+                    document.getElementById('step-dashboard').style.display = 'block';
+                    applyHackerTheme(securityLevel);
+                } else {
+                    msgDiv.style.color = "#ff3333";
+                    msgDiv.innerText = "> " + data.message;
+                }
+            })
+            .catch(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                msgDiv.style.color = "#ff3333";
+                msgDiv.innerText = "[কানেকশন ফেইলড]";
+            });
+        }
+
+        const MASTER_ENCRYPTION_KERNEL = "MIL_SPEC_X_2026_CORE_KEY_#$99";
+
+        function processText(mode) {
+            const box = document.getElementById('universal-box');
+            const text = box.value.trim();
+            if (!text) {
+                alert("বক্সে কিছু লিখুন বা কোড দিন!");
+                return;
+            }
+
+            const btn = document.getElementById(mode + '-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> প্রসেসিং হচ্ছে...`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    if (mode === 'encrypt') {
+                        let salt = Math.random().toString(36).substring(2, 10);
+                        let payload = encodeURIComponent(text) + "::" + salt + "::" + MASTER_ENCRYPTION_KERNEL + "::" + currentIdentifier;
+                        let layer1 = btoa(unescape(encodeURIComponent(payload)));
+                        
+                        let shifted = "";
+                        const xorKey = (securityLevel * 19) + 47;
+                        for (let i = 0; i < layer1.length; i++) {
+                            shifted += String.fromCharCode(layer1.charCodeAt(i) ^ xorKey);
+                        }
+
+                        let layer2 = btoa(shifted).split('').reverse().join('');
+                        box.value = "MIL_SECURE_LVL" + securityLevel + "_" + salt + "::" + layer2;
+                        syncAndSaveData();
+                        alert("এনক্রিপ্ট করা হয়েছে! 🔒");
+                    } 
+                    else if (mode === 'decrypt') {
+                        let parts = text.split("::");
+                        if (parts.length < 2) throw new Error();
+                        
+                        let unbased = atob(parts[1].split('').reverse().join(''));
+                        let unshifted = "";
+                        const xorKey = (securityLevel * 19) + 47;
+                        for (let i = 0; i < unbased.length; i++) {
+                            unshifted += String.fromCharCode(unbased.charCodeAt(i) ^ xorKey);
+                        }
+
+                        let originalText = decodeURIComponent(escape(atob(unshifted))).split("::")[0];
+                        box.value = originalText;
+                        syncAndSaveData();
+                        alert("ডিক্রিপ্ট করা হয়েছে! ✅");
+                    }
+                } catch (e) {
+                    alert("প্রসেস ফেইলড! সঠিক কোড বা লেভেল চেক করুন।");
+                }
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }, 600);
+        }
+
+        function syncAndSaveData() {
+            const val = document.getElementById('universal-box').value;
+            fetch('/save-user-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier: currentIdentifier, cipher_text: val, level: securityLevel })
+            });
+        }
+
+        function nextSecurityLevel() {
+            const overlay = document.getElementById('glitch-overlay');
+            const levelBtn = document.getElementById('level-btn');
+            
+            overlay.classList.add('glitch-active');
+            levelBtn.innerHTML = `<span class="spinner"></span> লেভেল ওভাররাইড হচ্ছে...`;
+            levelBtn.disabled = true;
+
+            setTimeout(() => {
+                securityLevel++;
+                if (securityLevel > 3) securityLevel = 1;
+                applyHackerTheme(securityLevel);
+                syncAndSaveData();
+
+                overlay.classList.remove('glitch-active');
+                levelBtn.disabled = false;
+                levelBtn.innerHTML = "লেভেল পরিবর্তন করুন";
+            }, 600);
+        }
+
+        function applyHackerTheme(level) {
+            const root = document.documentElement;
+            document.getElementById('current-level-text').innerText = "Level " + level;
+            if (level === 1) {
+                root.style.setProperty('--border-color', '#00ff66');
+                root.style.setProperty('--text-color', '#00ff66');
+                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 255, 102, 0.4)');
+            } else if (level === 2) {
+                root.style.setProperty('--border-color', '#00ccff');
+                root.style.setProperty('--text-color', '#00ccff');
+                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 204, 255, 0.4)');
+            } else if (level === 3) {
+                root.style.setProperty('--border-color', '#ff3333');
+                root.style.setProperty('--text-color', '#ff3333');
+                root.style.setProperty('--glow-shadow', '0 0 20px rgba(255, 51, 51, 0.4)');
+            }
+        }
+    </script>
+</body>
+</html>
