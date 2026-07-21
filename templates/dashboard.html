@@ -38,6 +38,29 @@
             opacity: 0.22;
         }
 
+        /* লেভেল পরিবর্তনের ভয়ঙ্কর স্ক্রিন গ্লিচ ওভারলে */
+        #glitch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0);
+            z-index: 9999;
+            pointer-events: none;
+            transition: background 0.3s ease;
+        }
+        @keyframes terrifyingGlitch {
+            0% { transform: translate(0, 0); background: rgba(255, 0, 0, 0.4); filter: hue-rotate(0deg); }
+            20% { transform: translate(-8px, 6px); background: rgba(0, 255, 255, 0.5); }
+            40% { transform: translate(6px, -4px); background: rgba(255, 0, 0, 0.6); }
+            60% { transform: translate(-4px, -6px); background: rgba(0, 255, 102, 0.5); }
+            80% { transform: translate(8px, 4px); background: rgba(255, 0, 0, 0.4); }
+            100% { transform: translate(0, 0); background: rgba(255, 0, 0, 0); }
+        .glitch-active {
+            animation: terrifyingGlitch 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
         .top-controls {
             position: fixed;
             top: 20px;
@@ -57,11 +80,13 @@
             border-radius: 6px;
             cursor: pointer;
             box-shadow: var(--glow-shadow);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .top-btn:hover {
             background: var(--border-color);
             color: #000;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 0 25px var(--border-color);
         }
 
         .coffee-btn { border-color: #ffaa00; color: #ffaa00; }
@@ -78,7 +103,7 @@
             z-index: 10;
             max-height: 90vh;
             overflow-y: auto;
-            transition: all 0.5s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card.desktop-view { width: 460px; }
@@ -96,17 +121,18 @@
             box-sizing: border-box; 
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
+            transition: all 0.3s ease;
         }
         input:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 12px var(--glow-shadow);
+            box-shadow: 0 0 15px var(--glow-shadow);
         }
 
         button.action-btn { 
             background-color: var(--btn-bg); 
             color: var(--btn-text); 
             border: 1px solid var(--border-color); 
-            padding: 11px; 
+            padding: 12px; 
             width: 100%; 
             border-radius: 6px; 
             cursor: pointer; 
@@ -115,11 +141,15 @@
             font-weight: bold;
             margin-top: 6px;
             box-shadow: var(--glow-shadow);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         button.action-btn:hover { 
             background-color: var(--border-color); 
             color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 0 22px var(--border-color);
         }
 
         .tool-btn-group {
@@ -138,11 +168,12 @@
             border-radius: 4px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
         .mini-btn:hover {
             background: var(--border-color);
             color: #000;
+            transform: scale(1.05);
         }
 
         .alt-btn {
@@ -165,6 +196,7 @@
             font-size: 12px;
         }
 
+        /* প্রিমিয়াম ডিভাইস মোডাল ও অ্যানিমেশন */
         .modal {
             display: none;
             position: fixed;
@@ -173,33 +205,82 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.85);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
         }
         .modal-content {
             background: #0d0d0d;
             border: 2px solid var(--border-color);
-            padding: 25px;
-            width: 340px;
-            border-radius: 12px;
+            padding: 30px;
+            width: 360px;
+            border-radius: 16px;
             text-align: center;
             color: var(--text-color);
+            box-shadow: 0 0 40px rgba(0,0,0,0.9), var(--glow-shadow);
+            transform: scale(0.6) translateY(40px);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        .modal.show .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
         .device-option-btn {
             background: #111;
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 12px;
             width: 100%;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            margin: 6px 0;
+            font-size: 14px;
+            margin: 8px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .device-option-btn:hover { background: var(--border-color); color: #000; }
-        .close-modal { background: var(--border-color); color: #000; border: none; padding: 6px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .device-option-btn:hover { 
+            background: var(--border-color); 
+            color: #000; 
+            transform: scale(1.04) translateX(4px);
+            box-shadow: 0 0 15px var(--border-color);
+        }
+        .close-modal { 
+            background: var(--border-color); 
+            color: #000; 
+            border: none; 
+            padding: 8px 20px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            transition: 0.2s;
+        }
+        .close-modal:hover { background: #fff; box-shadow: 0 0 10px #fff; }
+
+        /* প্রফেশনাল লোডিং স্পিনার অ্যানিমেশন */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .hidden { display: none; }
     </style>
@@ -207,6 +288,7 @@
 <body id="body-theme">
 
     <canvas id="matrix-canvas"></canvas>
+    <div id="glitch-overlay"></div>
 
     <div class="top-controls">
         <button class="top-btn coffee-btn" onclick="openCoffeeModal()">☕ কফি</button>
@@ -222,10 +304,11 @@
         </div>
     </div>
 
-    <!-- ডিভাইস মোডাল -->
+    <!-- প্রিমিয়াম অ্যানিমেটেড ডিভাইস মোডাল -->
     <div id="device-modal" class="modal">
         <div class="modal-content">
-            <h3>⚙️ ডিভাইস মোড সিলেক্ট</h3>
+            <h3 style="margin-top: 0; letter-spacing: 1px;">⚙️ ডিভাইস মোড সিলেক্ট</h3>
+            <p style="font-size: 11px; color: #aaa; margin-bottom: 15px;">স্ক্রিন লেআউট পরিবর্তন করুন:</p>
             <button class="device-option-btn" onclick="changeDeviceView('desktop')">💻 কম্পিউটার মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('tablet')">📋 ট্যাবলেট মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('mobile')">📱 মোবাইল মোড</button>
@@ -262,7 +345,7 @@
             <button class="action-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
         </div>
 
-        <!-- ড্যাশবোর্ড (সিম্পল সিঙ্গেল বক্স ও টুলবার) -->
+        <!-- ড্যাশবোর্ড -->
         <div id="step-dashboard" class="hidden">
             <h3 style="font-size: 14px; margin-bottom: 5px;">> সিকিউরিটি ড্যাশবোর্ড</h3>
             
@@ -279,12 +362,10 @@
                     </div>
                 </div>
                 
-                <!-- একমাত্র ইউনিভার্সাল বক্স -->
                 <textarea id="universal-box" placeholder="এখানে নরমাল লেখা লিখলে এনক্রিপ্ট হবে, আর কোড বসালে ডিক্রিপ্ট হবে..." rows="4" oninput="syncAndSaveData()"></textarea>
                 
-                <!-- কার্যকারী বাটনসমূহ -->
-                <button class="action-btn" onclick="processText('encrypt')" style="background: #003311;">🔒 এনক্রিপ্ট করো</button>
-                <button class="action-btn" onclick="processText('decrypt')" style="background: #331100; border-color: #ffaa00; color: #ffaa00;">🔓 ডিক्रিপ্ট করো</button>
+                <button class="action-btn" id="encrypt-btn" onclick="processText('encrypt')" style="background: #003311;">🔒 এনক্রিপ্ট করো</button>
+                <button class="action-btn" id="decrypt-btn" onclick="processText('decrypt')" style="background: #331100; border-color: #ffaa00; color: #ffaa00;">🔓 ডিক্রিপ্ট করো</button>
             </div>
 
             <button class="action-btn" onclick="nextSecurityLevel()" id="level-btn" style="margin-top: 10px; background: #002244;">লেভেল পরিবর্তন করুন</button>
@@ -320,10 +401,28 @@
         }
         setInterval(drawMatrix, 30);
 
-        function openCoffeeModal() { document.getElementById('coffee-modal').style.display = 'flex'; }
-        function closeCoffeeModal() { document.getElementById('coffee-modal').style.display = 'none'; }
-        function openDeviceModal() { document.getElementById('device-modal').style.display = 'flex'; }
-        function closeDeviceModal() { document.getElementById('device-modal').style.display = 'none'; }
+        // ডিভাইস মোডাল অ্যানিমেশন কন্ট্রোল
+        function openDeviceModal() {
+            const modal = document.getElementById('device-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+        function closeDeviceModal() {
+            const modal = document.getElementById('device-modal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
+
+        function openCoffeeModal() {
+            const modal = document.getElementById('coffee-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+        function closeCoffeeModal() {
+            const modal = document.getElementById('coffee-modal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
 
         function changeDeviceView(type) {
             const card = document.getElementById('main-card');
@@ -334,7 +433,6 @@
             closeDeviceModal();
         }
 
-        // বক্স কপি করার ফাংশন
         function copyText() {
             const textarea = document.getElementById('universal-box');
             if(!textarea.value) { alert("বক্স ফাঁকা!"); return; }
@@ -342,10 +440,8 @@
             navigator.clipboard.writeText(textarea.value).then(() => alert("ক্লিপবোর্ডে কপি করা হয়েছে! ✅"));
         }
 
-        // বক্স ফাঁকা (ক্লিয়ার) করার নতুন ফাংশন
         function clearText() {
-            const textarea = document.getElementById('universal-box');
-            textarea.value = "";
+            document.getElementById('universal-box').value = "";
             syncAndSaveData();
         }
 
@@ -414,82 +510,3 @@
             fetch('/alternative-login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, name, password })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.data) {
-                        document.getElementById('universal-box').value = data.data.cipher_text || data.data.saved_text || "";
-                        securityLevel = data.data.level || 1;
-                    }
-                    document.getElementById('step-alt-login').style.display = 'none';
-                    document.getElementById('step-dashboard').style.display = 'block';
-                    applyHackerTheme(securityLevel);
-                } else {
-                    msgDiv.style.color = "#ff3333";
-                    msgDiv.innerText = "> " + data.message;
-                }
-            });
-        }
-
-        function verifyOtp() {
-            const otpInput = document.getElementById('otp-code').value.trim();
-            const msgDiv = document.getElementById('response-msg');
-
-            fetch('/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentIdentifier, otp: otpInput })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.data) {
-                        document.getElementById('universal-box').value = data.data.cipher_text || data.data.saved_text || "";
-                        securityLevel = data.data.level || 1;
-                    }
-                    document.getElementById('step-otp').style.display = 'none';
-                    document.getElementById('step-dashboard').style.display = 'block';
-                    applyHackerTheme(securityLevel);
-                } else {
-                    msgDiv.style.color = "#ff3333";
-                    msgDiv.innerText = "> " + data.message;
-                }
-            });
-        }
-
-        const MASTER_ENCRYPTION_KERNEL = "MIL_SPEC_X_2026_CORE_KEY_#$99";
-
-        function processText(mode) {
-            const box = document.getElementById('universal-box');
-            const text = box.value.trim();
-            if (!text) {
-                alert("বক্সে কিছু লিখুন বা কোড দিন!");
-                return;
-            }
-
-            if (mode === 'encrypt') {
-                try {
-                    let salt = Math.random().toString(36).substring(2, 10);
-                    let payload = encodeURIComponent(text) + "::" + salt + "::" + MASTER_ENCRYPTION_KERNEL + "::" + currentIdentifier;
-                    let layer1 = btoa(unescape(encodeURIComponent(payload)));
-                    
-                    let shifted = "";
-                    const xorKey = (securityLevel * 19) + 47;
-                    for (let i = 0; i < layer1.length; i++) {
-                        shifted += String.fromCharCode(layer1.charCodeAt(i) ^ xorKey);
-                    }
-
-                    let layer2 = btoa(shifted).split('').reverse().join('');
-                    box.value = "MIL_SECURE_LVL" + securityLevel + "_" + salt + "::" + layer2;
-                    syncAndSaveData();
-                    alert("এনক্রিপ্ট করা হয়েছে! 🔒");
-                } catch (e) { alert("ত্রুটি ঘটেছে!"); }
-            } 
-            else if (mode === 'decrypt') {
-                try {
-                    let parts = text.split("::");
-                    if (parts.length < 2) throw new Error();
-                    
-                    let unbased = atob(parts[1].split('
