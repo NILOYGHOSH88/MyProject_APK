@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker Terminal - Secure Dashboard</title>
+    <title>Hacker Terminal - 100 Games Secure Hub</title>
     <style>
         :root {
             --bg-color: #030303;
-            --card-bg: #080808;
+            --card-bg: #070707;
             --border-color: #00ff66;
             --text-color: #00ff66;
-            --btn-bg: #00220f;
+            --btn-bg: #001a0c;
             --btn-text: #00ff66;
-            --glow-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            --glow-shadow: 0 0 25px rgba(0, 255, 102, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) var(--card-bg);
         }
 
         body { 
@@ -22,9 +28,10 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             margin: 0; 
-            overflow: hidden;
+            position: relative;
+            overflow-x: hidden;
             transition: background 0.6s ease, color 0.6s ease;
         }
 
@@ -35,10 +42,9 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.22;
+            opacity: 0.18;
         }
 
-        /* লেভেল পরিবর্তনের ভয়ঙ্কর স্ক্রিন গ্লিচ ওভারলে */
         #glitch-overlay {
             position: fixed;
             top: 0;
@@ -68,7 +74,7 @@
             right: 20px;
             display: flex;
             gap: 10px;
-            z-index: 999;
+            z-index: 100;
         }
 
         .top-btn {
@@ -78,7 +84,7 @@
             padding: 8px 14px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             box-shadow: var(--glow-shadow);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -91,35 +97,36 @@
         }
 
         .coffee-btn { border-color: #ffaa00; color: #ffaa00; }
+        .game-btn { border-color: #00ffff; color: #00ffff; }
 
         .card { 
             background: var(--card-bg); 
             color: var(--text-color);
-            padding: 25px; 
-            border-radius: 12px; 
+            padding: 30px; 
+            border-radius: 16px; 
             border: 2px solid var(--border-color);
             box-shadow: var(--glow-shadow); 
-            width: 440px; 
-            text-align: center; 
+            width: 450px; 
+            text-align: left; 
             z-index: 10;
             max-height: 90vh;
             overflow-y: auto;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 20px;
         }
 
-        .card.desktop-view { width: 460px; }
-        .card.tablet-view { width: 360px; }
-        .card.mobile-view { width: 280px; }
+        .card.desktop-view { width: 480px; }
+        .card.tablet-view { width: 380px; }
+        .card.mobile-view { width: 300px; }
 
         input, textarea { 
             width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
+            padding: 12px 15px; 
+            margin: 10px 0; 
             background: #020202;
             border: 1px solid var(--border-color); 
             color: var(--text-color);
-            border-radius: 6px; 
-            box-sizing: border-box; 
+            border-radius: 8px; 
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
             transition: all 0.3s ease;
@@ -127,6 +134,7 @@
         input:focus, textarea:focus {
             outline: none;
             box-shadow: 0 0 15px var(--glow-shadow);
+            border-color: #fff;
         }
 
         button.action-btn { 
@@ -135,69 +143,93 @@
             border: 1px solid var(--border-color); 
             padding: 12px; 
             width: 100%; 
-            border-radius: 6px; 
+            border-radius: 8px; 
             cursor: pointer; 
             font-size: 14px; 
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            margin-top: 6px;
+            margin-top: 8px;
             box-shadow: var(--glow-shadow);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
         button.action-btn:hover { 
             background-color: var(--border-color); 
             color: #000;
             transform: translateY(-2px);
-            box-shadow: 0 0 22px var(--border-color);
+            box-shadow: 0 0 25px var(--border-color);
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
         }
 
         .tool-btn-group {
             display: flex;
-            gap: 8px;
-            float: right;
-            margin-bottom: 4px;
+            gap: 10px;
+            width: 100%;
+            margin-top: 8px;
         }
 
-        .mini-btn {
+        /* বড় এবং আকর্ষণীয় কপি ও ডিলিট বাটন */
+        .big-action-btn {
+            flex: 1;
             background: #111;
-            border: 1px solid var(--border-color);
+            border: 2px solid var(--border-color);
             color: var(--text-color);
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-shadow);
+            text-align: center;
         }
-        .mini-btn:hover {
+        .big-action-btn:hover {
             background: var(--border-color);
             color: #000;
-            transform: scale(1.05);
+            transform: scale(1.03);
+            box-shadow: 0 0 20px var(--border-color);
+        }
+        .delete-big-btn {
+            border-color: #ff3333;
+            color: #ff3333;
+        }
+        .delete-big-btn:hover {
+            background: #ff3333;
+            color: #fff;
+            box-shadow: 0 0 20px #ff3333;
         }
 
         .alt-btn {
             background: transparent;
             color: #00ffff;
             border: 1px dashed #00ffff;
-            margin-top: 10px;
+            margin-top: 12px;
+        }
+        .alt-btn:hover {
+            background: #00ffff;
+            color: #000;
         }
 
-        .message { margin-top: 10px; font-weight: bold; font-size: 12px; clear: both; }
+        .message { margin-top: 12px; font-weight: bold; font-size: 12px; text-align: center; }
         .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; }
+        .bot-link:hover { text-decoration: underline; }
         
         .level-box { 
-            margin-top: 8px; 
-            padding: 10px; 
-            border-radius: 6px; 
+            margin-top: 12px; 
+            padding: 12px 15px; 
+            border-radius: 8px; 
             border: 1px dashed var(--border-color); 
-            text-align: left; 
-            background: rgba(0, 255, 102, 0.03);
-            font-size: 12px;
+            background: rgba(0, 255, 102, 0.04);
+            font-size: 13px;
         }
 
-        /* প্রিমিয়াম অ্যানিমেটেড মোডাল */
+        /* মোডাল ডিজাইন */
         .modal {
             display: none;
             position: fixed;
@@ -206,13 +238,12 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.4s ease;
         }
         .modal.show {
             display: flex;
@@ -221,38 +252,37 @@
         .modal-content {
             background: #0d0d0d;
             border: 2px solid var(--border-color);
-            padding: 30px;
-            width: 360px;
+            padding: 25px;
+            width: 420px;
             border-radius: 16px;
             text-align: center;
             color: var(--text-color);
-            box-shadow: 0 0 40px rgba(0,0,0,0.9), var(--glow-shadow);
-            transform: scale(0.6) translateY(40px);
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), var(--glow-shadow);
+            transform: scale(0.7);
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .modal.show .modal-content {
-            transform: scale(1) translateY(0);
+            transform: scale(1);
         }
 
         .device-option-btn {
-            background: #111;
+            background: #121212;
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 12px;
+            padding: 10px;
             width: 100%;
             border-radius: 8px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            font-size: 14px;
-            margin: 8px 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 13px;
+            margin: 6px 0;
+            transition: all 0.3s ease;
         }
         .device-option-btn:hover { 
             background: var(--border-color); 
             color: #000; 
-            transform: scale(1.04) translateX(4px);
-            box-shadow: 0 0 15px var(--border-color);
+            transform: scale(1.02);
         }
         .close-modal { 
             background: var(--border-color); 
@@ -260,14 +290,68 @@
             border: none; 
             padding: 8px 20px; 
             font-weight: bold; 
-            border-radius: 6px; 
+            border-radius: 8px; 
             cursor: pointer; 
-            margin-top: 15px; 
+            margin-top: 10px; 
             transition: 0.2s;
         }
-        .close-modal:hover { background: #fff; box-shadow: 0 0 10px #fff; }
+        .close-modal:hover { background: #fff; box-shadow: 0 0 15px #fff; }
 
-        /* প্রফেশনাল লোডিং স্পিনার অ্যানিমেশন */
+        /* ১০০টি মিনি গেম হাব স্টাইল */
+        .game-hub-content {
+            width: 480px;
+            max-width: 95vw;
+            border-color: #00ffff;
+            color: #00ffff;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .game-select-btn {
+            background: #040d0d;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .game-select-btn:hover {
+            background: #00ffff;
+            color: #000;
+            transform: scale(1.03);
+        }
+        #active-game-container {
+            border: 1px solid #00ffff;
+            background: #000;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 200px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .arcade-canvas {
+            background: #020202;
+            border: 1px dashed #00ffff;
+            border-radius: 4px;
+        }
+
         .spinner {
             display: inline-block;
             width: 14px;
@@ -275,7 +359,7 @@
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: #fff;
-            animation: spin 0.8s ease-in-out infinite;
+            animation: spin 0.8s linear infinite;
             vertical-align: middle;
             margin-right: 6px;
         }
@@ -292,24 +376,25 @@
     <div id="glitch-overlay"></div>
 
     <div class="top-controls">
+        <button class="top-btn game-btn" onclick="openGameModal()">🎮 ১০০ গেম হাব</button>
         <button class="top-btn coffee-btn" onclick="openCoffeeModal()">☕ কফি</button>
-        <button class="top-btn" onclick="openDeviceModal()" id="device-btn-indicator">🖥️ ডিভাইস</button>
+        <button class="top-btn" onclick="openDeviceModal()" id="device-btn-indicator">🖥️ অটো ডিভাইস</button>
     </div>
 
     <!-- কফি মোডাল -->
     <div id="coffee-modal" class="modal">
         <div class="modal-content" style="border-color: #ffaa00; color: #ffaa00;">
-            <h3>☕ Buy Me a Coffee</h3>
-            <p style="font-size: 12px; color: #fff;">বিকাশ/নগদ (Personal): 017XXXXXXXX</p>
+            <h3 style="margin-top:0;">☕ Buy Me a Coffee</h3>
+            <p style="font-size: 13px; color: #fff; margin: 15px 0;">বিকাশ/নগদ (Personal): <br><b style="color:#ffaa00; font-size:15px;">017XXXXXXXX</b></p>
             <button class="close-modal" style="background:#ffaa00;" onclick="closeCoffeeModal()">বন্ধ করুন</button>
         </div>
     </div>
 
-    <!-- প্রিমিয়াম অ্যানিমেটেড ডিভাইস মোডাল -->
+    <!-- ডিভাইস মোডাল -->
     <div id="device-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top: 0; letter-spacing: 1px;">⚙️ ডিভাইস মোড সিলেক্ট</h3>
-            <p style="font-size: 11px; color: #aaa; margin-bottom: 15px;">স্ক্রিন লেআউট পরিবর্তন করুন:</p>
+            <h3 style="margin-top: 0;">⚙️ ডিভাইস কন্ট্রোল</h3>
+            <p style="font-size: 11px; color: #aaa; margin-bottom: 15px;">বর্তমান ডিভাইস: <span id="detected-device-label" style="color:#00ff66; font-weight:bold;">অটো ডিটেকটিং...</span></p>
             <button class="device-option-btn" onclick="changeDeviceView('desktop')">💻 কম্পিউটার মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('tablet')">📋 ট্যাবলেট মোড</button>
             <button class="device-option-btn" onclick="changeDeviceView('mobile')">📱 মোবাইল মোড</button>
@@ -317,20 +402,47 @@
         </div>
     </div>
 
+    <!-- ১০০টি মিনি গেম হাব মোডাল -->
+    <div id="game-modal" class="modal">
+        <div class="modal-content game-hub-content">
+            <h3 style="margin-top: 0; margin-bottom: 2px;">⚡ হ্যাকার আর্কেড হাব (১০০ গেম)</h3>
+            <p style="font-size: 10px; color: #ccc; margin-top:0;">নিচের তালিকা থেকে যেকোনো গেম সিলেক্ট করুন:</p>
+            
+            <!-- গেম সিলেক্টর মেনু (১০০টি গেম ডাইনামিকালি লোড হবে) -->
+            <div id="game-menu-view">
+                <div class="game-grid" id="game-list-container"></div>
+            </div>
+
+            <!-- গেম খেলার স্ক্রিন -->
+            <div id="active-game-view" class="hidden">
+                <div style="display: flex; justify-content: space-between; width: 100%; font-size: 11px; margin-bottom: 5px;">
+                    <button class="mini-btn" onclick="backToGameMenu()" style="background:#040d0d; border:1px solid #00ffff; color:#00ffff; padding:5px 10px; border-radius:4px; cursor:pointer;">⬅️ গেম লিস্ট</button>
+                    <span id="active-game-title" style="color:#fff; font-weight:bold;">গেম</span>
+                    <span id="active-game-score" style="color:#00ff66;">স্কোর: 0</span>
+                </div>
+                <div id="active-game-container"></div>
+            </div>
+
+            <button class="close-modal" style="background:#00ffff; color:#000; margin-top: 12px; width:100%;" onclick="closeGameModal()">আর্কেড বন্ধ করুন</button>
+        </div>
+    </div>
+
     <div class="card desktop-view" id="main-card">
-        <h2 style="font-size: 18px; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
+        <h2 id="card-main-title" style="font-size: 18px; text-align: center; letter-spacing: 1px; margin-top: 0;">💀 ROOT_ACCESS // LOGIN</h2>
         
+        <!-- টেলিগ্রাম লগইন ধাপ -->
         <div id="step-telegram-login">
             <p>> টেলিগ্রাম ক্রডেনশিয়াল:</p>
             <input type="text" id="username" placeholder="Telegram Username (@username)">
             <input type="password" id="password" placeholder="Password">
             <button class="action-btn" id="tg-login-btn" onclick="loginStep1()">টেলিগ্রাম ওটিপি রিকোয়েস্ট</button>
-            <div style="margin-top: 8px; font-size: 11px;">
+            <div style="margin-top: 10px; font-size: 11px; text-align: center;">
                 > বট না থাকলে: <a href="https://t.me/CryptoGuard_OTP_bot" target="_blank" class="bot-link">/start দিন</a>
             </div>
             <button class="action-btn alt-btn" onclick="switchForm('alt')">🔄 অল্টারনেটিভ লগইন</button>
         </div>
 
+        <!-- অল্টারনেটিভ লগইন ধাপ -->
         <div id="step-alt-login" class="hidden">
             <p>> অল্টারনেটিভ এক্সেস:</p>
             <input type="text" id="alt-phone" placeholder="Phone Number">
@@ -340,36 +452,35 @@
             <button class="action-btn alt-btn" onclick="switchForm('telegram')">🔙 ফিরে যান</button>
         </div>
 
+        <!-- ওটিপি ভেরিফিকেশন ধাপ -->
         <div id="step-otp" class="hidden">
             <p>> ৪-ডিজিটের ওটিপি দিন:</p>
-            <input type="text" id="otp-code" placeholder="OTP" maxlength="4">
+            <input type="text" id="otp-code" placeholder="OTP" maxlength="4" style="text-align: center; letter-spacing: 5px; font-size: 18px;">
             <button class="action-btn" id="otp-verify-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
         </div>
 
-        <!-- ড্যাশবোর্ড -->
+        <!-- ড্যাশবোর্ড প্যানেল -->
         <div id="step-dashboard" class="hidden">
-            <h3 style="font-size: 14px; margin-bottom: 5px;">> সিকিউরিটি ড্যাশবোর্ড</h3>
-            
             <div class="level-box">
-                <p style="margin: 0;"><b>লেভেল:</b> <span id="current-level-text">Level 1</span></p>
+                <p style="margin: 0;"><b>নিরাপত্তা লেভেল:</b> <span id="current-level-text" style="color: #fff;">Level 1</span></p>
             </div>
 
-            <div style="margin-top: 10px; text-align: left; font-size: 12px;">
-                <div style="overflow: hidden;">
-                    <label>> টেক্সট বা সাইফার কোড:</label>
-                    <div class="tool-btn-group">
-                        <button class="mini-btn" onclick="clearText()">🗑️ মুছুন</button>
-                        <button class="mini-btn" onclick="copyText()">📋 কপি</button>
-                    </div>
+            <div style="margin-top: 12px;">
+                <label style="font-size: 12px; font-weight:bold;">> টেক্সট বা সাইফার কোড:</label>
+                
+                <textarea id="universal-box" placeholder="যেকোনো ইউজারের দেওয়া কোড এখানে পেস্ট করে ডিক্রিপ্ট করুন..." rows="5" oninput="syncAndSaveData()"></textarea>
+                
+                <!-- বড় এবং স্পষ্ট কপি ও ডিলিট বাটন -->
+                <div class="tool-btn-group">
+                    <button class="big-action-btn delete-big-btn" onclick="clearText()">🗑️ ডিলিট টেক্সট</button>
+                    <button class="big-action-btn" onclick="copyText()">📋 কপি টেক্সট</button>
                 </div>
-                
-                <textarea id="universal-box" placeholder="এখানে নরমাল লেখা লিখলে এনক্রিপ্ট হবে, আর কোড বসালে ডিক্রিপ্ট হবে..." rows="4" oninput="syncAndSaveData()"></textarea>
-                
-                <button class="action-btn" id="encrypt-btn" onclick="processText('encrypt')" style="background: #003311;">🔒 এনক্রিপ্ট করো</button>
+
+                <button class="action-btn" id="encrypt-btn" onclick="processText('encrypt')" style="background: #003311; margin-top:12px;">🔒 এনক্রিপ্ট করো</button>
                 <button class="action-btn" id="decrypt-btn" onclick="processText('decrypt')" style="background: #331100; border-color: #ffaa00; color: #ffaa00;">🔓 ডিক্রিপ্ট করো</button>
             </div>
 
-            <button class="action-btn" onclick="nextSecurityLevel()" id="level-btn" style="margin-top: 10px; background: #002244;">লেভেল পরিবর্তন করুন</button>
+            <button class="action-btn" onclick="nextSecurityLevel()" id="level-btn" style="margin-top: 12px; background: #002244; border-color: #00aaff; color: #00aaff;">⚡ লেভেল পরিবর্তন করুন</button>
         </div>
 
         <div class="message" id="response-msg"></div>
@@ -402,312 +513,12 @@
         }
         setInterval(drawMatrix, 30);
 
-        // ডিভাইস ও কফি মোডাল ফাংশন
-        function openDeviceModal() {
-            const modal = document.getElementById('device-modal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
-        function closeDeviceModal() {
-            const modal = document.getElementById('device-modal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 400);
-        }
-
-        function openCoffeeModal() {
-            const modal = document.getElementById('coffee-modal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
-        function closeCoffeeModal() {
-            const modal = document.getElementById('coffee-modal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 400);
-        }
-
-        function changeDeviceView(type) {
+        // --- অটো ডিভাইস ডিটেকশন লজিক ---
+        function detectUserDevice() {
+            const ua = navigator.userAgent;
             const card = document.getElementById('main-card');
             const indicator = document.getElementById('device-btn-indicator');
+            const label = document.getElementById('detected-device-label');
+            
             card.classList.remove('desktop-view', 'tablet-view', 'mobile-view');
-            card.classList.add(type + '-view');
-            indicator.innerText = type === 'desktop' ? "💻 কম্পিউটার" : (type === 'tablet' ? "📋 ট্যাবলেট" : "📱 মোবাইল");
-            closeDeviceModal();
-        }
-
-        function copyText() {
-            const textarea = document.getElementById('universal-box');
-            if(!textarea.value) { alert("বক্স ফাঁকা!"); return; }
-            textarea.select();
-            navigator.clipboard.writeText(textarea.value).then(() => alert("ক্লিপবোর্ডে কপি করা হয়েছে! ✅"));
-        }
-
-        function clearText() {
-            document.getElementById('universal-box').value = "";
-            syncAndSaveData();
-        }
-
-        function switchForm(type) {
-            document.getElementById('response-msg').innerText = "";
-            if (type === 'alt') {
-                document.getElementById('step-telegram-login').style.display = 'none';
-                document.getElementById('step-alt-login').style.display = 'block';
-            } else {
-                document.getElementById('step-alt-login').style.display = 'none';
-                document.getElementById('step-telegram-login').style.display = 'block';
-            }
-        }
-
-        let currentIdentifier = "";
-        let securityLevel = 1;
-
-        // টেলিগ্রাম লগইন ধাপ ১
-        function loginStep1() {
-            const usernameInput = document.getElementById('username').value.trim();
-            const passwordInput = document.getElementById('password').value.trim();
-            const msgDiv = document.getElementById('response-msg');
-            const btn = document.getElementById('tg-login-btn');
-
-            if (!usernameInput || !passwordInput) {
-                msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[ত্রুটি]: সব ফিল্ড পূরণ করুন!";
-                return;
-            }
-
-            currentIdentifier = usernameInput.replace('@', '').toLowerCase();
-            msgDiv.style.color = "#00ffff";
-            msgDiv.innerText = "[প্রসেসিং]: ওটিপি পাঠানো হচ্ছে...";
-            
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner"></span> ওটিপি রিকোয়েস্ট হচ্ছে...`;
-            btn.disabled = true;
-
-            fetch('/login-step1', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: usernameInput, password: passwordInput })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-                if (data.success) {
-                    msgDiv.style.color = "#00ff66";
-                    msgDiv.innerText = "> " + data.message;
-                    document.getElementById('step-telegram-login').style.display = 'none';
-                    document.getElementById('step-otp').style.display = 'block';
-                } else {
-                    msgDiv.style.color = "#ff3333";
-                    msgDiv.innerText = "> " + data.message;
-                }
-            })
-            .catch(() => { 
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-                msgDiv.style.color = "#ff3333"; 
-                msgDiv.innerText = "[কানেকশন ফেইলড]"; 
-            });
-        }
-
-        // অল্টারনেটিভ লগইন
-        function alternativeLoginSubmit() {
-            const phone = document.getElementById('alt-phone').value.trim();
-            const name = document.getElementById('alt-name').value.trim();
-            const password = document.getElementById('alt-password').value.trim();
-            const msgDiv = document.getElementById('response-msg');
-            const btn = document.getElementById('alt-login-btn');
-
-            if (!phone || !name || !password) {
-                msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[ত্রুটি]: তথ্য দিন!";
-                return;
-            }
-
-            currentIdentifier = phone.toLowerCase();
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner"></span> এক্সেস হচ্ছে...`;
-            btn.disabled = true;
-
-            fetch('/alternative-login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, name, password })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-                if (data.success) {
-                    if (data.data) {
-                        document.getElementById('universal-box').value = data.data.cipher_text || data.data.saved_text || "";
-                        securityLevel = data.data.level || 1;
-                    }
-                    document.getElementById('step-alt-login').style.display = 'none';
-                    document.getElementById('step-dashboard').style.display = 'block';
-                    applyHackerTheme(securityLevel);
-                } else {
-                    msgDiv.style.color = "#ff3333";
-                    msgDiv.innerText = "> " + data.message;
-                }
-            })
-            .catch(() => {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-                msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[কানেকশন ফেইলড]";
-            });
-        }
-
-        // ওটিপি ভেরিফিকেশন
-        function verifyOtp() {
-            const otpInput = document.getElementById('otp-code').value.trim();
-            const msgDiv = document.getElementById('response-msg');
-            const btn = document.getElementById('otp-verify-btn');
-
-            if (!otpInput) {
-                msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[ত্রুটি]: ওটিপি কোড দিন!";
-                return;
-            }
-
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner"></span> ভেরিফাই হচ্ছে...`;
-            btn.disabled = true;
-
-            fetch('/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: currentIdentifier, otp: otpInput })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-                if (data.success) {
-                    if (data.data) {
-                        document.getElementById('universal-box').value = data.data.cipher_text || data.data.saved_text || "";
-                        securityLevel = data.data.level || 1;
-                    }
-                    document.getElementById('step-otp').style.display = 'none';
-                    document.getElementById('step-dashboard').style.display = 'block';
-                    applyHackerTheme(securityLevel);
-                } else {
-                    msgDiv.style.color = "#ff3333";
-                    msgDiv.innerText = "> " + data.message;
-                }
-            })
-            .catch(() => {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-                msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[কানেকশন ফেইলড]";
-            });
-        }
-
-        const MASTER_ENCRYPTION_KERNEL = "MIL_SPEC_X_2026_CORE_KEY_#$99";
-
-        // এনক্রিপ্ট ও ডিক্রিপ্ট ফাংশন
-        function processText(mode) {
-            const box = document.getElementById('universal-box');
-            const text = box.value.trim();
-            if (!text) {
-                alert("বক্সে কিছু লিখুন বা কোড দিন!");
-                return;
-            }
-
-            const btn = document.getElementById(mode + '-btn');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner"></span> প্রসেসিং হচ্ছে...`;
-            btn.disabled = true;
-
-            setTimeout(() => {
-                try {
-                    if (mode === 'encrypt') {
-                        let salt = Math.random().toString(36).substring(2, 10);
-                        let payload = encodeURIComponent(text) + "::" + salt + "::" + MASTER_ENCRYPTION_KERNEL + "::" + currentIdentifier;
-                        let layer1 = btoa(unescape(encodeURIComponent(payload)));
-                        
-                        let shifted = "";
-                        const xorKey = (securityLevel * 19) + 47;
-                        for (let i = 0; i < layer1.length; i++) {
-                            shifted += String.fromCharCode(layer1.charCodeAt(i) ^ xorKey);
-                        }
-
-                        let layer2 = btoa(shifted).split('').reverse().join('');
-                        box.value = "MIL_SECURE_LVL" + securityLevel + "_" + salt + "::" + layer2;
-                        syncAndSaveData();
-                        alert("এনক্রিপ্ট করা হয়েছে! 🔒");
-                    } 
-                    else if (mode === 'decrypt') {
-                        let parts = text.split("::");
-                        if (parts.length < 2) throw new Error();
-                        
-                        let unbased = atob(parts[1].split('').reverse().join(''));
-                        let unshifted = "";
-                        const xorKey = (securityLevel * 19) + 47;
-                        for (let i = 0; i < unbased.length; i++) {
-                            unshifted += String.fromCharCode(unbased.charCodeAt(i) ^ xorKey);
-                        }
-
-                        let originalText = decodeURIComponent(escape(atob(unshifted))).split("::")[0];
-                        box.value = originalText;
-                        syncAndSaveData();
-                        alert("ডিক্রিপ্ট করা হয়েছে! ✅");
-                    }
-                } catch (e) {
-                    alert("প্রসেস ফেইলড! সঠিক কোড বা লেভেল চেক করুন।");
-                }
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }, 600);
-        }
-
-        function syncAndSaveData() {
-            const val = document.getElementById('universal-box').value;
-            fetch('/save-user-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identifier: currentIdentifier, cipher_text: val, level: securityLevel })
-            });
-        }
-
-        // লেভেল পরিবর্তন এবং ভয়ঙ্কর গ্লিচ ইফেক্ট
-        function nextSecurityLevel() {
-            const overlay = document.getElementById('glitch-overlay');
-            const levelBtn = document.getElementById('level-btn');
-            
-            overlay.classList.add('glitch-active');
-            levelBtn.innerHTML = `<span class="spinner"></span> লেভেল ওভাররাইড হচ্ছে...`;
-            levelBtn.disabled = true;
-
-            setTimeout(() => {
-                securityLevel++;
-                if (securityLevel > 3) securityLevel = 1;
-                applyHackerTheme(securityLevel);
-                syncAndSaveData();
-
-                overlay.classList.remove('glitch-active');
-                levelBtn.disabled = false;
-                levelBtn.innerHTML = "লেভেল পরিবর্তন করুন";
-            }, 600);
-        }
-
-        function applyHackerTheme(level) {
-            const root = document.documentElement;
-            document.getElementById('current-level-text').innerText = "Level " + level;
-            if (level === 1) {
-                root.style.setProperty('--border-color', '#00ff66');
-                root.style.setProperty('--text-color', '#00ff66');
-                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 255, 102, 0.4)');
-            } else if (level === 2) {
-                root.style.setProperty('--border-color', '#00ccff');
-                root.style.setProperty('--text-color', '#00ccff');
-                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 204, 255, 0.4)');
-            } else if (level === 3) {
-                root.style.setProperty('--border-color', '#ff3333');
-                root.style.setProperty('--text-color', '#ff3333');
-                root.style.setProperty('--glow-shadow', '0 0 20px rgba(255, 51, 51, 0.4)');
-            }
-        }
-    </script>
-</body>
-</html>
+            if (/(tablet|ipad|playbook|silk)
