@@ -6,13 +6,14 @@
     <title>Hacker Terminal - Secure Dashboard</title>
     <style>
         :root {
-            --bg-color: #050505;
-            --card-bg: #0a0a0a;
+            --bg-color: #030303;
+            --card-bg: #080808;
             --border-color: #00ff66;
             --text-color: #00ff66;
-            --btn-bg: #003311;
+            --btn-bg: #00220f;
             --btn-hover: #00ff66;
             --btn-text: #00ff66;
+            --glow-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
         }
 
         body { 
@@ -25,7 +26,7 @@
             height: 100vh; 
             margin: 0; 
             overflow: hidden;
-            transition: all 0.4s ease;
+            transition: background 0.6s ease, color 0.6s ease;
         }
 
         canvas {
@@ -35,44 +36,86 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.25;
+            opacity: 0.22;
         }
 
-        .view-toggle-btn {
+        .top-controls {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #00ff66;
-            color: #000;
-            border: none;
-            padding: 8px 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .top-btn {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            z-index: 999;
-            box-shadow: 0 0 10px #00ff66;
+            box-shadow: var(--glow-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .view-toggle-btn:hover {
-            background: #fff;
-            box-shadow: 0 0 15px #fff;
+        .top-btn:hover {
+            background: var(--border-color);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--border-color);
+        }
+
+        .coffee-btn {
+            border-color: #ffaa00;
+            color: #ffaa00;
+            box-shadow: 0 0 12px rgba(255, 170, 0, 0.4);
+        }
+        .coffee-btn:hover {
+            background: #ffaa00 !important;
+            color: #000 !important;
+            box-shadow: 0 0 25px #ffaa00;
         }
 
         .card { 
             background: var(--card-bg); 
             color: var(--text-color);
             padding: 25px; 
-            border-radius: 8px; 
+            border-radius: 12px; 
             border: 2px solid var(--border-color);
-            box-shadow: 0px 0px 20px var(--border-color); 
-            width: 420px; 
+            box-shadow: var(--glow-shadow); 
+            width: 440px; 
             text-align: center; 
-            transition: all 0.4s ease-in-out;
             z-index: 10;
             max-height: 90vh;
             overflow-y: auto;
+            animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        @keyframes fadeInScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* ডাইনামিক ডিভাইস ভিউ সাইজ */
+        .card.desktop-view {
+            width: 460px !important;
+            padding: 25px !important;
+            border-style: solid;
+        }
+        .card.tablet-view {
+            width: 360px !important;
+            padding: 20px !important;
+            border-style: dotted;
+        }
         .card.mobile-view {
             width: 280px !important;
             padding: 15px !important;
@@ -81,112 +124,250 @@
 
         input, textarea { 
             width: 100%; 
-            padding: 8px; 
+            padding: 10px; 
             margin: 8px 0; 
-            background: #000;
+            background: #020202;
             border: 1px solid var(--border-color); 
             color: var(--text-color);
-            border-radius: 4px; 
+            border-radius: 6px; 
             box-sizing: border-box; 
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
+            transition: all 0.3s ease;
         }
         input:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 8px var(--border-color);
+            border-color: var(--border-color);
+            box-shadow: 0 0 12px var(--glow-shadow);
         }
 
         button.action-btn { 
             background-color: var(--btn-bg); 
             color: var(--btn-text); 
             border: 1px solid var(--border-color); 
-            padding: 8px; 
+            padding: 10px; 
             width: 100%; 
-            border-radius: 4px; 
+            border-radius: 6px; 
             cursor: pointer; 
             font-size: 14px; 
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            transition: 0.3s; 
-            margin-top: 5px;
+            margin-top: 6px;
+            box-shadow: var(--glow-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         button.action-btn:hover { 
-            background-color: var(--btn-hover); 
+            background-color: var(--border-color); 
             color: #000;
-            box-shadow: 0 0 10px var(--border-color);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px var(--border-color);
+        }
+
+        .copy-btn {
+            background: #111;
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            font-size: 11px;
+            padding: 4px 10px;
+            width: auto;
+            float: right;
+            margin-bottom: 5px;
+            box-shadow: none !important;
+        }
+        .copy-btn:hover {
+            background: #00ffff;
+            color: #000;
+            transform: translateY(-1px);
         }
 
         .alt-btn {
             background: transparent;
             color: #00ffff;
             border: 1px dashed #00ffff;
-            margin-top: 10px;
+            margin-top: 12px;
+            box-shadow: none !important;
         }
         .alt-btn:hover {
             background: #00ffff;
             color: #000;
         }
 
-        .message { margin-top: 10px; font-weight: bold; font-size: 12px; }
-        .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; }
-        .bot-link:hover { text-decoration: underline; }
+        .message { margin-top: 10px; font-weight: bold; font-size: 12px; clear: both; }
+        .bot-link { color: #00ffff; text-decoration: none; font-weight: bold; transition: 0.2s; }
+        .bot-link:hover { text-decoration: underline; text-shadow: 0 0 8px #00ffff; }
         
         .level-box { 
             margin-top: 10px; 
-            padding: 10px; 
-            border-radius: 5px; 
+            padding: 12px; 
+            border-radius: 6px; 
             border: 1px dashed var(--border-color); 
             text-align: left; 
-            background: rgba(0, 255, 102, 0.05);
+            background: rgba(0, 255, 102, 0.03);
             font-size: 12px;
+            transition: all 0.4s ease;
         }
+
+        /* মোডাল ডিজাইন */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-content {
+            background: #0d0d0d;
+            border: 2px solid var(--border-color);
+            padding: 25px;
+            width: 340px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--glow-shadow);
+            color: var(--text-color);
+            transform: scale(0.7) translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal.show .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .coffee-modal-content {
+            border-color: #ffaa00;
+            color: #ffaa00;
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.5);
+        }
+
+        .device-option-btn {
+            background: #111;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        .device-option-btn:hover {
+            background: var(--border-color);
+            color: #000;
+            transform: scale(1.03);
+            box-shadow: 0 0 15px var(--border-color);
+        }
+
+        .close-modal {
+            background: var(--border-color);
+            color: #000;
+            border: none;
+            padding: 8px 20px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.2s;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .close-modal:hover {
+            background: #fff;
+            box-shadow: 0 0 10px #fff;
+        }
+
         .hidden { display: none; }
     </style>
 </head>
 <body id="body-theme">
 
     <canvas id="matrix-canvas"></canvas>
-    <button class="view-toggle-btn" onclick="toggleViewMode()" id="view-btn">📱 মোবাইল ভিউ</button>
 
-    <div class="card" id="main-card">
-        <h2 id="card-title" style="font-size: 20px;">💀 ROOT_ACCESS // LOGIN</h2>
+    <div class="top-controls">
+        <button class="top-btn coffee-btn" onclick="openCoffeeModal()">☕ কফি খাওয়ান</button>
+        <button class="top-btn" onclick="openDeviceModal()" id="device-btn-indicator">🖥️ ডিভাইস মোড</button>
+    </div>
+
+    <!-- কফি পেমেন্ট মোডাল -->
+    <div id="coffee-modal" class="modal">
+        <div class="modal-content coffee-modal-content">
+            <h3>☕ Buy Me a Coffee</h3>
+            <p style="font-size: 12px; color: #fff; margin: 15px 0;">
+                ডেভলপারকে সাপোর্ট করতে নিচের বিকাশ/নগদ নাম্বারে কফি পাঠাতে পারেন:
+            </p>
+            <p style="font-size: 14px; font-weight: bold; background: #222; padding: 8px; border-radius: 4px;">
+                017XXXXXXXX (Personal)
+            </p>
+            <button class="close-modal" style="background:#ffaa00;" onclick="closeCoffeeModal()">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <!-- ডিভাইস সিলেকশন অ্যানিমেটেড মোডাল -->
+    <div id="device-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; font-size: 18px; letter-spacing: 1px;">⚙️ ডিভাইস লেআউট সিলেক্ট</h3>
+            <p style="font-size: 11px; color: #aaa; margin-bottom: 15px;">আপনার পছন্দমতো স্ক্রিন সাইজ ও ভিউ বেছে নিন:</p>
+            
+            <button class="device-option-btn" onclick="changeDeviceView('desktop')">
+                💻 কম্পিউটার (Desktop View)
+            </button>
+            <button class="device-option-btn" onclick="changeDeviceView('tablet')">
+                📋 ট্যাবলেট (Tablet View)
+            </button>
+            <button class="device-option-btn" onclick="changeDeviceView('mobile')">
+                📱 মোবাইল (Mobile View)
+            </button>
+
+            <button class="close-modal" onclick="closeDeviceModal()">বাতিল</button>
+        </div>
+    </div>
+
+    <div class="card desktop-view" id="main-card">
+        <h2 id="card-title" style="font-size: 20px; letter-spacing: 1px;">💀 ROOT_ACCESS // LOGIN</h2>
         
-        <!-- ধাপ ১: টেলিগ্রাম ইউজারনেম ও পাসওয়ার্ড লগইন -->
         <div id="step-telegram-login">
             <p>> টেলিগ্রাম ক্রডেনশিয়াল:</p>
             <input type="text" id="username" placeholder="Telegram Username (@username)">
             <input type="password" id="password" placeholder="Password">
             <button class="action-btn" onclick="loginStep1()">টেলিগ্রাম ওটিপি রিকোয়েস্ট</button>
             
-            <div style="margin-top: 8px; font-size: 12px;">
+            <div style="margin-top: 10px; font-size: 12px;">
                 > বট কানেক্ট না থাকলে: <a href="https://t.me/CryptoGuard_OTP_bot" target="_blank" class="bot-link">এখানে ক্লিক করে /start দিন</a>
             </div>
 
-            <!-- অল্টারনেটিভ লগইন সুইচ বাটন -->
             <button class="action-btn alt-btn" onclick="switchForm('alt')">🔄 অল্টারনেটিভ লগইন (ফোন/নাম)</button>
         </div>
 
-        <!-- অল্টারনেটিভ লগইন ফর্ম (টেলিগ্রাম না থাকলে) -->
         <div id="step-alt-login" class="hidden">
-            <p>> অল্টারনেটিভ এক্সেস (ফোন ও নাম):</p>
-            <input type="text" id="alt-phone" placeholder="Phone Number (যেমন: 017xxxxxxxx)">
+            <p>> অল্টারনেটিভ এক্সেস:</p>
+            <input type="text" id="alt-phone" placeholder="Phone Number">
             <input type="text" id="alt-name" placeholder="Full Name">
             <input type="password" id="alt-password" placeholder="Password">
-            <input type="email" id="alt-email" placeholder="Email Address (ঐচ্ছিক / Optional)">
+            <input type="email" id="alt-email" placeholder="Email Address (ঐচ্ছিক)">
             <button class="action-btn" onclick="alternativeLoginSubmit()" style="background: #002244; color: #00ffff; border-color: #00ffff;">লগইন / রেজিস্টার</button>
-
-            <!-- টেলিগ্রাম লগইনে ফিরে যাওয়ার বাটন -->
             <button class="action-btn alt-btn" onclick="switchForm('telegram')">🔙 টেলিগ্রাম লগইনে ফিরে যান</button>
         </div>
 
-        <!-- ধাপ ২: ওটিপি ভেরিফিকেশন (শুধুমাত্র টেলিগ্রাম ইউজারদের জন্য) -->
         <div id="step-otp" class="hidden">
             <p>> টেলিগ্রাম ওটিপি কোড ইনপুট করুন:</p>
             <input type="text" id="otp-code" placeholder="4-digit OTP" maxlength="4">
             <button class="action-btn" onclick="verifyOtp()">ভেরিফাই ওটিপি</button>
         </div>
 
-        <!-- ধাপ ৩: ৩ লেভেলের এনক্রিপশন ও ডিক্রিপশন ড্যাশবোর্ড -->
         <div id="step-dashboard" class="hidden">
             <h3 id="dash-heading" style="font-size: 16px;">> সিস্টেম ড্যাশবোর্ড আনলকড</h3>
             
@@ -195,17 +376,25 @@
                 <p><b>এনক্রিপশন প্রোটোকল:</b> <span id="enc-mode">AES-128 Active</span></p>
             </div>
 
-            <div style="margin-top: 10px; text-align: left; font-size: 12px;">
-                <label>> সিক্রেট টেক্সট এনক্রিপ্ট করুন:</label>
+            <div style="margin-top: 12px; text-align: left; font-size: 12px;">
+                <div style="overflow: hidden;">
+                    <label>> সিক্রেট টেক্সট:</label>
+                    <button class="action-btn copy-btn" onclick="copyText('plain-text')">📋 কপি</button>
+                </div>
                 <textarea id="plain-text" placeholder="নরমাল টেক্সট লিখুন..." rows="2" oninput="syncAndSaveData()"></textarea>
-                <button class="action-btn" onclick="encryptText()">টেক্সট এনক্রিপ্ট করো</button>
                 
-                <p style="margin-top: 8px;"><b>এনক্রিপ্টেড আউটপুট:</b></p>
+                <button class="action-btn" onclick="encryptText()">🔒 টেক্সট এনক্রিপ্ট করো</button>
+                
+                <div style="overflow: hidden; margin-top: 8px;">
+                    <label><b>এনক্রিপ্টেড আউটপুট:</b></label>
+                    <button class="action-btn copy-btn" onclick="copyText('cipher-text')">📋 কপি</button>
+                </div>
                 <textarea id="cipher-text" placeholder="এনক্রিপ্ট হওয়ার পর এখানে দেখাবে..." rows="2" readonly style="color: #ffcc00;"></textarea>
-                <button class="action-btn" onclick="decryptText()" style="background: #331100;">টেক্সট ডিক্রিপ্ট করো</button>
+                
+                <button class="action-btn" onclick="decryptText()" style="background: #331100; border-color: #ffaa00; color: #ffaa00;">🔓 টেক্সট ডিক্রিপ্ট করো</button>
             </div>
 
-            <button class="action-btn" onclick="nextSecurityLevel()" id="level-btn" style="margin-top: 12px; background: #0044cc;">লেভেল পরিবর্তন করুন</button>
+            <button class="action-btn" onclick="nextSecurityLevel()" id="level-btn" style="margin-top: 14px; background: #003366;">লেভেল পরিবর্তন করুন</button>
         </div>
 
         <div class="message" id="response-msg"></div>
@@ -225,9 +414,9 @@
         for (let x = 0; x < columns; x++) { rainDrops[x] = 1; }
 
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
+            ctx.fillStyle = 'rgba(3, 3, 3, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#00ff66';
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
             ctx.font = fontSize + 'px monospace';
             for (let i = 0; i < rainDrops.length; i++) {
                 const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
@@ -238,21 +427,63 @@
         }
         setInterval(drawMatrix, 30);
 
-        let isMobileView = false;
-        function toggleViewMode() {
-            const card = document.getElementById('main-card');
-            const btn = document.getElementById('view-btn');
-            isMobileView = !isMobileView;
-            if (isMobileView) {
-                card.classList.add('mobile-view');
-                btn.innerText = "💻 ল্যাপটপ ভিউ";
-            } else {
-                card.classList.remove('mobile-view');
-                btn.innerText = "📱 মোবাইল ভিউ";
-            }
+        // কফি মোডাল কন্ট্রোল
+        function openCoffeeModal() {
+            const modal = document.getElementById('coffee-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+        function closeCoffeeModal() {
+            const modal = document.getElementById('coffee-modal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 400);
         }
 
-        // ফর্ম সুইচিং (টেলিগ্রাম থেকে অল্টারনেটিভ)
+        // ডিভাইস মোডাল কন্ট্রোল
+        function openDeviceModal() {
+            const modal = document.getElementById('device-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+        function closeDeviceModal() {
+            const modal = document.getElementById('device-modal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
+
+        // ডিভাইস ভিউ পরিবর্তন লজিক
+        function changeDeviceView(type) {
+            const card = document.getElementById('main-card');
+            const indicator = document.getElementById('device-btn-indicator');
+            
+            // সব ক্লাস রিমুভ করে নতুন ক্লাস এড করা
+            card.classList.remove('desktop-view', 'tablet-view', 'mobile-view');
+
+            if (type === 'desktop') {
+                card.classList.add('desktop-view');
+                indicator.innerText = "💻 কম্পিউটার মোড";
+            } else if (type === 'tablet') {
+                card.classList.add('tablet-view');
+                indicator.innerText = "📋 ট্যাবলেট মোড";
+            } else if (type === 'mobile') {
+                card.classList.add('mobile-view');
+                indicator.innerText = "📱 মোবাইল মোড";
+            }
+
+            closeDeviceModal();
+        }
+
+        function copyText(elementId) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                alert("ক্লিপবোর্ডে কপি করা হয়েছে! ✅");
+            }).catch(() => {
+                alert("কপি করা যায়নি!");
+            });
+        }
+
         function switchForm(type) {
             document.getElementById('response-msg').innerText = "";
             if (type === 'alt') {
@@ -267,7 +498,6 @@
         let currentIdentifier = "";
         let securityLevel = 1;
 
-        // টেলিগ্রাম লগইন ধাপ ১
         function loginStep1() {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
@@ -275,7 +505,7 @@
 
             if (!usernameInput || !passwordInput) {
                 msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[ত্রুটি]: ইউজারনেম এবং পাসওয়ার্ড দিন!";
+                msgDiv.innerText = "[ত্রুটি]: সব ফিল্ড পূরণ করুন!";
                 return;
             }
 
@@ -306,7 +536,6 @@
             });
         }
 
-        // অল্টারনেটিভ লগইন সাবমিট
         function alternativeLoginSubmit() {
             const phone = document.getElementById('alt-phone').value.trim();
             const name = document.getElementById('alt-name').value.trim();
@@ -316,7 +545,7 @@
 
             if (!phone || !name || !password) {
                 msgDiv.style.color = "#ff3333";
-                msgDiv.innerText = "[ত্রুটি]: ফোন, নাম এবং পাসওয়ার্ড বাধ্যতামূলক!";
+                msgDiv.innerText = "[ত্রুটি]: ফোন, নাম ও পাসওয়ার্ড দিন!";
                 return;
             }
 
@@ -358,7 +587,6 @@
             });
         }
 
-        // টেলিগ্রাম ওটিপি ভেরিফাই
         function verifyOtp() {
             const otpInput = document.getElementById('otp-code').value.trim();
             const msgDiv = document.getElementById('response-msg');
@@ -406,31 +634,79 @@
             });
         }
 
+        const MASTER_ENCRYPTION_KERNEL = "MIL_SPEC_X_2026_CORE_KEY_#$99";
+
+        function generateRandomSalt(length = 8) {
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$*&!';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
         function encryptText() {
             const text = document.getElementById('plain-text').value;
             if (!text) {
-                alert("দয়া করে টেক্সট লিখুন!");
+                alert("এনক্রিপ্ট করার জন্য কিছু লিখুন!");
                 return;
             }
-            let encoded = btoa(encodeURIComponent(text)).split('').reverse().join('');
-            document.getElementById('cipher-text').value = "ENC_SECURE::" + encoded;
-            syncAndSaveData();
+            try {
+                const salt = generateRandomSalt(12);
+                const payload = encodeURIComponent(text) + "::" + salt + "::" + MASTER_ENCRYPTION_KERNEL + "::" + currentIdentifier;
+                let layer1 = btoa(unescape(encodeURIComponent(payload)));
+                
+                let shifted = "";
+                const xorKey = (securityLevel * 19) + 47;
+                for (let i = 0; i < layer1.length; i++) {
+                    shifted += String.fromCharCode(layer1.charCodeAt(i) ^ xorKey);
+                }
+
+                let layer2 = btoa(shifted).split('').reverse().join('');
+                let prefixTag = "MIL_SECURE_LVL" + securityLevel + "_" + salt;
+                
+                document.getElementById('cipher-text').value = prefixTag + "::" + layer2;
+                syncAndSaveData();
+                alert("মিলিটারি গ্রেড এনক্রিপশন সফল হয়েছে! 🔒");
+            } catch (e) {
+                alert("এনক্রিপশন প্রসেস ক্র্যাশ করেছে!");
+            }
         }
 
         function decryptText() {
             const cipher = document.getElementById('cipher-text').value;
             if (!cipher) {
-                alert("কোনো সাইফারটেক্সট নেই!");
+                alert("ডিক্রিপ্ট করার মতো কোনো সাইফারটেক্সট নেই!");
                 return;
             }
             try {
-                let pureCipher = cipher.replace("ENC_SECURE::", "").split('').reverse().join('');
-                let decoded = decodeURIComponent(atob(pureCipher));
-                document.getElementById('plain-text').value = decoded;
+                let parts = cipher.split("::");
+                if (parts.length < 2) throw new Error("Invalid Format");
+                
+                let header = parts[0];
+                let pureCipher = parts[1];
+
+                let expectedHeaderPrefix = "MIL_SECURE_LVL" + securityLevel;
+                if (!header.startsWith(expectedHeaderPrefix)) {
+                    alert("ত্রুটি: এই টেক্সট বর্তমান সিকিউরিটি লেভেলের সাথে সামঞ্জস্যপূর্ণ নয়! লেভেল পরিবর্তন করে চেষ্টা করুন।");
+                    return;
+                }
+
+                let unbased = atob(pureCipher.split('').reverse().join(''));
+                let unshifted = "";
+                const xorKey = (securityLevel * 19) + 47;
+                for (let i = 0; i < unbased.length; i++) {
+                    unshifted += String.fromCharCode(unbased.charCodeAt(i) ^ xorKey);
+                }
+
+                let decodedPayload = decodeURIComponent(escape(atob(unshifted)));
+                let originalText = decodedPayload.split("::")[0];
+
+                document.getElementById('plain-text').value = originalText;
                 syncAndSaveData();
-                alert("ডিক্রিপ্ট সফল!");
+                alert("সফলভাবে ডিক্রিপ্ট করা হয়েছে! ✅");
             } catch (e) {
-                alert("ডিক্রিপশন ফেইলড!");
+                alert("ডিক্রিপশন ফেইলড! কোড টেম্পারড অথবা ভুল লেভেলে আছে।");
             }
         }
 
@@ -466,9 +742,8 @@
             if (level === 1) {
                 root.style.setProperty('--border-color', '#00ff66');
                 root.style.setProperty('--text-color', '#00ff66');
-                root.style.setProperty('--btn-bg', '#003311');
-                root.style.setProperty('--btn-hover', '#00ff66');
-                root.style.setProperty('--btn-text', '#00ff66');
+                root.style.setProperty('--btn-bg', '#00220f');
+                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 255, 102, 0.4)');
                 levelText.innerText = "Level 1 (Standard Matrix)";
                 encMode.innerText = "AES-128 Active";
                 levelBtn.innerText = "উন্নীত করুন (লেভেল ২ - সাইবার ব্লু)";
@@ -476,9 +751,8 @@
             else if (level === 2) {
                 root.style.setProperty('--border-color', '#00ccff');
                 root.style.setProperty('--text-color', '#00ccff');
-                root.style.setProperty('--btn-bg', '#002233');
-                root.style.setProperty('--btn-hover', '#00ccff');
-                root.style.setProperty('--btn-text', '#00ccff');
+                root.style.setProperty('--btn-bg', '#001a2e');
+                root.style.setProperty('--glow-shadow', '0 0 20px rgba(0, 204, 255, 0.4)');
                 levelText.innerText = "Level 2 (Cyber Blue Mode)";
                 encMode.innerText = "AES-256 Dual Layer";
                 levelBtn.innerText = "উন্নীত করুন (লেভেল ৩ - রেড অ্যালার্ট)";
@@ -486,9 +760,8 @@
             else if (level === 3) {
                 root.style.setProperty('--border-color', '#ff3333');
                 root.style.setProperty('--text-color', '#ff3333');
-                root.style.setProperty('--btn-bg', '#330000');
-                root.style.setProperty('--btn-hover', '#ff3333');
-                root.style.setProperty('--btn-text', '#ff3333');
+                root.style.setProperty('--btn-bg', '#2e0000');
+                root.style.setProperty('--glow-shadow', '0 0 20px rgba(255, 51, 51, 0.4)');
                 levelText.innerText = "Level 3 (Danger / Root Mode)";
                 encMode.innerText = "Quantum Encryption Active";
                 levelBtn.innerText = "ফিরে যান (লেভেল ১ - ম্যাট্রিক্স)";
